@@ -170,18 +170,28 @@ nav .inner {
   position: relative;
   color: var(--sage);
 }
+.logo-dot::before,
 .logo-dot::after {
-  content: '.';
+  content: '';
   position: absolute;
-  left: 0;
-  top: 0;
-  color: var(--sage);
-  animation: dot-wave 2.5s ease-out infinite;
+  width: 6px;
+  height: 6px;
+  top: 50%;
+  left: 50%;
+  margin-top: 2px;
+  border-radius: 50%;
+  border: 1.5px solid var(--sage);
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 0;
+  animation: ripple-wave 3s ease-out infinite;
 }
-@keyframes dot-wave {
-  0% { opacity: 0.6; transform: scale(1); }
-  60% { opacity: 0; transform: scale(2.5); }
-  100% { opacity: 0; transform: scale(2.5); }
+.logo-dot::after {
+  animation-delay: 1s;
+}
+@keyframes ripple-wave {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+  70% { transform: translate(-50%, -50%) scale(5); opacity: 0; }
+  100% { transform: translate(-50%, -50%) scale(5); opacity: 0; }
 }
 
 .nav-links {
