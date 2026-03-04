@@ -165,7 +165,7 @@ nav .inner {
 }
 
 .logo span { color: var(--brand); }
-/* Logo dot — base styles */
+/* Logo dot — universal em-based sizing */
 .logo-dot {
   display: inline-block;
   position: relative;
@@ -175,66 +175,39 @@ nav .inner {
 .logo-dot::before {
   content: '';
   position: absolute;
+  width: 0.36em; height: 0.36em;
+  bottom: 0.18em; left: 50%;
   border-radius: 50%;
+  background: #fff;
   transform: translateX(-50%);
   z-index: 1;
 }
 .logo-dot::after {
   content: '';
   position: absolute;
+  width: 0.22em; height: 0.22em;
+  bottom: 0.25em; left: 50%;
   border-radius: 50%;
+  background: var(--sage);
   transform: translateX(-50%);
   z-index: 2;
 }
 
-/* Header logo — 1.4rem, white bg, with pulse */
-.logo .logo-dot::before {
-  width: 8px; height: 8px;
-  bottom: 4px; left: 50%;
-  background: #fff;
-}
-.logo .logo-dot::after {
-  width: 5px; height: 5px;
-  bottom: 5.5px; left: 50%;
-  background: var(--sage);
+/* Header — add pulse */
+.nav .logo .logo-dot::after {
   animation: live-pulse 1.5s ease-in-out infinite;
 }
 
-/* Preloader logo — 2.4rem, light bg, no pulse */
-.preloader-logo .logo-dot::before {
-  width: 13px; height: 13px;
-  bottom: 6px; left: 50%;
-  background: var(--sage-bg);
-}
-.preloader-logo .logo-dot::after {
-  width: 8px; height: 8px;
-  bottom: 8.5px; left: 50%;
-  background: var(--sage);
-}
+/* Preloader — match light bg */
+.preloader-logo .logo-dot::before { background: var(--sage-bg); }
 
-/* Footer logo — 1.3rem, dark bg, no pulse */
-.footer-brand .logo-dot::before {
-  width: 7px; height: 7px;
-  bottom: 3.5px; left: 50%;
-  background: var(--sage);
-}
-.footer-brand .logo-dot::after {
-  width: 4.5px; height: 4.5px;
-  bottom: 4.8px; left: 50%;
-  background: rgba(255,255,255,0.7);
-}
+/* Footer — dark bg */
+.footer-brand .logo-dot::before { background: var(--sage); }
+.footer-brand .logo-dot::after { background: rgba(255,255,255,0.7); }
 
-/* Case modal logo — 1.8rem, dark bg, no pulse */
-.smodal-case-self-logo .logo-dot::before {
-  width: 10px; height: 10px;
-  bottom: 5px; left: 50%;
-  background: rgba(30, 58, 95, 0.8);
-}
-.smodal-case-self-logo .logo-dot::after {
-  width: 6px; height: 6px;
-  bottom: 7px; left: 50%;
-  background: rgba(255,255,255,0.9);
-}
+/* Case modal — dark bg */
+.smodal-case-self-logo .logo-dot::before { background: rgba(30, 58, 95, 0.8); }
+.smodal-case-self-logo .logo-dot::after { background: rgba(255,255,255,0.9); }
 @keyframes live-pulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(30, 58, 95, 0.5); }
   50% { box-shadow: 0 0 0 6px rgba(30, 58, 95, 0); }
