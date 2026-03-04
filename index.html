@@ -167,12 +167,21 @@ nav .inner {
 .logo span { color: var(--brand); }
 .logo-dot {
   display: inline-block;
-  color: var(--brand);
-  animation: pulse-dot 2s ease-in-out infinite;
+  position: relative;
+  color: var(--sage);
 }
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(1.3); }
+.logo-dot::after {
+  content: '.';
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--sage);
+  animation: dot-wave 2.5s ease-out infinite;
+}
+@keyframes dot-wave {
+  0% { opacity: 0.6; transform: scale(1); }
+  60% { opacity: 0; transform: scale(2.5); }
+  100% { opacity: 0; transform: scale(2.5); }
 }
 
 .nav-links {
@@ -2047,7 +2056,7 @@ footer {
 <!-- Preloader -->
 <div class="preloader" id="preloader">
   <div class="preloader-inner">
-    <div class="preloader-logo">MIL<span class="logo-dot">.</span><span>LE</span></div>
+    <div class="preloader-logo">MIL.<span>LE</span></div>
     <div class="preloader-bar-track">
       <div class="preloader-bar" id="preloaderBar"></div>
     </div>
@@ -2410,7 +2419,7 @@ footer {
   <div class="container">
     <div class="footer-top">
       <div class="footer-brand">
-        <a href="#" class="logo">MIL<span class="logo-dot">.</span><span>LE</span></a>
+        <a href="#" class="logo">MIL.<span>LE</span></a>
         <p>Агентство комплексного digital-присутствия. Создаём экосистемы, которые приносят клиентов.</p>
       </div>
       <div class="footer-col">
@@ -2765,7 +2774,7 @@ function openServiceModal(index) {
     '<div class="smodal-cases-grid">' + d.cases.map(c => {
       if (c.isSelf) {
         return '<div class="smodal-case-visual smodal-case-self" onclick="closeServiceModal(); document.getElementById(\'hero\').scrollIntoView({behavior:\'smooth\'});">' +
-          '<div class="smodal-case-self-hero"><div class="smodal-case-self-logo">MIL<span class="logo-dot">.</span><span>LE</span></div><div class="smodal-case-self-tagline">digital-экосистемы<br>для бизнеса</div></div>' +
+          '<div class="smodal-case-self-hero"><div class="smodal-case-self-logo">MIL.<span>LE</span></div><div class="smodal-case-self-tagline">digital-экосистемы<br>для бизнеса</div></div>' +
           '<div class="smodal-case-self-badge">Вы здесь ✦</div>' +
           '<div class="smodal-case-visual-info"><h4>' + c.title + '</h4><p>' + c.subtitle + '</p></div>' +
           '</div>';
