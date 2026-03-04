@@ -41,7 +41,7 @@ body {
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   overflow-x: hidden;
-  padding-bottom: 80px;
+  padding-bottom: 100px;
 }
 
 /* ═══════════ LOGO HEADER ═══════════ */
@@ -70,16 +70,18 @@ body {
 /* ═══════════ TAB BAR ═══════════ */
 .tab-bar {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(255,255,255,0.92);
+  bottom: calc(16px + env(safe-area-inset-bottom, 8px));
+  left: 12px;
+  right: 12px;
+  background: rgba(255,255,255,0.94);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border);
+  border: 1px solid rgba(30, 58, 95, 0.08);
+  box-shadow: 0 8px 32px rgba(30, 58, 95, 0.12);
   display: flex;
   z-index: 100;
-  padding: 6px 0 env(safe-area-inset-bottom, 8px);
+  padding: 4px 4px;
+  border-radius: 60px;
 }
 
 .tab-item {
@@ -87,14 +89,15 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
-  padding: 8px 4px 6px;
+  gap: 2px;
+  padding: 6px 4px 5px;
   cursor: pointer;
   transition: all 0.2s;
   border: none;
   background: none;
   font-family: 'Figtree', sans-serif;
   position: relative;
+  border-radius: 50px;
 }
 
 .tab-item .tab-icon {
