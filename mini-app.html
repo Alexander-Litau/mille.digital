@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>MIL.LE — Услуги</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%234A5D4A'/%3E%3Ctext x='8' y='46' font-family='Arial,Helvetica,sans-serif' font-weight='800' font-size='36' fill='%23ffffff'%3EM%3C/text%3E%3Ctext x='38' y='46' font-family='Arial,Helvetica,sans-serif' font-weight='800' font-size='36' fill='%23ff9e02'%3EL%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231E3A5F'/%3E%3Ctext x='8' y='46' font-family='Arial,Helvetica,sans-serif' font-weight='800' font-size='36' fill='%23ffffff'%3EM%3C/text%3E%3Ctext x='38' y='46' font-family='Arial,Helvetica,sans-serif' font-weight='800' font-size='36' fill='%23ff9e02'%3EL%3C/text%3E%3C/svg%3E">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -16,17 +16,17 @@
   --brand-light: #ffc55c;
   --brand-soft: rgba(255, 158, 2, 0.07);
   --brand-glow: rgba(255, 158, 2, 0.2);
-  --sage: #4A5D4A;
-  --sage-light: #E8EDE5;
-  --sage-bg: #F4F6F0;
+  --sage: #1E3A5F;
+  --sage-light: #D8E2EE;
+  --sage-bg: #EDF1F7;
   --bg: #FAFAF6;
   --text: #2C2C28;
   --text-muted: #8A8A80;
   --border: rgba(0, 0, 0, 0.06);
   --glass: rgba(255, 255, 255, 0.55);
   --glass-border: rgba(255, 255, 255, 0.65);
-  --shadow: 0 8px 32px rgba(74, 93, 74, 0.06);
-  --shadow-lg: 0 24px 64px rgba(74, 93, 74, 0.09);
+  --shadow: 0 8px 32px rgba(30, 58, 95, 0.08);
+  --shadow-lg: 0 24px 64px rgba(30, 58, 95, 0.11);
   --radius: 20px;
   --radius-sm: 14px;
 }
@@ -34,7 +34,7 @@
 html { font-size: 16px; }
 
 body {
-  background: linear-gradient(165deg, #F4F6F0 0%, #FAFAF6 25%, #F0ECE4 50%, #FAFAF6 75%, #EDF0E8 100%);
+  background: linear-gradient(165deg, #EDF1F7 0%, #FAFBFD 25%, #E8ECF3 50%, #FAFBFD 75%, #E5EAF2 100%);
   background-attachment: fixed;
   color: var(--text);
   font-family: 'Figtree', sans-serif;
@@ -717,7 +717,7 @@ body {
 }
 
 .material-badge.checklist {
-  background: rgba(74, 93, 74, 0.1);
+  background: rgba(30, 58, 95, 0.1);
   color: var(--sage);
 }
 
@@ -795,7 +795,7 @@ body {
 .material-download.secondary {
   background: var(--sage);
   color: #fff;
-  box-shadow: 0 4px 16px rgba(74, 93, 74, 0.15);
+  box-shadow: 0 4px 16px rgba(30, 58, 95, 0.15);
 }
 
 /* ═══════════ ORDER OVERLAY ═══════════ */
@@ -999,39 +999,7 @@ body {
 
 <!-- ═══════════ PAGE: ABOUT ═══════════ -->
 <div class="page" id="pageAbout">
-  <div class="section-label">Как мы работаем</div>
-  <div class="section-title">От идеи до потока клиентов</div>
-
-  <div class="process-step">
-    <div class="step-num">01</div>
-    <div class="step-content">
-      <h3>Аудит и стратегия</h3>
-      <p>Анализируем бизнес, конкурентов и ЦА. Формируем digital-стратегию.</p>
-    </div>
-  </div>
-  <div class="process-step">
-    <div class="step-num">02</div>
-    <div class="step-content">
-      <h3>Дизайн и прототип</h3>
-      <p>Создаём макеты и прототипы. Согласовываем каждый экран.</p>
-    </div>
-  </div>
-  <div class="process-step">
-    <div class="step-num">03</div>
-    <div class="step-content">
-      <h3>Разработка</h3>
-      <p>Верстаем, программируем, тестируем на всех устройствах.</p>
-    </div>
-  </div>
-  <div class="process-step">
-    <div class="step-num">04</div>
-    <div class="step-content">
-      <h3>Запуск и рост</h3>
-      <p>Запускаем рекламу, подключаем аналитику и оптимизируем.</p>
-    </div>
-  </div>
-
-  <div class="section-label" style="margin-top:24px;">Наши принципы</div>
+  <div class="section-label">Наши принципы</div>
   <div class="section-title">Делаем так, как договорились</div>
 
   <div class="process-step">
@@ -1216,7 +1184,7 @@ const tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
 const fallbackServices = [
   {icon:'🚀',title:'Лендинги',desc:'Создаём посадочные страницы, которые не просто красиво выглядят — а превращают посетителей в клиентов. Каждый элемент проходит проверку на конверсию.',items:['Анализ конкурентов и целевой аудитории','Прототипирование и UX-дизайн','Адаптивная вёрстка под все устройства','Подключение аналитики и целей','SEO-оптимизация и скорость загрузки','A/B тестирование заголовков и CTA'],stats:[{num:'до 12%',label:'конверсия'},{num:'<1 сек',label:'загрузка'},{num:'3 дня',label:'срок'}],tags:['UI/UX','Разработка','A/B тесты']},
   {icon:'🤖',title:'Чат-боты',desc:'Умные боты для Telegram, MAX и VK, которые продают, консультируют и автоматизируют процессы 24/7.',items:['Проектирование сценариев и воронок','Разработка бота с кнопками и inline-меню','Интеграция с CRM и платёжными системами','AI-модуль для обработки нестандартных вопросов','Сегментация аудитории внутри бота','Аналитика и оптимизация воронки'],stats:[{num:'80%',label:'автоматизация'},{num:'24/7',label:'работа'},{num:'×2.5',label:'конверсия'}],tags:['TG','MAX','VK','AI']},
-  {icon:'📱',title:'Telegram/Max/VK Mini Apps',desc:'Мини-приложения внутри Telegram/Max/VK — интернет-магазины, сервисы записи, программы лояльности и геймификация.',items:['Дизайн интерфейса Mini App','Программирование всех экранов и функций','Бэкенд, база данных и API','Интеграция с Telegram Bot API','Платежи через Telegram Stars и банки','Пуш-уведомления и ретеншн'],stats:[{num:'1 клик',label:'доступ'},{num:'×3',label:'вовлечение'},{num:'до 7 дней',label:'запуск'}],tags:['TWA','React','E-commerce','API']},
+  {icon:'📱',title:'Telegram/Max/VK Mini Apps',desc:'Мини-приложения внутри Telegram/Max/VK — интернет-магазины, сервисы записи, программы лояльности и геймификация.',items:['Дизайн интерфейса Mini App','Программирование всех экранов и функций','Бэкенд, база данных и API','Интеграция с Telegram Bot API','Платежи через Telegram Stars и банки','Пуш-уведомления и ретеншн'],stats:[{num:'1 клик',label:'доступ'},{num:'×3',label:'вовлечение'},{num:'5 дней',label:'запуск'}],tags:['TWA','React','E-commerce','API']},
   {icon:'📢',title:'Яндекс Директ & РСЯ',desc:'Настройка и ведение рекламных кампаний с оптимизацией стоимости лида и максимизацией ROI.',items:['Сбор семантического ядра и минус-слов','Создание рекламных объявлений','Настройка ретаргетинга и look-alike','Ежедневная оптимизация ставок','Управление бюджетом и ROI','Еженедельные отчёты с аналитикой'],stats:[{num:'-54%',label:'стоимость лида'},{num:'×2.1',label:'ROI'},{num:'3 дня',label:'запуск'}],tags:['Директ','РСЯ','Ретаргетинг']},
   {icon:'✈️',title:'Telegram Ads',desc:'Таргетированная реклама в Telegram — точный охват вашей аудитории через рекламную платформу мессенджера.',items:['Подбор каналов и аудиторий','Создание рекламных креативов','Запуск и управление кампаниями','Оптимизация CPM и охвата','Аналитика подписок и конверсий','Тестирование гипотез и креативов'],stats:[{num:'от 3₽',label:'за подписчика'},{num:'500K+',label:'охват'},{num:'2 дня',label:'старт'}],tags:['Таргетинг','CPM','Аналитика']},
   {icon:'📝',title:'Ведение Telegram-каналов',desc:'Берём канал на себя целиком — от стратегии до ежедневного контента. Растим подписчиков и превращаем канал в инструмент продаж.',items:['Разработка контент-стратегии','Написание и оформление постов','Рубрикатор и контент-план на месяц','Работа с вовлечением и охватами','Посевы и коллаборации','Ежемесячный отчёт о росте'],stats:[{num:'+40%',label:'вовлечение'},{num:'×3',label:'рост подписчиков'},{num:'от 12',label:'постов/мес'}],tags:['Контент','Стратегия','Рост']}
