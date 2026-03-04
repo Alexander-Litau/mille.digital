@@ -170,7 +170,6 @@ nav .inner {
   position: relative;
   color: var(--sage);
 }
-.logo-dot::before,
 .logo-dot::after {
   content: '';
   position: absolute;
@@ -180,18 +179,13 @@ nav .inner {
   left: 50%;
   margin-top: 2px;
   border-radius: 50%;
-  border: 1.5px solid var(--sage);
-  transform: translate(-50%, -50%) scale(1);
-  opacity: 0;
-  animation: ripple-wave 3s ease-out infinite;
+  background: var(--sage);
+  transform: translate(-50%, -50%);
+  animation: live-pulse 1.5s ease-in-out infinite;
 }
-.logo-dot::after {
-  animation-delay: 1s;
-}
-@keyframes ripple-wave {
-  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
-  70% { transform: translate(-50%, -50%) scale(5); opacity: 0; }
-  100% { transform: translate(-50%, -50%) scale(5); opacity: 0; }
+@keyframes live-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(30, 58, 95, 0.5); }
+  50% { box-shadow: 0 0 0 6px rgba(30, 58, 95, 0); }
 }
 
 .nav-links {
