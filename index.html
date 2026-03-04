@@ -171,30 +171,31 @@ nav .inner {
   color: transparent;
   margin: 0;
 }
-/* White circle mask — clean circular cutout around the dot */
+/* White circle mask — tight cutout just around the dot */
 .logo .logo-dot::before {
   content: '';
   position: absolute;
-  width: 14px;
-  height: 14px;
-  bottom: 0;
+  width: 8px;
+  height: 8px;
+  bottom: 1.5px;
   left: 50%;
   border-radius: 50%;
   background: #fff;
   transform: translateX(-50%);
   z-index: 1;
 }
-/* The pulsing dot */
+/* The pulsing dot — pulse overlaps letters */
 .logo .logo-dot::after {
   content: '';
   position: absolute;
   width: 5px;
   height: 5px;
-  bottom: 4.5px;
+  bottom: 3px;
   left: 50%;
   border-radius: 50%;
   background: var(--sage);
   transform: translateX(-50%);
+  z-index: 3;
   z-index: 2;
   animation: live-pulse 1.5s ease-in-out infinite;
 }
