@@ -165,22 +165,28 @@ nav .inner {
 }
 
 .logo span { color: var(--brand); }
-.logo-dot {
+.logo .logo-dot {
   display: inline-block;
   position: relative;
+  color: transparent;
+}
+.logo .logo-dot::before {
+  content: '.';
+  position: absolute;
+  left: 0;
+  top: 0;
   color: var(--sage);
 }
-.logo-dot::after {
+.logo .logo-dot::after {
   content: '';
   position: absolute;
-  width: 6px;
-  height: 6px;
-  top: 50%;
+  width: 5px;
+  height: 5px;
+  bottom: 0.22em;
   left: 50%;
-  margin-top: 2px;
   border-radius: 50%;
   background: var(--sage);
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   animation: live-pulse 1.5s ease-in-out infinite;
 }
 @keyframes live-pulse {
