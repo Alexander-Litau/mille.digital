@@ -165,39 +165,75 @@ nav .inner {
 }
 
 .logo span { color: var(--brand); }
-.logo .logo-dot {
+/* Logo dot — base styles */
+.logo-dot {
   display: inline-block;
   position: relative;
-  color: transparent;
+  color: transparent !important;
   margin: 0;
 }
-/* White circle mask — tight cutout just around the dot */
-.logo .logo-dot::before {
+.logo-dot::before {
   content: '';
   position: absolute;
-  width: 8px;
-  height: 8px;
-  bottom: 4px;
-  left: 50%;
   border-radius: 50%;
-  background: #fff;
   transform: translateX(-50%);
   z-index: 1;
 }
-/* The pulsing dot — pulse overlaps letters */
-.logo .logo-dot::after {
+.logo-dot::after {
   content: '';
   position: absolute;
-  width: 5px;
-  height: 5px;
-  bottom: 5.5px;
-  left: 50%;
   border-radius: 50%;
-  background: var(--sage);
   transform: translateX(-50%);
-  z-index: 3;
   z-index: 2;
+}
+
+/* Header logo — 1.4rem, white bg, with pulse */
+.logo .logo-dot::before {
+  width: 8px; height: 8px;
+  bottom: 4px; left: 50%;
+  background: #fff;
+}
+.logo .logo-dot::after {
+  width: 5px; height: 5px;
+  bottom: 5.5px; left: 50%;
+  background: var(--sage);
   animation: live-pulse 1.5s ease-in-out infinite;
+}
+
+/* Preloader logo — 2.4rem, light bg, no pulse */
+.preloader-logo .logo-dot::before {
+  width: 13px; height: 13px;
+  bottom: 6px; left: 50%;
+  background: var(--sage-bg);
+}
+.preloader-logo .logo-dot::after {
+  width: 8px; height: 8px;
+  bottom: 8.5px; left: 50%;
+  background: var(--sage);
+}
+
+/* Footer logo — 1.3rem, dark bg, no pulse */
+.footer-brand .logo-dot::before {
+  width: 7px; height: 7px;
+  bottom: 3.5px; left: 50%;
+  background: var(--sage);
+}
+.footer-brand .logo-dot::after {
+  width: 4.5px; height: 4.5px;
+  bottom: 4.8px; left: 50%;
+  background: rgba(255,255,255,0.7);
+}
+
+/* Case modal logo — 1.8rem, dark bg, no pulse */
+.smodal-case-self-logo .logo-dot::before {
+  width: 10px; height: 10px;
+  bottom: 5px; left: 50%;
+  background: rgba(30, 58, 95, 0.8);
+}
+.smodal-case-self-logo .logo-dot::after {
+  width: 6px; height: 6px;
+  bottom: 7px; left: 50%;
+  background: rgba(255,255,255,0.9);
 }
 @keyframes live-pulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(30, 58, 95, 0.5); }
@@ -2076,7 +2112,7 @@ footer {
 <!-- Preloader -->
 <div class="preloader" id="preloader">
   <div class="preloader-inner">
-    <div class="preloader-logo">MIL.<span>LE</span></div>
+    <div class="preloader-logo">MIL<span class="logo-dot">.</span><span>LE</span></div>
     <div class="preloader-bar-track">
       <div class="preloader-bar" id="preloaderBar"></div>
     </div>
@@ -2439,7 +2475,7 @@ footer {
   <div class="container">
     <div class="footer-top">
       <div class="footer-brand">
-        <a href="#" class="logo">MIL.<span>LE</span></a>
+        <a href="#" class="logo">MIL<span class="logo-dot">.</span><span>LE</span></a>
         <p>Агентство комплексного digital-присутствия. Создаём экосистемы, которые приносят клиентов.</p>
       </div>
       <div class="footer-col">
@@ -2794,7 +2830,7 @@ function openServiceModal(index) {
     '<div class="smodal-cases-grid">' + d.cases.map(c => {
       if (c.isSelf) {
         return '<div class="smodal-case-visual smodal-case-self" onclick="closeServiceModal(); document.getElementById(\'hero\').scrollIntoView({behavior:\'smooth\'});">' +
-          '<div class="smodal-case-self-hero"><div class="smodal-case-self-logo">MIL.<span>LE</span></div><div class="smodal-case-self-tagline">digital-экосистемы<br>для бизнеса</div></div>' +
+          '<div class="smodal-case-self-hero"><div class="smodal-case-self-logo">MIL<span class="logo-dot">.</span><span>LE</span></div><div class="smodal-case-self-tagline">digital-экосистемы<br>для бизнеса</div></div>' +
           '<div class="smodal-case-self-badge">Вы здесь ✦</div>' +
           '<div class="smodal-case-visual-info"><h4>' + c.title + '</h4><p>' + c.subtitle + '</p></div>' +
           '</div>';
