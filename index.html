@@ -193,9 +193,9 @@ nav .inner {
   z-index: 2;
 }
 
-/* Header — pulse + adaptive ring (hide over dark sections) */
-#navbar.over-dark .logo .logo-dot::before { opacity: 0; }
-#navbar .logo .logo-dot::before { transition: opacity 0.3s; }
+/* Header — pulse + adaptive ring (blend over dark sections) */
+#navbar .logo .logo-dot::before { transition: background 0.3s; }
+#navbar.over-dark .logo .logo-dot::before { background: #BCC4CF; }
 #navbar .logo .logo-dot::after {
   animation: live-pulse 1.5s ease-in-out infinite;
 }
