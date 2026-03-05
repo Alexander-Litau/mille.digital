@@ -193,8 +193,9 @@ nav .inner {
   z-index: 2;
 }
 
-/* Header — hide ring (glass nav provides contrast), add pulse */
-#navbar .logo .logo-dot::before { display: none; }
+/* Header — pulse + adaptive ring (hide over dark sections) */
+#navbar.over-dark .logo .logo-dot::before { opacity: 0; }
+#navbar .logo .logo-dot::before { transition: opacity 0.3s; }
 #navbar .logo .logo-dot::after {
   animation: live-pulse 1.5s ease-in-out infinite;
 }
@@ -2604,8 +2605,18 @@ document.body.style.overflow = 'hidden';
 advanceLoader();
 // Nav scroll
 const navbar = document.getElementById('navbar');
+// Dark sections that can appear behind nav
+const darkEls = [...document.querySelectorAll('.cta-box, footer')];
 window.addEventListener('scroll', () => {
   navbar.classList.toggle('scrolled', window.scrollY > 50);
+  // Check if nav overlaps any dark element
+  const navBottom = navbar.getBoundingClientRect().bottom;
+  const navTop = navbar.getBoundingClientRect().top;
+  const overDark = darkEls.some(el => {
+    const r = el.getBoundingClientRect();
+    return r.top < navBottom && r.bottom > navTop;
+  });
+  navbar.classList.toggle('over-dark', overDark);
 });
 
 // Mobile menu
