@@ -6,6 +6,7 @@
 <title>MIL.LE — Услуги</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231E3A5F'/%3E%3Ctext x='8' y='46' font-family='Arial,Helvetica,sans-serif' font-weight='800' font-size='36' fill='%23ffffff'%3EM%3C/text%3E%3Ctext x='38' y='46' font-family='Arial,Helvetica,sans-serif' font-weight='800' font-size='36' fill='%23ff9e02'%3EL%3C/text%3E%3C/svg%3E">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://st.max.ru/js/max-web-app.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -1196,16 +1197,18 @@ body {
 </div>
 
 <script>
-// ═══════════ REDIRECT IF NOT IN TELEGRAM ═══════════
-// Uncomment and set your URL when deployed:
-// if (!window.Telegram || !window.Telegram.WebApp || !window.Telegram.WebApp.initData) {
-//   window.location.href = 'https://your-site.com';
-// }
-
-// ═══════════ TELEGRAM WEBAPP ═══════════
+// ═══════════ UNIVERSAL PLATFORM DETECTION (Telegram + MAX) ═══════════
 const tg = window.Telegram && window.Telegram.WebApp;
+const maxApp = !tg && window.WebApp;
+const app = tg || maxApp;
+const platform = tg ? 'telegram' : maxApp ? 'max' : 'web';
+
+// Initialize
 if (tg) { tg.ready(); tg.expand(); }
-const tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+if (maxApp) { maxApp.ready(); }
+
+// Universal user data
+const appUser = app && app.initDataUnsafe && app.initDataUnsafe.user;
 
 // ═══════════ DATA ═══════════
 const fallbackServices = [
@@ -1263,13 +1266,13 @@ function openDetail(index) {
     '<div class="detail-stat"><div class="detail-stat-num">' + st.num + '</div><div class="detail-stat-label">' + st.label + '</div></div>'
   ).join('');
   document.getElementById('detailOverlay').classList.add('active');
-  if (tg) tg.BackButton.show();
+  if (app) app.BackButton.show();
   window.scrollTo(0, 0);
 }
 
 function closeDetail() {
   document.getElementById('detailOverlay').classList.remove('active');
-  if (tg) tg.BackButton.hide();
+  if (app) app.BackButton.hide();
 }
 
 // ═══════════ ORDER ═══════════
@@ -1279,16 +1282,16 @@ function openOrder(index) {
   document.getElementById('orderBadge').textContent = s ? s.icon + ' ' + s.title : '📋 Общая заявка';
   document.getElementById('orderMessage').value = '';
 
-  if (tgUser) {
-    const name = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ');
-    document.getElementById('userAvatar').textContent = (tgUser.first_name || '?')[0];
-    document.getElementById('userText').innerHTML = name + (tgUser.username ? '<small>@' + tgUser.username + '</small>' : '');
+  if (appUser) {
+    const name = [appUser.first_name, appUser.last_name].filter(Boolean).join(' ');
+    document.getElementById('userAvatar').textContent = (appUser.first_name || '?')[0];
+    document.getElementById('userText').innerHTML = name + (appUser.username ? '<small>@' + appUser.username + '</small>' : '');
     document.getElementById('userInfo').style.display = 'flex';
   }
 
   document.getElementById('detailOverlay').classList.remove('active');
   document.getElementById('orderOverlay').classList.add('active');
-  if (tg) tg.BackButton.show();
+  if (app) app.BackButton.show();
   window.scrollTo(0, 0);
 }
 
@@ -1297,7 +1300,7 @@ function closeOrder() {
   if (currentIndex >= 0) {
     openDetail(currentIndex);
   } else {
-    if (tg) tg.BackButton.hide();
+    if (app) app.BackButton.hide();
   }
 }
 
@@ -1307,7 +1310,8 @@ function submitOrder() {
   const data = {
     service: s ? s.title : 'Общая заявка',
     message: message,
-    user: tgUser ? { id: tgUser.id, name: [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' '), username: tgUser.username } : null
+    platform: platform,
+    user: appUser ? { id: appUser.id, name: [appUser.first_name, appUser.last_name].filter(Boolean).join(' '), username: appUser.username } : null
   };
   console.log('Order:', data);
 
@@ -1321,9 +1325,9 @@ function submitOrder() {
     '</div>';
 }
 
-// Telegram BackButton handler
-if (tg) {
-  tg.BackButton.onClick(() => {
+// Universal BackButton handler (Telegram + MAX)
+if (app) {
+  app.BackButton.onClick(() => {
     if (document.getElementById('orderOverlay').classList.contains('active')) { closeOrder(); }
     else if (document.getElementById('detailOverlay').classList.contains('active')) { closeDetail(); }
   });
