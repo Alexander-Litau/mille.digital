@@ -2610,7 +2610,7 @@ const navbar = document.getElementById('navbar');
 // Adaptive logo ring — detect dark/amber/text behind nav
 const darkEls = [...document.querySelectorAll('.cta-box, footer')];
 const amberEls = [...document.querySelectorAll('.btn-primary, .floating-cta button, .nav-cta')];
-const textEls = [...document.querySelectorAll('.section-title')];
+const textEls = [...document.querySelectorAll('.section-title, .hero h1')];
 window.addEventListener('scroll', () => {
   navbar.classList.toggle('scrolled', window.scrollY > 50);
   const navRect = navbar.getBoundingClientRect();
