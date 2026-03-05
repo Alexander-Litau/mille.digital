@@ -1327,10 +1327,11 @@ function submitOrder() {
   const userName = appUser ? [appUser.first_name, appUser.last_name].filter(Boolean).join(' ') : 'Аноним';
   const userTag = appUser && appUser.username ? ' (@' + appUser.username + ')' : '';
   const userId = appUser ? appUser.id : '—';
+  const userLink = appUser && appUser.id ? '<a href="tg://user?id=' + appUser.id + '">' + userName + '</a>' : userName;
   const lines = [
     '📬 <b>Новая заявка из Mini App</b>',
     '',
-    '👤 <b>Клиент:</b> ' + userName + userTag,
+    '👤 <b>Клиент:</b> ' + userLink + userTag,
     '🆔 <b>ID:</b> ' + userId,
     '📱 <b>Платформа:</b> ' + platform,
     '⚡ <b>Услуга:</b> ' + (s ? s.icon + ' ' + s.title : 'Общая заявка'),
