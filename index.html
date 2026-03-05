@@ -193,9 +193,10 @@ nav .inner {
   z-index: 2;
 }
 
-/* Header — pulse + adaptive ring (blend over dark sections) */
+/* Header — pulse + adaptive ring (blend over dark/amber sections) */
 #navbar .logo .logo-dot::before { transition: background 0.3s; }
 #navbar.over-dark .logo .logo-dot::before { background: #BCC4CF; }
+#navbar.over-amber .logo .logo-dot::before { background: #F5E6CD; }
 #navbar .logo .logo-dot::after {
   animation: live-pulse 1.5s ease-in-out infinite;
 }
@@ -2605,18 +2606,23 @@ document.body.style.overflow = 'hidden';
 advanceLoader();
 // Nav scroll
 const navbar = document.getElementById('navbar');
-// Dark sections that can appear behind nav
+// Adaptive logo ring — detect dark/amber sections behind nav
 const darkEls = [...document.querySelectorAll('.cta-box, footer')];
+const amberEls = [...document.querySelectorAll('.btn-primary, .floating-cta button, .nav-cta')];
 window.addEventListener('scroll', () => {
   navbar.classList.toggle('scrolled', window.scrollY > 50);
-  // Check if nav overlaps any dark element
-  const navBottom = navbar.getBoundingClientRect().bottom;
-  const navTop = navbar.getBoundingClientRect().top;
-  const overDark = darkEls.some(el => {
+  const navRect = navbar.getBoundingClientRect();
+  // Logo dot is roughly in the left part of nav
+  const dotY = navRect.top + navRect.height / 2;
+  const dotX = navRect.left + 80; // approximate logo position
+  const overlaps = (el) => {
     const r = el.getBoundingClientRect();
-    return r.top < navBottom && r.bottom > navTop;
-  });
+    return r.top < navRect.bottom && r.bottom > navRect.top && r.left < dotX + 10 && r.right > dotX - 10;
+  };
+  const overAmber = amberEls.some(overlaps);
+  const overDark = !overAmber && darkEls.some(overlaps);
   navbar.classList.toggle('over-dark', overDark);
+  navbar.classList.toggle('over-amber', overAmber);
 });
 
 // Mobile menu
