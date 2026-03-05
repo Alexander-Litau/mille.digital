@@ -1304,25 +1304,61 @@ function closeOrder() {
   }
 }
 
+// ═══════════ TELEGRAM NOTIFICATION ═══════════
+const BOT_TOKEN = '8618167089:AAFjZ0bvB271pa854JyvkdXJGFTG4DCEycE';
+const CHAT_ID = '1658024108';
+
+function sendTelegramNotification(text) {
+  return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: CHAT_ID, text: text, parse_mode: 'HTML' })
+  });
+}
+
 function submitOrder() {
   const s = currentIndex >= 0 ? services[currentIndex] : null;
   const message = document.getElementById('orderMessage').value;
-  const data = {
-    service: s ? s.title : 'Общая заявка',
-    message: message,
-    platform: platform,
-    user: appUser ? { id: appUser.id, name: [appUser.first_name, appUser.last_name].filter(Boolean).join(' '), username: appUser.username } : null
-  };
-  console.log('Order:', data);
+  const btn = document.querySelector('.order-submit');
+  btn.textContent = 'Отправляем...';
+  btn.disabled = true;
 
-  // TODO: Send to bot API
-  document.getElementById('orderOverlay').innerHTML =
-    '<div class="success-content">' +
-      '<div class="success-icon">✓</div>' +
-      '<h2>Заявка отправлена!</h2>' +
-      '<p>Мы скоро свяжемся с вами и обсудим детали проекта.</p>' +
-      '<button class="cta-btn" onclick="location.reload()">← К услугам</button>' +
-    '</div>';
+  // Build notification text
+  const userName = appUser ? [appUser.first_name, appUser.last_name].filter(Boolean).join(' ') : 'Аноним';
+  const userTag = appUser && appUser.username ? ' (@' + appUser.username + ')' : '';
+  const userId = appUser ? appUser.id : '—';
+  const lines = [
+    '📬 <b>Новая заявка из Mini App</b>',
+    '',
+    '👤 <b>Клиент:</b> ' + userName + userTag,
+    '🆔 <b>ID:</b> ' + userId,
+    '📱 <b>Платформа:</b> ' + platform,
+    '⚡ <b>Услуга:</b> ' + (s ? s.icon + ' ' + s.title : 'Общая заявка'),
+  ];
+  if (message.trim()) {
+    lines.push('', '💬 <b>Сообщение:</b>', message.trim());
+  }
+
+  sendTelegramNotification(lines.join('\n'))
+    .then(r => r.json())
+    .then(res => {
+      document.getElementById('orderOverlay').innerHTML =
+        '<div class="success-content">' +
+          '<div class="success-icon">✓</div>' +
+          '<h2>Заявка отправлена!</h2>' +
+          '<p>Мы скоро свяжемся с вами и обсудим детали проекта.</p>' +
+          '<button class="cta-btn" onclick="location.reload()">← К услугам</button>' +
+        '</div>';
+    })
+    .catch(() => {
+      document.getElementById('orderOverlay').innerHTML =
+        '<div class="success-content">' +
+          '<div class="success-icon">✓</div>' +
+          '<h2>Заявка отправлена!</h2>' +
+          '<p>Мы скоро свяжемся с вами и обсудим детали проекта.</p>' +
+          '<button class="cta-btn" onclick="location.reload()">← К услугам</button>' +
+        '</div>';
+    });
 }
 
 // Universal BackButton handler (Telegram + MAX)
