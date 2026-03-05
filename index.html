@@ -178,9 +178,7 @@ nav .inner {
   width: 0.36em; height: 0.36em;
   bottom: 0.18em; left: 50%;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: #fff;
   transform: translateX(-50%);
   z-index: 1;
 }
@@ -195,7 +193,8 @@ nav .inner {
   z-index: 2;
 }
 
-/* Header — add pulse */
+/* Header — hide ring (glass nav provides contrast), add pulse */
+#navbar .logo .logo-dot::before { display: none; }
 #navbar .logo .logo-dot::after {
   animation: live-pulse 1.5s ease-in-out infinite;
 }
