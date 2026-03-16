@@ -826,6 +826,340 @@ body {
   box-shadow: 0 4px 16px rgba(30, 58, 95, 0.15);
 }
 
+/* ═══════════ MATERIAL OVERLAY ═══════════ */
+.material-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(165deg, #EDF1F7 0%, #FAFBFD 25%, #E8ECF3 50%, #FAFBFD 75%, #E5EAF2 100%);
+  z-index: 250;
+  overflow-y: auto;
+  padding: 20px 16px 100px;
+  display: none;
+  animation: slideUp 0.3s ease-out;
+}
+.material-overlay.active { display: block; }
+
+.mat-header { margin-bottom: 20px; }
+.mat-header h2 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.25;
+}
+.mat-header p {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-top: 6px;
+}
+
+.mat-progress {
+  background: var(--border);
+  border-radius: 50px;
+  height: 6px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.mat-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--brand), var(--sage));
+  border-radius: 50px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+.mat-counter {
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-muted);
+}
+.mat-counter b { color: var(--brand); font-weight: 800; }
+
+/* Checklist */
+.check-group { margin-bottom: 20px; }
+.check-group-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--brand);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.check-group-title::before {
+  content: '';
+  width: 16px;
+  height: 1.5px;
+  background: var(--brand);
+}
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.83rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+.check-item:active { transform: scale(0.98); }
+.check-box {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s;
+  margin-top: 1px;
+}
+.check-item.checked .check-box {
+  background: var(--brand);
+  border-color: var(--brand);
+}
+.check-item.checked .check-box::after {
+  content: '\2713';
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.check-item.checked span {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+/* Quiz */
+.quiz-question {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  line-height: 1.3;
+}
+.quiz-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 16px;
+  background: var(--glass);
+  border: 2px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 10px;
+  font-size: 0.86rem;
+  font-family: 'Figtree', sans-serif;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s;
+  line-height: 1.4;
+}
+.quiz-option:active { transform: scale(0.98); }
+.quiz-result { text-align: center; padding: 20px 0; }
+.quiz-score-ring {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--brand-soft);
+  border: 4px solid var(--brand);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+.quiz-score-num {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--brand);
+  line-height: 1;
+}
+.quiz-score-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+.quiz-verdict {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.quiz-rec {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+.quiz-rec-icon { flex-shrink: 0; }
+
+/* Content Plan */
+.plan-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.plan-tab {
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: 'Figtree', sans-serif;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.plan-tab.active {
+  background: var(--brand);
+  color: #fff;
+  border-color: var(--brand);
+}
+.plan-day {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.plan-day-name {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: var(--brand);
+  min-width: 24px;
+  padding-top: 2px;
+}
+.plan-day-content h4 { font-size: 0.86rem; font-weight: 600; margin-bottom: 3px; }
+.plan-day-content p { font-size: 0.76rem; color: var(--text-muted); line-height: 1.4; }
+
+/* Guide */
+.guide-block {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+}
+.guide-block-num {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--brand);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+}
+.guide-block h3 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.guide-block p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin-bottom: 10px;
+}
+.guide-tip {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--brand-soft);
+  border-radius: 10px;
+  font-size: 0.78rem;
+  color: var(--text);
+  line-height: 1.4;
+}
+.guide-tip-icon { flex-shrink: 0; }
+
+/* Ideas */
+.ideas-filter {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.ideas-filter-btn {
+  padding: 7px 14px;
+  border-radius: 50px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-family: 'Figtree', sans-serif;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.ideas-filter-btn.active {
+  background: var(--sage);
+  color: #fff;
+  border-color: var(--sage);
+}
+.idea-cat-header {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--brand);
+  margin: 16px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.idea-cat-header::before {
+  content: '';
+  width: 16px;
+  height: 1.5px;
+  background: var(--brand);
+}
+.idea-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.idea-num {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--brand);
+  min-width: 24px;
+  flex-shrink: 0;
+}
+.idea-card h4 { font-size: 0.86rem; font-weight: 600; margin-bottom: 3px; line-height: 1.3; }
+.idea-card p { font-size: 0.76rem; color: var(--text-muted); line-height: 1.4; }
+
 /* ═══════════ ORDER OVERLAY ═══════════ */
 .order-overlay {
   position: fixed;
@@ -1127,6 +1461,66 @@ body {
     <a href="materials/guide_ad_check_7points_MILLE.pdf" download class="material-download secondary">Скачать гайд →</a>
   </div>
 
+  <div class="material-card">
+    <div class="material-badge checklist">Чек-лист</div>
+    <h3>20 ошибок, из-за которых ваш канал не растёт</h3>
+    <p>Проверьте свой MAX/Telegram-канал по 20 пунктам — найдите слабые места и исправьте их.</p>
+    <div class="material-meta">
+      <div class="material-meta-item"><span class="num">20</span> пунктов</div>
+      <div class="material-meta-item"><span class="num">3</span> мин</div>
+      <div class="material-meta-item"><span class="num">4</span> категории</div>
+    </div>
+    <button class="material-download primary" onclick="openMaterial('checklist20')">Открыть чек-лист →</button>
+  </div>
+
+  <div class="material-card">
+    <div class="material-badge guide" style="background:rgba(30,58,95,0.08);color:var(--sage);">Интерактив</div>
+    <h3>Мини-аудит канала за 2 минуты</h3>
+    <p>Ответьте на 8 вопросов — получите оценку канала с персональными рекомендациями.</p>
+    <div class="material-meta">
+      <div class="material-meta-item"><span class="num">8</span> вопросов</div>
+      <div class="material-meta-item"><span class="num">2</span> мин</div>
+      <div class="material-meta-item"><span class="num">∞</span> польза</div>
+    </div>
+    <button class="material-download secondary" onclick="openMaterial('quiz')">Пройти аудит →</button>
+  </div>
+
+  <div class="material-card">
+    <div class="material-badge guide">Шаблон</div>
+    <h3>Контент-план на месяц</h3>
+    <p>Готовая таблица с рубриками и подсказками на каждый день. Выберите нишу и адаптируйте.</p>
+    <div class="material-meta">
+      <div class="material-meta-item"><span class="num">4</span> недели</div>
+      <div class="material-meta-item"><span class="num">7</span> рубрик</div>
+      <div class="material-meta-item"><span class="num">28</span> постов</div>
+    </div>
+    <button class="material-download primary" onclick="openMaterial('plan')">Открыть шаблон →</button>
+  </div>
+
+  <div class="material-card">
+    <div class="material-badge guide">Гайд</div>
+    <h3>Как оформить канал, чтобы 7 из 10 подписались</h3>
+    <p>Пошаговая инструкция: аватар, описание, закреп и первые посты, которые конвертят гостей в подписчиков.</p>
+    <div class="material-meta">
+      <div class="material-meta-item"><span class="num">5</span> шагов</div>
+      <div class="material-meta-item"><span class="num">5</span> мин</div>
+      <div class="material-meta-item"><span class="num">70%</span> конверсия</div>
+    </div>
+    <button class="material-download secondary" onclick="openMaterial('guide')">Читать гайд →</button>
+  </div>
+
+  <div class="material-card">
+    <div class="material-badge checklist" style="background:rgba(255,158,2,0.1);color:var(--brand);">Подборка</div>
+    <h3>50 идей для постов в MAX и Telegram</h3>
+    <p>Готовые идеи с пояснениями — почему каждый формат цепляет. Забудьте про «не знаю, что писать».</p>
+    <div class="material-meta">
+      <div class="material-meta-item"><span class="num">50</span> идей</div>
+      <div class="material-meta-item"><span class="num">5</span> категорий</div>
+      <div class="material-meta-item"><span class="num">10</span> мин</div>
+    </div>
+    <button class="material-download primary" onclick="openMaterial('ideas')">Смотреть идеи →</button>
+  </div>
+
   <div class="cta-card" style="margin-top:6px;">
     <h2>Хотите <em>персональный аудит</em>?</h2>
     <p>Наши эксперты проверят ваш сайт и рекламу — бесплатно и с рекомендациями.</p>
@@ -1170,6 +1564,11 @@ body {
     <textarea id="orderMessage" placeholder="Расскажите, что вам нужно..."></textarea>
   </div>
   <button class="order-submit" onclick="submitOrder()">Отправить заявку →</button>
+</div>
+
+<!-- ═══════════ MATERIAL OVERLAY ═══════════ -->
+<div class="material-overlay" id="materialOverlay">
+  <div id="materialContent"></div>
 </div>
 
 <!-- ═══════════ TAB BAR ═══════════ -->
@@ -1362,10 +1761,366 @@ function submitOrder() {
     });
 }
 
+// ═══════════ MATERIALS SYSTEM ═══════════
+let checklist20State = new Array(20).fill(false);
+let quizState = { currentQ: 0, scores: [], total: 0 };
+let currentPlanTab = 'universal';
+
+function openMaterial(type) {
+  const el = document.getElementById('materialContent');
+  if (type === 'checklist20') el.innerHTML = renderChecklist20();
+  else if (type === 'quiz') { quizState = { currentQ: 0, scores: [], total: 0 }; el.innerHTML = renderQuiz(); }
+  else if (type === 'plan') el.innerHTML = renderPlan();
+  else if (type === 'guide') el.innerHTML = renderGuide();
+  else if (type === 'ideas') el.innerHTML = renderIdeas('all');
+  document.getElementById('materialOverlay').classList.add('active');
+  if (app) app.BackButton.show();
+  window.scrollTo(0, 0);
+}
+
+function closeMaterial() {
+  document.getElementById('materialOverlay').classList.remove('active');
+  if (app) app.BackButton.hide();
+}
+
+// ═══ CHECKLIST 20 ═══
+const checklist20Data = [
+  { group: 'Оформление', items: [
+    'Нет аватара или он не отражает тематику канала',
+    'Название непонятное или слишком длинное — не считывается за 2 секунды',
+    'В описании нет конкретного оффера — непонятно, зачем подписываться',
+    'Нет закреплённого сообщения с навигацией по каналу',
+    'Ссылка на канал сложная и не запоминается'
+  ]},
+  { group: 'Контент', items: [
+    'Нет контент-плана — посты выходят хаотично',
+    'Используете только один формат (например, только текст)',
+    'Посты без структуры — сплошная стена текста без абзацев',
+    'Нет регулярности — то 5 постов в день, то тишина неделю',
+    'Контент не решает конкретные проблемы целевой аудитории'
+  ]},
+  { group: 'Продвижение', items: [
+    'Нет стратегии привлечения — ждёте, пока найдут сами',
+    'Не используете перекрёстное продвижение между платформами',
+    'Не анализируете статистику и охваты постов',
+    'Не тестируете разные каналы привлечения трафика',
+    'Нет выделенного бюджета на продвижение канала'
+  ]},
+  { group: 'Вовлечение', items: [
+    'Нет призывов к действию (CTA) в постах',
+    'Не отвечаете на комментарии подписчиков',
+    'Не проводите опросы, голосования и интерактивы',
+    'Не используете Stories и короткие форматы',
+    'Не создаёте поводов для репостов и обсуждений'
+  ]}
+];
+
+function renderChecklist20() {
+  const checked = checklist20State.filter(Boolean).length;
+  let idx = 0;
+  let h = '<div class="mat-header"><h2>20 ошибок, из-за которых канал не растёт</h2><p>Отмечайте пункты, которые у вас в порядке. Оставшиеся — зоны роста.</p></div>';
+  h += '<div class="mat-progress"><div class="mat-progress-bar" style="width:' + (checked / 20 * 100) + '%"></div></div>';
+  h += '<div class="mat-counter">Исправлено: <b>' + checked + '</b> из 20</div>';
+  checklist20Data.forEach(function(g) {
+    h += '<div class="check-group"><div class="check-group-title">' + g.group + '</div>';
+    g.items.forEach(function(item) {
+      h += '<div class="check-item' + (checklist20State[idx] ? ' checked' : '') + '" onclick="toggleCheck(' + idx + ')"><div class="check-box"></div><span>' + item + '</span></div>';
+      idx++;
+    });
+    h += '</div>';
+  });
+  return h;
+}
+
+function toggleCheck(idx) {
+  checklist20State[idx] = !checklist20State[idx];
+  document.getElementById('materialContent').innerHTML = renderChecklist20();
+}
+
+// ═══ QUIZ (Mini-audit) ═══
+const quizData = [
+  { q: 'Как выглядит аватар вашего канала?', opts: [
+    { text: 'Нет аватара или стоит стоковое фото', score: 0 },
+    { text: 'Есть, но не уникальный — не выделяется в ленте', score: 1 },
+    { text: 'Профессиональный, узнаваемый, отражает бренд', score: 2 }
+  ]},
+  { q: 'Что написано в описании канала?', opts: [
+    { text: 'Описания нет или что-то вроде «мой канал»', score: 0 },
+    { text: 'Есть описание, но без конкретного оффера', score: 1 },
+    { text: 'Чёткий оффер: что даёт канал + для кого', score: 2 }
+  ]},
+  { q: 'Есть ли закреплённое сообщение?', opts: [
+    { text: 'Нет закрепа', score: 0 },
+    { text: 'Есть, но устарело или не информативно', score: 1 },
+    { text: 'Актуальный закреп с навигацией или оффером', score: 2 }
+  ]},
+  { q: 'Как часто выходят посты?', opts: [
+    { text: 'Реже одного раза в неделю', score: 0 },
+    { text: '1–2 раза в неделю', score: 1 },
+    { text: '3+ раз в неделю по контент-плану', score: 2 }
+  ]},
+  { q: 'Какие форматы контента вы используете?', opts: [
+    { text: 'Только текстовые посты', score: 0 },
+    { text: '2–3 формата (текст + картинки/видео)', score: 1 },
+    { text: '4+ форматов: тексты, видео, опросы, подборки, Stories', score: 2 }
+  ]},
+  { q: 'Как обстоят дела с вовлечённостью?', opts: [
+    { text: 'Реакций и комментариев почти нет', score: 0 },
+    { text: 'Иногда ставят реакции, редкие комментарии', score: 1 },
+    { text: 'Активные обсуждения, много реакций на посты', score: 2 }
+  ]},
+  { q: 'Используете ли вы CTA в постах?', opts: [
+    { text: 'Нет, просто публикую контент', score: 0 },
+    { text: 'Иногда добавляю призыв', score: 1 },
+    { text: 'В каждом посте есть конкретный призыв к действию', score: 2 }
+  ]},
+  { q: 'Как вы привлекаете новых подписчиков?', opts: [
+    { text: 'Никак — жду, пока найдут сами', score: 0 },
+    { text: 'Иногда делаю посевы или рекламу', score: 1 },
+    { text: 'Есть системная стратегия продвижения', score: 2 }
+  ]}
+];
+
+function renderQuiz() {
+  var q = quizState.currentQ;
+  if (q >= quizData.length) return renderQuizResult();
+  var data = quizData[q];
+  var pct = (q / quizData.length * 100);
+  var h = '<div class="mat-header"><h2>Мини-аудит канала</h2><p>Вопрос ' + (q + 1) + ' из ' + quizData.length + '</p></div>';
+  h += '<div class="mat-progress"><div class="mat-progress-bar" style="width:' + pct + '%"></div></div>';
+  h += '<div class="quiz-question">' + data.q + '</div>';
+  data.opts.forEach(function(opt) {
+    h += '<button class="quiz-option" onclick="selectQuizAnswer(' + opt.score + ')">' + opt.text + '</button>';
+  });
+  return h;
+}
+
+function selectQuizAnswer(score) {
+  quizState.scores.push(score);
+  quizState.total += score;
+  quizState.currentQ++;
+  document.getElementById('materialContent').innerHTML = renderQuiz();
+  window.scrollTo(0, 0);
+}
+
+function renderQuizResult() {
+  var total = quizState.total;
+  var max = quizData.length * 2;
+  var verdict, recs;
+  if (total <= 5) {
+    verdict = 'Нужна серьёзная доработка';
+    recs = [
+      { icon: '🎨', text: 'Начните с оформления: уникальный аватар и чёткое описание с оффером.' },
+      { icon: '📝', text: 'Составьте контент-план минимум на 2 недели и придерживайтесь расписания.' },
+      { icon: '📌', text: 'Сделайте закреп с навигацией по каналу и главным оффером.' },
+      { icon: '📢', text: 'Подключите хотя бы один канал привлечения — РСЯ, посевы или коллаборации.' }
+    ];
+  } else if (total <= 10) {
+    verdict = 'Есть база — нужно усилить';
+    recs = [
+      { icon: '🎯', text: 'Добавьте CTA в каждый пост — просите подписаться, оставить реакцию, комментарий.' },
+      { icon: '🔄', text: 'Разнообразьте форматы: опросы, подборки, видео, Stories.' },
+      { icon: '📊', text: 'Анализируйте статистику: какие посты набирают больше охватов и почему.' },
+      { icon: '🚀', text: 'Систематизируйте продвижение — протестируйте 2–3 канала трафика.' }
+    ];
+  } else {
+    verdict = 'Отличная работа!';
+    recs = [
+      { icon: '📈', text: 'Канал готов к масштабированию — увеличивайте бюджет на продвижение.' },
+      { icon: '🤝', text: 'Запускайте коллаборации с каналами из смежных ниш.' },
+      { icon: '💰', text: 'Начинайте монетизацию: интеграции, платный контент, воронки продаж.' },
+      { icon: '🔬', text: 'Проводите A/B-тесты заголовков и форматов для роста вовлечённости.' }
+    ];
+  }
+  var h = '<div class="quiz-result">';
+  h += '<div class="quiz-score-ring"><div class="quiz-score-num">' + total + '/' + max + '</div><div class="quiz-score-label">баллов</div></div>';
+  h += '<div class="quiz-verdict">' + verdict + '</div>';
+  h += '<p style="font-size:0.84rem;color:var(--text-muted);line-height:1.5;">Ваш канал набрал ' + total + ' из ' + max + ' возможных баллов.</p></div>';
+  h += '<div style="text-align:left;margin-top:20px;"><div class="check-group-title">Рекомендации</div>';
+  recs.forEach(function(r) {
+    h += '<div class="quiz-rec"><span class="quiz-rec-icon">' + r.icon + '</span><span>' + r.text + '</span></div>';
+  });
+  h += '</div>';
+  h += '<button class="detail-cta" style="margin-top:20px;" onclick="quizState={currentQ:0,scores:[],total:0};document.getElementById(\'materialContent\').innerHTML=renderQuiz();window.scrollTo(0,0);">Пройти заново →</button>';
+  return h;
+}
+
+// ═══ CONTENT PLAN ═══
+const planData = {
+  universal: [
+    { day: 'ПН', title: 'Экспертный пост', desc: 'Разбор темы, полезный совет или инструкция. Покажите экспертизу.' },
+    { day: 'ВТ', title: 'Кейс или история', desc: 'Результат клиента, ваш опыт или разбор чужого кейса с выводами.' },
+    { day: 'СР', title: 'Опрос / интерактив', desc: 'Голосование, вопрос аудитории, «выберите вариант». Растит вовлечённость.' },
+    { day: 'ЧТ', title: 'Подборка / чек-лист', desc: 'Список инструментов, ресурсов, книг, ошибок. Репостабельный формат.' },
+    { day: 'ПТ', title: 'Личный / закулисье', desc: 'Рабочий процесс, мысли, инсайты. Формирует доверие к автору.' },
+    { day: 'СБ', title: 'Развлекательный', desc: 'Мем по теме, ироничное наблюдение. Лёгкий контент для выходных.' },
+    { day: 'ВС', title: 'Итоги + анонс', desc: 'Подведите итоги недели и расскажите, что будет дальше.' }
+  ],
+  business: [
+    { day: 'ПН', title: 'Разбор ниши/рынка', desc: 'Тренды, цифры, аналитика. Покажите понимание рынка.' },
+    { day: 'ВТ', title: 'Кейс клиента', desc: 'Было/стало, цифры, процесс. Социальное доказательство.' },
+    { day: 'СР', title: 'Ответы на вопросы', desc: 'Соберите вопросы аудитории и ответьте. Вовлекает и показывает экспертизу.' },
+    { day: 'ЧТ', title: 'Инструменты и лайфхаки', desc: 'Полезные сервисы, таблицы, шаблоны из вашей работы.' },
+    { day: 'ПТ', title: 'Ваша история / ценности', desc: 'Почему занимаетесь этим, что важно. Формирует связь с аудиторией.' },
+    { day: 'СБ', title: 'Отзыв или UGC', desc: 'Отзыв клиента, скриншот переписки, благодарность.' },
+    { day: 'ВС', title: 'Оффер недели', desc: 'Спецпредложение, акция или приглашение на консультацию.' }
+  ],
+  expert: [
+    { day: 'ПН', title: 'Разрушение мифа', desc: 'Опровергните заблуждение в нише. Цепляет и генерирует обсуждение.' },
+    { day: 'ВТ', title: 'Пошаговая инструкция', desc: 'Как сделать что-то за N шагов. Практическая ценность.' },
+    { day: 'СР', title: 'Опрос-дискуссия', desc: 'Спорный вопрос с голосованием. Провоцирует комментарии и репосты.' },
+    { day: 'ЧТ', title: 'Подборка ресурсов', desc: 'Книги, курсы, каналы, инструменты по теме. Высокий % сохранений.' },
+    { day: 'ПТ', title: 'Личный инсайт', desc: 'Что поняли за неделю, какой опыт получили. Искренность привлекает.' },
+    { day: 'СБ', title: 'До/после', desc: 'Наглядный результат: ваш или клиента. Визуально убедительно.' },
+    { day: 'ВС', title: 'Мотивация + анонс', desc: 'Вдохновляющая мысль + план на следующую неделю.' }
+  ]
+};
+
+function renderPlan() {
+  var h = '<div class="mat-header"><h2>Контент-план на месяц</h2><p>Выберите нишу и адаптируйте план под себя.</p></div>';
+  h += '<div class="plan-tabs">';
+  ['universal','business','expert'].forEach(function(t) {
+    var labels = { universal: 'Универсальный', business: 'Бизнес', expert: 'Эксперт' };
+    h += '<button class="plan-tab' + (currentPlanTab === t ? ' active' : '') + '" onclick="switchPlanTab(\'' + t + '\')">' + labels[t] + '</button>';
+  });
+  h += '</div>';
+  var days = planData[currentPlanTab];
+  for (var w = 1; w <= 4; w++) {
+    h += '<div class="check-group-title">Неделя ' + w + '</div>';
+    days.forEach(function(d) {
+      h += '<div class="plan-day"><div class="plan-day-name">' + d.day + '</div><div class="plan-day-content"><h4>' + d.title + '</h4><p>' + d.desc + '</p></div></div>';
+    });
+  }
+  return h;
+}
+
+function switchPlanTab(tab) {
+  currentPlanTab = tab;
+  document.getElementById('materialContent').innerHTML = renderPlan();
+}
+
+// ═══ GUIDE ═══
+function renderGuide() {
+  var blocks = [
+    { num: 'Шаг 1', title: 'Аватар — первое впечатление за 0.3 секунды',
+      text: 'Аватар — ваше лицо в ленте. Он должен быть ярким, контрастным и считываться даже в маленьком кружке. Избегайте мелких деталей, текста и стоковых фото.',
+      tip: 'Используйте свою фотографию или логотип на контрастном фоне. Проверьте, как выглядит в размере 40×40 пикселей.' },
+    { num: 'Шаг 2', title: 'Название — ясность важнее креатива',
+      text: 'Название должно сразу говорить, о чём канал. Формула: [Тема] + [Для кого] или [Имя] + [Тема]. Избегайте абстрактных названий.',
+      tip: 'Хорошо: «Маркетинг для малого бизнеса». Плохо: «Мысли вслух», «Канал №1».' },
+    { num: 'Шаг 3', title: 'Описание — оффер за 5 секунд',
+      text: 'У вас 5 секунд, чтобы убедить подписаться. Описание отвечает на: «Что я получу?». Конкретика всегда бьёт абстракцию.',
+      tip: 'Шаблон: «Здесь вы найдёте [что] + [как часто]. [Для кого]. [Результат/выгода]».' },
+    { num: 'Шаг 4', title: 'Закреп — навигация и доверие',
+      text: 'Закреп — это витрина канала. Новый человек видит его первым. Сделайте закреп полезным: навигация по рубрикам, лучшие посты, ваше предложение.',
+      tip: 'Включите: кто вы, о чём канал, ссылки на лучшие посты, CTA (подписаться / задать вопрос).' },
+    { num: 'Шаг 5', title: 'Первые 5 постов решают всё',
+      text: 'Человек листает последние посты. Если топ-5 — мусор, он уйдёт. Убедитесь, что верхние посты показывают максимальную ценность канала.',
+      tip: 'Держите в топе: экспертный пост, кейс, полезный чек-лист, личный пост и интерактив.' }
+  ];
+  var h = '<div class="mat-header"><h2>Как оформить канал, чтобы 7 из 10 подписались</h2><p>5 элементов, которые превращают случайных гостей в подписчиков.</p></div>';
+  blocks.forEach(function(b) {
+    h += '<div class="guide-block"><div class="guide-block-num">' + b.num + '</div>';
+    h += '<h3>' + b.title + '</h3><p>' + b.text + '</p>';
+    h += '<div class="guide-tip"><span class="guide-tip-icon">💡</span><span>' + b.tip + '</span></div></div>';
+  });
+  return h;
+}
+
+// ═══ 50 IDEAS ═══
+const ideasData = [
+  { cat: 'Экспертные', icon: '🎓', ideas: [
+    { title: 'Топ-5 ошибок в вашей нише', why: 'Цепляет боль и показывает экспертизу.' },
+    { title: 'Пошаговая инструкция', why: 'Практическая ценность = сохранения и репосты.' },
+    { title: 'Разбор чужого кейса', why: 'Аудитория учится на чужих примерах.' },
+    { title: 'Миф vs реальность', why: 'Разрушение мифов генерирует споры.' },
+    { title: 'Чек-лист по теме', why: 'Самый репостабельный формат.' },
+    { title: 'Ответ на частый вопрос', why: 'Показывает, что вы слушаете аудиторию.' },
+    { title: 'Обзор инструмента/сервиса', why: 'Экономит время подписчиков.' },
+    { title: 'Прогноз или тренды', why: 'Позиционирует как визионера.' },
+    { title: '«Как я это делаю» — процесс', why: 'Закулисье вызывает доверие.' },
+    { title: 'Словарь терминов для новичков', why: 'Привлекает новую аудиторию.' }
+  ]},
+  { cat: 'Вовлекающие', icon: '💬', ideas: [
+    { title: 'Опрос с двумя вариантами', why: 'Минимальный порог — каждый нажмёт кнопку.' },
+    { title: '«А как у вас?» — открытый вопрос', why: 'Провоцирует комментарии.' },
+    { title: 'Угадай по описанию', why: 'Геймификация: не удержатся от ответа.' },
+    { title: '«Согласны?» — спорное утверждение', why: 'Поляризация = взрыв комментариев.' },
+    { title: 'Просьба дать совет', why: 'Люди обожают давать советы — льстит.' },
+    { title: '«Оцените от 1 до 10»', why: 'Простое действие, ощущение участия.' },
+    { title: 'История с открытым финалом', why: '«Как бы вы поступили?» — эмпатия.' },
+    { title: 'Челлендж на неделю', why: 'Привычка заходить в канал каждый день.' },
+    { title: '«Правда или вымысел»', why: 'Игровой формат, удерживает внимание.' },
+    { title: '«Выбери одно из двух»', why: 'Простой выбор генерирует массу реакций.' }
+  ]},
+  { cat: 'Продающие', icon: '💰', ideas: [
+    { title: 'Кейс: было / стало', why: 'Социальное доказательство — мощный триггер.' },
+    { title: 'Отзыв-скриншот', why: 'Скриншот = честно и неподдельно.' },
+    { title: 'Ограниченное предложение', why: 'Дедлайн ускоряет решение.' },
+    { title: 'FAQ по продукту', why: 'Снимает возражения и барьеры.' },
+    { title: '«Для кого это, а для кого — нет»', why: 'Честность продаёт лучше «подходит всем».' },
+    { title: 'Закулисье создания продукта', why: 'Люди ценят труд и процесс.' },
+    { title: 'Сравнение «с нами» vs «без нас»', why: 'Наглядно демонстрирует ценность.' },
+    { title: 'История клиента от первого лица', why: 'Сторителлинг вовлекает сильнее фактов.' },
+    { title: 'Калькуляция выгоды', why: 'Цифры убеждают рациональную часть мозга.' },
+    { title: 'Оффер + бонус за репост', why: 'Двойная мотивация для действия.' }
+  ]},
+  { cat: 'Личные', icon: '🙋', ideas: [
+    { title: 'Ваш путь: как начинали', why: 'Люди подписываются на людей, не на бренды.' },
+    { title: 'Главный провал и выводы', why: 'Уязвимость = доверие.' },
+    { title: 'Рабочий день — таймлайн', why: 'Закулисье привлекает внимание.' },
+    { title: 'Книга, которая изменила взгляд', why: 'Показывает глубину, формирует связь.' },
+    { title: 'Благодарность подписчикам', why: 'Усиливает лояльность и комьюнити.' },
+    { title: 'Ваши правила работы', why: 'Фильтрует аудиторию, притягивает «своих».' },
+    { title: 'Фото с рабочего места', why: 'Визуал + закулисье = двойной интерес.' },
+    { title: 'Публичная цель на месяц', why: 'Создаёт интригу и вовлечение.' },
+    { title: 'Что мотивирует каждый день', why: 'Вдохновляющий контент = репосты.' },
+    { title: '«Спросите что угодно» — AMA', why: 'Максимальное вовлечение.' }
+  ]},
+  { cat: 'Вирусные', icon: '🚀', ideas: [
+    { title: 'Мем по теме канала', why: 'Юмор — самый вирусный формат.' },
+    { title: 'Подборка каналов для подписки', why: 'Авторы репостят — двойной охват.' },
+    { title: 'Инфографика с цифрами', why: 'Визуально яркий, высокая репостабельность.' },
+    { title: 'Спорное мнение по тренду', why: 'Провокация = комментарии и охваты.' },
+    { title: '«Сохрани себе» — шпаргалка', why: 'Прямой призыв повышает engagement.' },
+    { title: 'Ожидание vs реальность', why: 'Контраст + юмор = репосты.' },
+    { title: 'Цитата + ваш комментарий', why: 'Авторитет + экспертиза.' },
+    { title: 'Разбор хайповой новости', why: 'Инфоповод усиливает охват в разы.' },
+    { title: 'Эксперимент в прямом эфире', why: 'Интрига + результат = обсуждения.' },
+    { title: '«Этот пост сохранят 90%»', why: 'Челлендж триггерит проверку.' }
+  ]}
+];
+
+function renderIdeas(filter) {
+  var h = '<div class="mat-header"><h2>50 идей для постов</h2><p>Готовые идеи с пояснениями, почему каждый формат работает.</p></div>';
+  h += '<div class="ideas-filter">';
+  h += '<button class="ideas-filter-btn' + (filter === 'all' ? ' active' : '') + '" onclick="filterIdeas(\'all\')">Все</button>';
+  ideasData.forEach(function(cat) {
+    h += '<button class="ideas-filter-btn' + (filter === cat.cat ? ' active' : '') + '" onclick="filterIdeas(\'' + cat.cat + '\')">' + cat.icon + ' ' + cat.cat + '</button>';
+  });
+  h += '</div>';
+  var num = 1;
+  ideasData.forEach(function(cat) {
+    if (filter !== 'all' && filter !== cat.cat) { num += cat.ideas.length; return; }
+    h += '<div class="idea-cat-header">' + cat.icon + ' ' + cat.cat + '</div>';
+    cat.ideas.forEach(function(idea) {
+      h += '<div class="idea-card"><div class="idea-num">' + num + '</div><div><h4>' + idea.title + '</h4><p>' + idea.why + '</p></div></div>';
+      num++;
+    });
+  });
+  return h;
+}
+
+function filterIdeas(filter) {
+  document.getElementById('materialContent').innerHTML = renderIdeas(filter);
+  window.scrollTo(0, 0);
+}
+
 // Universal BackButton handler (Telegram + MAX)
 if (app) {
   app.BackButton.onClick(() => {
-    if (document.getElementById('orderOverlay').classList.contains('active')) { closeOrder(); }
+    if (document.getElementById('materialOverlay').classList.contains('active')) { closeMaterial(); }
+    else if (document.getElementById('orderOverlay').classList.contains('active')) { closeOrder(); }
     else if (document.getElementById('detailOverlay').classList.contains('active')) { closeDetail(); }
   });
 }
