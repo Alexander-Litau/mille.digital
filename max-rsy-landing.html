@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Подписчики в MAX через РСЯ — MILLE Digital</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231E3A5F'/%3E%3Ctext x='8' y='46' font-family='Arial,Helvetica,sans-serif' font-weight='800' font-size='36' fill='%23ffffff'%3EM%3C/text%3E%3Ctext x='38' y='46' font-family='Arial,Helvetica,sans-serif' font-weight='800' font-size='36' fill='%23ff9e02'%3EL%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --brand: #ff9e02;
+  --brand-light: #ffc55c;
+  --brand-soft: rgba(255, 158, 2, 0.07);
+  --brand-glow: rgba(255, 158, 2, 0.2);
+  --sage: #1E3A5F;
+  --sage-light: #D8E2EE;
+  --sage-bg: #EDF1F7;
+  --bg: #FAFAF6;
+  --text: #2C2C28;
+  --text-muted: #8A8A80;
+  --border: rgba(0, 0, 0, 0.06);
+  --glass: rgba(255, 255, 255, 0.50);
+  --glass-border: rgba(255, 255, 255, 0.65);
+  --glass-hover: rgba(255, 255, 255, 0.72);
+  --shadow: 0 8px 32px rgba(30, 58, 95, 0.08);
+  --shadow-lg: 0 24px 64px rgba(30, 58, 95, 0.11);
+  --radius: 20px;
+  --radius-sm: 14px;
+}
+
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  background: linear-gradient(165deg, #EDF1F7 0%, #FAFBFD 25%, #E8ECF3 50%, #FAFBFD 75%, #E5EAF2 100%);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: 'Figtree', sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+.container { max-width: 820px; margin: 0 auto; padding: 0 20px; }
+
+/* ═══════════ DECORATIVE BLOBS ═══════════ */
+.blob {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+}
+.blob-1 { width: 400px; height: 400px; background: rgba(30, 58, 95, 0.1); top: -100px; right: -100px; }
+.blob-2 { width: 350px; height: 350px; background: rgba(255, 158, 2, 0.07); bottom: 20%; left: -80px; }
+.blob-3 { width: 300px; height: 300px; background: rgba(30, 58, 95, 0.06); top: 55%; left: 50%; }
+
+/* ═══════════ NAV ═══════════ */
+.nav {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: calc(100% - 32px);
+  max-width: 820px;
+  padding: 12px 28px;
+  background: var(--glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
+  border-radius: 60px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.4s ease;
+}
+
+.nav.scrolled {
+  padding: 10px 24px;
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: var(--shadow-lg);
+}
+
+.logo {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--sage);
+  text-decoration: none;
+  letter-spacing: -1px;
+}
+.logo span { color: var(--brand); }
+.logo-dot {
+  display: inline-block;
+  position: relative;
+  color: transparent !important;
+  margin: 0;
+}
+.logo-dot::before {
+  content: '';
+  position: absolute;
+  width: 0.36em; height: 0.36em;
+  bottom: 0.18em; left: 50%;
+  border-radius: 50%;
+  background: #fff;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+.logo-dot::after {
+  content: '';
+  position: absolute;
+  width: 0.22em; height: 0.22em;
+  bottom: 0.25em; left: 50%;
+  border-radius: 50%;
+  background: var(--sage);
+  transform: translateX(-50%);
+  z-index: 2;
+  animation: live-pulse 1.5s ease-in-out infinite;
+}
+@keyframes live-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(30, 58, 95, 0.5); }
+  50% { box-shadow: 0 0 0 6px rgba(30, 58, 95, 0); }
+}
+
+.nav-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--brand);
+  color: #fff;
+  padding: 10px 22px;
+  border-radius: 60px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  font-family: 'Figtree', sans-serif;
+  text-decoration: none;
+  box-shadow: 0 4px 16px var(--brand-glow);
+  transition: transform 0.15s;
+}
+.nav-cta:active { transform: scale(0.96); }
+
+/* ═══════════ SECTION HELPERS ═══════════ */
+.section { padding: 48px 0; position: relative; z-index: 1; }
+.section:first-of-type { padding-top: 100px; }
+
+.section-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  color: var(--brand);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-label::before {
+  content: '';
+  width: 20px;
+  height: 1.5px;
+  background: var(--brand);
+}
+
+.section-title {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -1px;
+  margin-bottom: 16px;
+}
+.section-title em { font-style: normal; color: var(--brand); }
+
+@media (max-width: 480px) {
+  .section-title { font-size: 1.4rem; }
+}
+
+/* ═══════════ HERO ═══════════ */
+.hero {
+  padding-top: 110px;
+  padding-bottom: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--brand-soft);
+  border: 1px solid rgba(255,158,2,0.15);
+  border-radius: 50px;
+  padding: 8px 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--brand);
+  margin-bottom: 20px;
+}
+
+.hero h1 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 2.4rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -1.5px;
+  margin-bottom: 16px;
+}
+.hero h1 em { font-style: normal; color: var(--brand); }
+
+.hero-sub {
+  font-size: 1rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  max-width: 560px;
+  margin-bottom: 28px;
+}
+
+.hero-cta-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--brand);
+  color: #fff;
+  padding: 16px 36px;
+  border-radius: 60px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  font-family: 'Figtree', sans-serif;
+  text-decoration: none;
+  box-shadow: 0 6px 24px var(--brand-glow);
+  transition: transform 0.15s;
+}
+.btn-primary:active { transform: scale(0.97); }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--sage);
+  color: #fff;
+  padding: 16px 36px;
+  border-radius: 60px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  font-family: 'Figtree', sans-serif;
+  text-decoration: none;
+  box-shadow: 0 6px 24px rgba(30, 58, 95, 0.15);
+  transition: transform 0.15s;
+}
+.btn-secondary:active { transform: scale(0.97); }
+
+.hero-stats {
+  display: flex;
+  gap: 12px;
+}
+
+.hero-stat {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+  flex: 1;
+  text-align: center;
+}
+
+.hero-stat-num {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--brand), var(--sage));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-stat-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+@media (max-width: 480px) {
+  .hero h1 { font-size: 1.8rem; }
+  .hero-stats { flex-direction: column; }
+  .hero-cta-row { flex-direction: column; align-items: stretch; }
+  .btn-primary, .btn-secondary { text-align: center; justify-content: center; }
+}
+
+/* ═══════════ PROBLEM SECTION ═══════════ */
+.problem-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.problem-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 22px 20px;
+  box-shadow: var(--shadow);
+}
+
+.problem-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(30, 58, 95, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+}
+
+.problem-card h3 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.problem-card p {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+@media (max-width: 480px) {
+  .problem-grid { grid-template-columns: 1fr; }
+}
+
+/* ═══════════ SCHEME / HOW IT WORKS ═══════════ */
+.scheme-card {
+  background: var(--sage);
+  border-radius: var(--radius);
+  padding: 32px 28px;
+  color: #fff;
+  margin-top: 20px;
+}
+
+.scheme-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.scheme-step {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.scheme-num {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--brand);
+  flex-shrink: 0;
+  min-width: 40px;
+  line-height: 1;
+}
+
+.scheme-step h3 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.scheme-step p {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.5;
+}
+
+.scheme-arrow {
+  text-align: center;
+  color: rgba(255,255,255,0.2);
+  font-size: 1.2rem;
+  margin-left: 16px;
+}
+
+/* ═══════════ ADVANTAGES ═══════════ */
+.adv-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.adv-item {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 22px 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.adv-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  background: var(--brand-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.adv-item h3 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.adv-item p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ═══════════ FOR WHOM ═══════════ */
+.whom-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.whom-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 22px 18px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.whom-icon {
+  font-size: 1.6rem;
+  margin-bottom: 10px;
+}
+
+.whom-card h3 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.whom-card p {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+@media (max-width: 600px) {
+  .whom-grid { grid-template-columns: 1fr; }
+}
+
+/* ═══════════ RESULTS / CASE ═══════════ */
+.result-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  box-shadow: var(--shadow);
+  margin-top: 20px;
+}
+
+.result-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.result-stat {
+  text-align: center;
+  padding: 16px 8px;
+  background: var(--sage-bg);
+  border-radius: var(--radius-sm);
+}
+
+.result-stat-num {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--brand), var(--sage));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.result-stat-label {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.result-note {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  text-align: center;
+  font-style: italic;
+}
+
+@media (max-width: 480px) {
+  .result-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ═══════════ FAQ ═══════════ */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.faq-item {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.faq-q {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  cursor: pointer;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  border: none;
+  background: none;
+  color: var(--text);
+  width: 100%;
+  text-align: left;
+}
+
+.faq-q-icon {
+  font-size: 1.2rem;
+  color: var(--brand);
+  transition: transform 0.3s;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.faq-item.open .faq-q-icon { transform: rotate(45deg); }
+
+.faq-a {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.35s ease;
+  padding: 0 20px;
+}
+
+.faq-item.open .faq-a {
+  max-height: 300px;
+  padding: 0 20px 18px;
+}
+
+.faq-a p {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ═══════════ CTA FINAL ═══════════ */
+.cta-final {
+  background: var(--sage);
+  border-radius: var(--radius);
+  padding: 40px 28px;
+  color: #fff;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.cta-final h2 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+  line-height: 1.25;
+}
+.cta-final h2 em { font-style: normal; color: var(--brand); }
+
+.cta-final p {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 24px;
+  line-height: 1.55;
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cta-checks {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.55);
+  margin-top: 16px;
+}
+.cta-checks span::before {
+  content: "\2713  ";
+  color: var(--brand);
+}
+
+/* ═══════════ FOOTER ═══════════ */
+.footer {
+  text-align: center;
+  padding: 32px 20px 40px;
+  position: relative;
+  z-index: 1;
+}
+
+.footer-logo {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--sage);
+  letter-spacing: -1px;
+  margin-bottom: 6px;
+}
+.footer-logo span { color: var(--brand); }
+
+.footer p {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* ═══════════ ANIMATIONS ═══════════ */
+.fade-up {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<!-- Blobs -->
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<!-- Nav -->
+<div class="nav" id="navbar">
+  <a href="https://mille.digital" class="logo">MIL<span class="logo-dot">.</span><span>LE</span></a>
+  <a href="https://max.ru/u/f9LHodD0cOJjpA8IcT8R5DX13-0VsNHW-4ulnpIjGedGegtriCUrdGrIveo" class="nav-cta" target="_blank">Подписаться на MAX</a>
+</div>
+
+<div class="container">
+
+  <!-- ═══════════ HERO ═══════════ -->
+  <section class="hero fade-up">
+    <div class="hero-badge">📢 РСЯ + MAX = связка, которая работает</div>
+    <h1>Как набирать <em>сотни подписчиков</em> в MAX через РСЯ</h1>
+    <p class="hero-sub">Рекламная сеть Яндекса даёт дешёвый трафик. MAX даёт вовлечённую аудиторию. Вместе это рабочая система роста канала без слива бюджета.</p>
+    <div class="hero-cta-row">
+      <a href="https://max.ru/u/f9LHodD0cOJjpA8IcT8R5DX13-0VsNHW-4ulnpIjGedGegtriCUrdGrIveo" class="btn-primary" target="_blank">Подписаться на канал →</a>
+      <a href="#scheme" class="btn-secondary">Как это работает ↓</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-num">от 3 ₽</div>
+        <div class="hero-stat-label">за подписчика</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">500+</div>
+        <div class="hero-stat-label">подписчиков/мес</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">72%</div>
+        <div class="hero-stat-label">остаются</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ PROBLEM ═══════════ -->
+  <section class="section fade-up">
+    <div class="section-label">Знакомые проблемы?</div>
+    <div class="section-title">Почему каналы в MAX <em>не растут</em></div>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="problem-icon">💸</div>
+        <h3>Дорогая реклама в Telegram</h3>
+        <p>Telegram Ads стоит от 15-30 ₽ за подписчика и требует минимальный бюджет от 1 500 EUR.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">👻</div>
+        <h3>Боты вместо людей</h3>
+        <p>Посевы в каналах приносят ботов и мёртвые аккаунты — охваты падают, а деньги улетают.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">🔇</div>
+        <h3>MAX ещё не раскачали</h3>
+        <p>Конкуренция в MAX низкая, но непонятно, откуда брать аудиторию — органика почти нулевая.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">🎯</div>
+        <h3>Нет понятной воронки</h3>
+        <p>Трафик идёт непонятно куда. Нет конкретного маршрута: увидел рекламу → перешёл → подписался.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ SCHEME ═══════════ -->
+  <section class="section fade-up" id="scheme">
+    <div class="section-label">Механика</div>
+    <div class="section-title">Как работает связка <em>РСЯ → MAX</em></div>
+    <div class="scheme-card">
+      <div class="scheme-steps">
+        <div class="scheme-step">
+          <div class="scheme-num">01</div>
+          <div>
+            <h3>Собираем семантику и аудиторию</h3>
+            <p>Подбираем ключевые запросы и интересы вашей целевой аудитории. Настраиваем сегменты для точного попадания.</p>
+          </div>
+        </div>
+        <div class="scheme-arrow">↓</div>
+        <div class="scheme-step">
+          <div class="scheme-num">02</div>
+          <div>
+            <h3>Запускаем РСЯ-кампанию</h3>
+            <p>Баннеры и текстовые объявления в рекламной сети Яндекса. Охват миллионов площадок за копейки по сравнению с Telegram Ads.</p>
+          </div>
+        </div>
+        <div class="scheme-arrow">↓</div>
+        <div class="scheme-step">
+          <div class="scheme-num">03</div>
+          <div>
+            <h3>Ведём на подписную страницу</h3>
+            <p>Трафик попадает на лендинг с чётким оффером и одной кнопкой — подписка на канал в MAX. Никаких лишних шагов.</p>
+          </div>
+        </div>
+        <div class="scheme-arrow">↓</div>
+        <div class="scheme-step">
+          <div class="scheme-num">04</div>
+          <div>
+            <h3>Подписчик попадает в канал</h3>
+            <p>Человек подписывается, получает приветственный контент и втягивается в воронку. Далее — прогрев, вовлечение, продажи.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ ADVANTAGES ═══════════ -->
+  <section class="section fade-up">
+    <div class="section-label">Почему РСЯ</div>
+    <div class="section-title">Преимущества связки <em>РСЯ + MAX</em></div>
+    <div class="adv-list">
+      <div class="adv-item">
+        <div class="adv-icon">💰</div>
+        <div>
+          <h3>В 5-10 раз дешевле Telegram Ads</h3>
+          <p>Стоимость подписчика через РСЯ начинается от 3-5 ₽. Telegram Ads — от 15-30 ₽. Разница очевидна.</p>
+        </div>
+      </div>
+      <div class="adv-item">
+        <div class="adv-icon">🧲</div>
+        <div>
+          <h3>Целевая аудитория, а не случайные люди</h3>
+          <p>РСЯ позволяет таргетировать по интересам, запросам, географии и поведению. Приходят те, кому реально интересна тема.</p>
+        </div>
+      </div>
+      <div class="adv-item">
+        <div class="adv-icon">📈</div>
+        <div>
+          <h3>MAX — голубой океан</h3>
+          <p>Пока все борются за внимание в Telegram, в MAX конкуренция минимальна. Сейчас — лучшее время для захвата аудитории.</p>
+        </div>
+      </div>
+      <div class="adv-item">
+        <div class="adv-icon">⚡</div>
+        <div>
+          <h3>Быстрый запуск — результат за 48 часов</h3>
+          <p>Не нужно ждать модерацию неделями. Кампания в РСЯ запускается за день, первые подписчики приходят на следующий.</p>
+        </div>
+      </div>
+      <div class="adv-item">
+        <div class="adv-icon">🔄</div>
+        <div>
+          <h3>Масштабирование без потолка</h3>
+          <p>Работает на бюджетах от 5 000 ₽. Нашли рабочую связку — масштабируете до любых объёмов без потери качества.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ FOR WHOM ═══════════ -->
+  <section class="section fade-up">
+    <div class="section-label">Для кого</div>
+    <div class="section-title">Кому подойдёт эта <em>стратегия</em></div>
+    <div class="whom-grid">
+      <div class="whom-card">
+        <div class="whom-icon">🏢</div>
+        <h3>Бизнесу</h3>
+        <p>Нужен канал продаж в новом мессенджере с дешёвым трафиком и высокой вовлечённостью.</p>
+      </div>
+      <div class="whom-card">
+        <div class="whom-icon">🎤</div>
+        <h3>Экспертам и блогерам</h3>
+        <p>Хотите быть первыми в MAX и собрать лояльную аудиторию, пока конкуренция на нуле.</p>
+      </div>
+      <div class="whom-card">
+        <div class="whom-icon">🚀</div>
+        <h3>Маркетологам</h3>
+        <p>Ищете новый канал привлечения, чтобы диверсифицировать источники трафика.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ RESULTS ═══════════ -->
+  <section class="section fade-up">
+    <div class="section-label">Цифры</div>
+    <div class="section-title">Результаты, которые мы <em>получаем</em></div>
+    <div class="result-card">
+      <div class="result-stats">
+        <div class="result-stat">
+          <div class="result-stat-num">3-7 ₽</div>
+          <div class="result-stat-label">за подписчика</div>
+        </div>
+        <div class="result-stat">
+          <div class="result-stat-num">500+</div>
+          <div class="result-stat-label">подписчиков/мес</div>
+        </div>
+        <div class="result-stat">
+          <div class="result-stat-num">72%</div>
+          <div class="result-stat-label">retention</div>
+        </div>
+        <div class="result-stat">
+          <div class="result-stat-num">48 ч</div>
+          <div class="result-stat-label">до первых подписчиков</div>
+        </div>
+      </div>
+      <p class="result-note">Средние показатели по нашим кампаниям за последние 3 месяца. Конкретные результаты зависят от ниши и качества контента.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════ FAQ ═══════════ -->
+  <section class="section fade-up">
+    <div class="section-label">Вопросы</div>
+    <div class="section-title">Частые <em>вопросы</em></div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>Какой минимальный бюджет нужен?</span>
+          <span class="faq-q-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Для тестового запуска достаточно 5 000 ₽ на рекламный бюджет. Этого хватит, чтобы проверить гипотезу и получить первые 200-500 подписчиков. Далее масштабируем то, что работает.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>Почему MAX, а не Telegram?</span>
+          <span class="faq-q-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <p>MAX — это растущая платформа с низкой конкуренцией. Те, кто заходят сейчас, получают преимущество первопроходцев. Охваты в MAX выше, а стоимость подписчика — ниже. При этом аудитория максимально вовлечённая.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>А подписчики живые?</span>
+          <span class="faq-q-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Да. Через РСЯ приходят реальные люди, которые увидели рекламу, заинтересовались и осознанно подписались. Это не боты и не мотивированный трафик — это ваша целевая аудитория.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>Сколько времени занимает запуск?</span>
+          <span class="faq-q-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Полный запуск кампании — 2-3 дня. Сбор семантики, создание креативов, настройка лендинга и запуск рекламы. Первые подписчики приходят в течение 48 часов после старта.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>Можно ли масштабировать?</span>
+          <span class="faq-q-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Безусловно. РСЯ покрывает тысячи площадок с миллионами пользователей. Когда находим рабочую связку креатив + аудитория + лендинг, масштабируем бюджет и получаем кратный рост подписчиков.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ CTA FINAL ═══════════ -->
+  <section class="section fade-up">
+    <div class="cta-final">
+      <h2>Хотите узнать <em>больше деталей</em>?</h2>
+      <p>В нашем канале в MAX — разборы связок, реальные кейсы, цифры по кампаниям и пошаговые инструкции по привлечению подписчиков.</p>
+      <a href="https://max.ru/u/f9LHodD0cOJjpA8IcT8R5DX13-0VsNHW-4ulnpIjGedGegtriCUrdGrIveo" class="btn-primary" target="_blank" style="margin-bottom: 0;">Подписаться на канал в MAX →</a>
+      <div class="cta-checks">
+        <span>Бесплатно</span>
+        <span>Только практика</span>
+        <span>Реальные кейсы</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ MID CTA ═══════════ -->
+  <section class="section fade-up">
+    <div style="background: var(--glass); border: 1px solid var(--glass-border); border-radius: var(--radius); padding: 28px 24px; box-shadow: var(--shadow); text-align: center;">
+      <div class="section-label" style="justify-content: center;">Нужна настройка?</div>
+      <div class="section-title" style="text-align: center;">Настроим <em>всё под ключ</em></div>
+      <p style="font-size: 0.86rem; color: var(--text-muted); line-height: 1.55; max-width: 440px; margin: 0 auto 20px;">Не хотите разбираться сами? Наша команда настроит рекламную кампанию, создаст лендинг и запустит трафик на ваш канал в MAX.</p>
+      <a href="https://max.ru/u/f9LHodD0cOJjpA8IcT8R5DX13-0VsNHW-4ulnpIjGedGegtriCUrdGrIveo" class="btn-primary" target="_blank">Написать нам в MAX →</a>
+    </div>
+  </section>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <div class="footer-logo">MIL<span class="logo-dot">.</span><span>LE</span></div>
+  <p>Агентство комплексного digital-присутствия</p>
+</div>
+
+<script>
+// Nav scroll effect
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 40);
+});
+
+// FAQ toggle
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if (!wasOpen) item.classList.add('open');
+}
+
+// Fade-up on scroll
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
