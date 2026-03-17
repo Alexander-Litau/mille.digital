@@ -9,7 +9,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@800&family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -54,37 +54,165 @@ body::before {
   z-index: 0;
 }
 
+/* Top bar */
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  padding-top: max(8px, env(safe-area-inset-top));
+  min-height: 44px;
+}
+.top-bar-back {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--sage);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.top-bar-back svg {
+  width: 20px;
+  height: 20px;
+}
+.top-bar-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  padding: 6px 16px;
+  border-radius: 20px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.top-bar-pill:active {
+  background: rgba(255, 255, 255, 0.8);
+}
+.pill-logo {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--sage);
+  letter-spacing: -0.5px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: baseline;
+}
+.pill-logo span { color: var(--brand); }
+.pill-logo-dot {
+  display: inline-block;
+  position: relative;
+  color: transparent !important;
+  margin: 0;
+}
+.pill-logo-dot::before {
+  content: '';
+  position: absolute;
+  width: 0.36em; height: 0.36em;
+  bottom: 0.12em; left: 50%;
+  border-radius: 50%;
+  background: #B8DFFF;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+.pill-logo-dot::after {
+  content: '';
+  position: absolute;
+  width: 0.22em; height: 0.22em;
+  bottom: 0.19em; left: 50%;
+  border-radius: 50%;
+  background: var(--sage);
+  transform: translateX(-50%);
+  z-index: 2;
+  animation: live-pulse 1.5s ease-in-out infinite;
+}
+.pill-tagline {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  letter-spacing: 0.1px;
+}
+
 .container {
   max-width: 600px;
   margin: 0 auto;
-  padding: 16px 16px 120px;
+  padding: 60px 16px 120px;
   position: relative;
   z-index: 1;
 }
 
-/* Post card */
+/* Post card — Max-style full-width post */
 .post-card {
-  background: var(--glass);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius);
-  padding: 14px 16px;
+  background: #fff;
+  border-radius: 14px;
   margin-bottom: 16px;
-  box-shadow: var(--shadow);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+.post-card-media {
+  width: 100%;
+  display: block;
+}
+.post-card-media img,
+.post-card-media video {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+  max-height: 360px;
+}
+.post-card-content {
+  padding: 12px 14px 10px;
 }
 .post-card-title {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.85rem;
-  color: var(--sage);
-  margin-bottom: 8px;
+  color: var(--text);
+  margin-bottom: 6px;
 }
 .post-card-text {
-  font-size: 0.92rem;
-  line-height: 1.5;
+  font-size: 0.93rem;
+  line-height: 1.45;
   color: var(--text);
   white-space: pre-wrap;
   word-wrap: break-word;
+}
+.post-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 4px 14px 10px;
+  font-size: 0.75rem;
+  color: #a0a0a0;
+}
+.post-card-views {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.post-card-views svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0.5;
 }
 
 /* Comments count */
@@ -109,16 +237,12 @@ body::before {
   border-radius: 20px;
 }
 
-/* Comment card */
+/* Comment row: avatar + bubble */
 .comment {
-  background: var(--glass);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius);
-  padding: 14px 16px;
-  margin-bottom: 10px;
-  box-shadow: var(--shadow);
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  margin-bottom: 8px;
   animation: fadeIn 0.3s ease;
 }
 
@@ -127,16 +251,9 @@ body::before {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.comment-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
 .comment-avatar {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--sage) 0%, var(--brand) 100%);
   display: flex;
@@ -144,7 +261,7 @@ body::before {
   justify-content: center;
   color: #fff;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -154,29 +271,184 @@ body::before {
   object-fit: cover;
 }
 
-.comment-meta {
-  flex: 1;
-  min-width: 0;
+/* Bubble */
+.comment-bubble {
+  position: relative;
+  background: #fff;
+  border-radius: 12px 12px 12px 4px;
+  padding: 6px 10px 6px 10px;
+  max-width: calc(100% - 50px);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
 }
+
+/* Bubble tail */
+.comment-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -6px;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  border-radius: 0 0 0 3px;
+}
+
 .comment-name {
   font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--sage);
+  font-size: 0.8rem;
+  color: #3a8cde;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-bottom: 1px;
 }
-.comment-time {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+.comment-name a {
+  color: inherit;
+  text-decoration: none;
+}
+.comment-name a:active {
+  opacity: 0.6;
+}
+
+.comment-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0 8px;
 }
 
 .comment-text {
   font-size: 0.92rem;
-  line-height: 1.5;
+  line-height: 1.4;
   color: var(--text);
   word-wrap: break-word;
   white-space: pre-wrap;
+}
+
+.comment-time {
+  font-size: 0.68rem;
+  color: #a0a0a0;
+  margin-left: auto;
+  white-space: nowrap;
+  align-self: flex-end;
+  line-height: 1.6;
+}
+.comment-time .edited-mark {
+  font-style: italic;
+}
+
+/* Context menu (long-press) */
+.context-menu-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 999;
+  background: rgba(0,0,0,0.25);
+  animation: fadeOverlay 0.15s ease;
+}
+@keyframes fadeOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.context-menu {
+  position: fixed;
+  z-index: 1000;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  min-width: 180px;
+  overflow: hidden;
+  animation: popMenu 0.18s ease;
+  transform-origin: top center;
+}
+@keyframes popMenu {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 18px;
+  font-family: 'Figtree', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text);
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.context-menu-item:active {
+  background: rgba(0,0,0,0.05);
+}
+.context-menu-item + .context-menu-item {
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+.context-menu-item.danger {
+  color: #e05555;
+}
+.context-menu-item svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* Edit banner inside input field */
+.edit-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px 6px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.edit-banner-line {
+  width: 3px;
+  align-self: stretch;
+  min-height: 28px;
+  border-radius: 2px;
+  background: #007AFF;
+  flex-shrink: 0;
+}
+.edit-banner-content {
+  flex: 1;
+  min-width: 0;
+}
+.edit-banner-label {
+  font-weight: 600;
+  color: #007AFF;
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
+.edit-banner-preview {
+  color: #666;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+.edit-banner-close {
+  border: none;
+  background: none;
+  color: #2C2C28;
+  cursor: pointer;
+  padding: 4px;
+  flex-shrink: 0;
+}
+.edit-banner-close svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Long-press highlight */
+.comment-bubble.hold-highlight {
+  background: #f0f4f8;
+  transition: background 0.2s;
+}
+.comment-bubble.hold-highlight::before {
+  background: #f0f4f8;
 }
 
 /* Empty state (unused, kept for fallback) */
@@ -204,50 +476,110 @@ body::before {
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(200, 225, 255, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.4);
-  padding: 12px 16px;
-  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  background: transparent;
+  padding: 8px 8px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
   z-index: 100;
 }
 .input-wrap {
   max-width: 600px;
   margin: 0 auto;
   display: flex;
-  gap: 10px;
+  gap: 6px;
   align-items: flex-end;
 }
-.input-wrap textarea {
+
+/* Icon buttons (attach, emoji) */
+.input-icon-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  transition: color 0.2s;
+}
+.input-icon-btn:active {
+  color: var(--sage);
+}
+.input-icon-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Text input field */
+.input-field-wrap {
   flex: 1;
-  border: 1px solid var(--glass-border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
   background: var(--glass);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 0 4px 0 0;
+  min-height: 36px;
+  transition: border-color 0.2s;
+  overflow: hidden;
+}
+.input-field-wrap .edit-banner {
+  width: 100%;
+  flex-basis: 100%;
+}
+.input-field-wrap:focus-within {
+  border-color: rgba(0, 122, 255, 0.4);
+}
+.input-field-wrap textarea {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 8px 0 8px 14px;
   font-family: 'Figtree', sans-serif;
   font-size: 0.92rem;
   color: var(--text);
   resize: none;
   outline: none;
-  min-height: 42px;
+  min-height: 20px;
   max-height: 120px;
   line-height: 1.4;
-  transition: border-color 0.2s;
 }
-.input-wrap textarea:focus {
-  border-color: var(--brand);
-}
-.input-wrap textarea::placeholder {
+.input-field-wrap textarea::placeholder {
   color: var(--text-muted);
 }
 
-.send-btn {
-  width: 42px;
-  height: 42px;
+/* Emoji button inside input */
+.input-emoji-btn {
+  width: 32px;
+  height: 32px;
   border: none;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-light) 100%);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  margin-bottom: 2px;
+}
+.input-emoji-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Send button */
+.send-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #007AFF;
   color: #fff;
   cursor: pointer;
   display: flex;
@@ -260,12 +592,21 @@ body::before {
   transform: scale(0.92);
 }
 .send-btn:disabled {
-  opacity: 0.4;
-  cursor: default;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
 }
 .send-btn svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
+}
+
+@keyframes live-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(30, 58, 95, 0.5); }
+  50% { box-shadow: 0 0 0 6px rgba(30, 58, 95, 0); }
 }
 
 /* Error banner */
@@ -283,10 +624,29 @@ body::before {
 </head>
 <body>
 
+<div class="top-bar">
+  <button class="top-bar-back" id="backBtn" aria-label="Назад">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+  </button>
+  <a href="https://mille.digital" target="_blank" class="top-bar-pill" id="topBarPill"><span class="pill-logo">MIL<span class="pill-logo-dot">.</span><span>LE</span></span><span class="pill-tagline">Агентство комплексного Digital-присутствия</span></a>
+</div>
+
 <div class="container">
   <div class="post-card" id="postCard" style="display:none;">
-    <div class="post-card-title" id="postCardTitle"></div>
-    <div class="post-card-text" id="postCardText"></div>
+    <div class="post-card-media" id="postCardMedia" style="display:none;"></div>
+    <div class="post-card-content">
+      <div class="post-card-title" id="postCardTitle"></div>
+      <div class="post-card-text" id="postCardText"></div>
+    </div>
+    <div class="post-card-footer" id="postCardFooter" style="display:none;">
+      <div class="post-card-views" id="postCardViews">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span id="postCardViewsCount"></span>
+      </div>
+      <span id="postCardTime"></span>
+    </div>
   </div>
 
   <div class="error-banner" id="errorBanner"></div>
@@ -299,15 +659,31 @@ body::before {
   </div>
 
   <div class="comments-count" id="commentsCount"></div>
+
+
 </div>
 
 <div class="input-area">
   <div class="input-wrap">
-    <textarea id="messageInput" rows="1" placeholder="Написать комментарий..." maxlength="2000"></textarea>
+    <button class="input-icon-btn" type="button" aria-label="Прикрепить">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
+      </svg>
+    </button>
+    <div class="input-field-wrap">
+      <textarea id="messageInput" rows="1" placeholder="Комментарий" maxlength="2000"></textarea>
+      <button class="input-emoji-btn" type="button" aria-label="Эмодзи">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+          <line x1="9" y1="9" x2="9.01" y2="9"/>
+          <line x1="15" y1="9" x2="15.01" y2="9"/>
+        </svg>
+      </button>
+    </div>
     <button class="send-btn" id="sendBtn" disabled>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="22" y1="2" x2="11" y2="13"></line>
-        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M3.4 20.4l17.45-7.48a1 1 0 000-1.84L3.4 3.6a.993.993 0 00-1.39.91L2 9.12c0 .5.37.93.87.99L17 12 2.87 13.88c-.5.07-.87.5-.87 1l.01 4.61c0 .71.73 1.2 1.39.91z"/>
       </svg>
     </button>
   </div>
@@ -342,25 +718,55 @@ body::before {
   // Get post ID and content from URL params
   const params = new URLSearchParams(window.location.search);
   const postId = params.get('post') || 'default';
-  const postTitle = params.get('title') || '';
-  const postText = params.get('text') || '';
+  const postTitle = params.get('title') || (params.get('post') ? '' : 'ВЕСТИ-ИРКУТСК');
+  const postText = params.get('text') || (params.get('post') ? '' : 'В Усолье-Сибирском капитально ремонтируют школу № 17 — одну из старейших в городе\n\nЕе открыли в 1965 году и с того времени проводили только косметическое обновление. По стенам здания пошли трещины, из окон дует, а крыша рассыпается. На капитальный ремонт образовательного учреждения выделили 149 млн рублей. Строители приступили к нему в феврале, начали с кровли.\n\nУчебный процесс пока останавливать не стали, ведь трудятся подрядчики во внеучебное время. Основные работы начнутся летом, поэтому на следующий учебный год детей и педколлектив распределят по другим учебным заведения города. Завершить ремонт планируют в августе 2027 года.\n\nВ Усолье-Сибирском побывала наша съемочная группа. Сюжет о капитальном ремонте школы и о нюансах работ во время учебного процесса смотрите в выпуске программы «Вести-Иркутск» в 11:30 на телеканале «Россия 1».');
+  const postImage = params.get('image') || '';
+  const postVideo = params.get('video') || '';
+  const postViews = params.get('views') || (params.get('post') ? '' : '2,2K');
+  const postTime = params.get('time') || (params.get('post') ? '' : '07:20');
 
   // Render post card
   const postCard = document.getElementById('postCard');
   const postCardTitle = document.getElementById('postCardTitle');
   const postCardText = document.getElementById('postCardText');
+  const postCardMedia = document.getElementById('postCardMedia');
+  const postCardFooter = document.getElementById('postCardFooter');
 
-  if (postText) {
-    postCardTitle.textContent = postTitle || 'Пост #' + postId;
-    postCardText.textContent = postText;
-    postCard.style.display = '';
-  } else if (postTitle) {
-    postCardTitle.textContent = postTitle;
+  if (postText || postTitle || postImage || postVideo) {
+    // Media
+    if (postVideo) {
+      postCardMedia.innerHTML = '<video src="' + postVideo + '" controls playsinline preload="metadata"></video>';
+      postCardMedia.style.display = '';
+    } else if (postImage) {
+      postCardMedia.innerHTML = '<img src="' + postImage + '" alt="" loading="lazy">';
+      postCardMedia.style.display = '';
+    }
+
+    // Title & text
+    if (postTitle) postCardTitle.textContent = postTitle;
+    else postCardTitle.style.display = 'none';
+
+    if (postText) postCardText.textContent = postText;
+    else postCardText.style.display = 'none';
+
+    // Footer (views + time)
+    if (postViews || postTime) {
+      if (postViews) {
+        document.getElementById('postCardViewsCount').textContent = postViews;
+      } else {
+        document.getElementById('postCardViews').style.display = 'none';
+      }
+      if (postTime) {
+        document.getElementById('postCardTime').textContent = postTime;
+      }
+      postCardFooter.style.display = '';
+    }
+
     postCard.style.display = '';
   }
 
   // Max Web App user data
-  let currentUser = { id: null, name: 'Аноним', photo: null };
+  let currentUser = { id: null, name: 'Аноним', photo: null, username: null };
 
   try {
     if (window.TelegramWebviewProxy || window.Telegram?.WebApp?.initDataUnsafe?.user) {
@@ -369,6 +775,7 @@ body::before {
         currentUser.id = String(tgUser.id);
         currentUser.name = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') || 'Аноним';
         currentUser.photo = tgUser.photo_url || null;
+        currentUser.username = tgUser.username || null;
       }
     }
   } catch(e) {}
@@ -381,6 +788,7 @@ body::before {
         currentUser.id = String(maxUser.id);
         currentUser.name = [maxUser.first_name, maxUser.last_name].filter(Boolean).join(' ') || 'Аноним';
         currentUser.photo = maxUser.photo_url || null;
+        currentUser.username = maxUser.username || null;
       }
     }
   } catch(e) {}
@@ -400,6 +808,16 @@ body::before {
   const commentsCount = document.getElementById('commentsCount');
   const messageInput = document.getElementById('messageInput');
   const sendBtn = document.getElementById('sendBtn');
+  const topBarPill = document.getElementById('topBarPill');
+
+  // Back button
+  document.getElementById('backBtn').addEventListener('click', function() {
+    try {
+      if (window.Telegram?.WebApp) window.Telegram.WebApp.close();
+      if (window.MaxWebApp) window.MaxWebApp.close();
+    } catch(e) {}
+    window.history.back();
+  });
 
   // Auto-resize textarea
   messageInput.addEventListener('input', function() {
@@ -418,27 +836,93 @@ body::before {
 
   sendBtn.addEventListener('click', sendComment);
 
+  // Edit state
+  var editingKey = null;
+
+  function startEditMode(key, text) {
+    editingKey = key;
+    messageInput.value = text;
+    messageInput.style.height = 'auto';
+    messageInput.style.height = Math.min(messageInput.scrollHeight, 120) + 'px';
+    sendBtn.disabled = false;
+    // Switch to checkmark icon
+    sendBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    messageInput.focus();
+
+    // Show edit banner
+    cancelEditMode(true); // remove previous banner if any
+    editingKey = key; // re-set after cancel cleared it
+    var banner = document.createElement('div');
+    banner.className = 'edit-banner';
+    banner.id = 'editBanner';
+    banner.innerHTML =
+      '<div class="edit-banner-line"></div>' +
+      '<div class="edit-banner-content">' +
+        '<div class="edit-banner-label">Редактирование</div>' +
+        '<div class="edit-banner-preview">' + escapeHtml(text) + '</div>' +
+      '</div>' +
+      '<button class="edit-banner-close" id="editBannerClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
+
+    var fieldWrap = document.querySelector('.input-field-wrap');
+    fieldWrap.insertBefore(banner, fieldWrap.firstChild);
+
+    document.getElementById('editBannerClose').addEventListener('click', function() {
+      cancelEditMode(false);
+    });
+  }
+
+  function cancelEditMode(keepText) {
+    editingKey = null;
+    var banner = document.getElementById('editBanner');
+    if (banner) banner.remove();
+    // Restore send arrow icon
+    sendBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.4 20.4l17.45-7.48a1 1 0 000-1.84L3.4 3.6a.993.993 0 00-1.39.91L2 9.12c0 .5.37.93.87.99L17 12 2.87 13.88c-.5.07-.87.5-.87 1l.01 4.61c0 .71.73 1.2 1.39.91z"/></svg>';
+    if (!keepText) {
+      messageInput.value = '';
+      messageInput.style.height = 'auto';
+      sendBtn.disabled = true;
+    }
+  }
+
   function sendComment() {
     const text = messageInput.value.trim();
     if (!text || !db) return;
 
     sendBtn.disabled = true;
-    const ref = db.ref('comments/' + postId);
-    ref.push({
-      userId: currentUser.id,
-      name: currentUser.name,
-      photo: currentUser.photo,
-      text: text,
-      timestamp: firebase.database.ServerValue.TIMESTAMP
-    }).then(function() {
-      messageInput.value = '';
-      messageInput.style.height = 'auto';
-      sendBtn.disabled = true;
-    }).catch(function(err) {
-      console.error('Send error:', err);
-      sendBtn.disabled = !messageInput.value.trim();
-      showError('Не удалось отправить. Попробуйте ещё раз.');
-    });
+
+    if (editingKey) {
+      // Update existing comment
+      var key = editingKey;
+      db.ref('comments/' + postId + '/' + key).update({
+        text: text,
+        edited: true
+      }).then(function() {
+        cancelEditMode(false);
+      }).catch(function(err) {
+        console.error('Edit error:', err);
+        sendBtn.disabled = !messageInput.value.trim();
+        showError('Не удалось сохранить изменения.');
+      });
+    } else {
+      // New comment
+      const ref = db.ref('comments/' + postId);
+      ref.push({
+        userId: currentUser.id,
+        name: currentUser.name,
+        photo: currentUser.photo,
+        username: currentUser.username,
+        text: text,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+      }).then(function() {
+        messageInput.value = '';
+        messageInput.style.height = 'auto';
+        sendBtn.disabled = true;
+      }).catch(function(err) {
+        console.error('Send error:', err);
+        sendBtn.disabled = !messageInput.value.trim();
+        showError('Не удалось отправить. Попробуйте ещё раз.');
+      });
+    }
   }
 
   // Listen for comments in real-time
@@ -477,6 +961,108 @@ body::before {
         commentsArea.innerHTML = '<div class="no-comments-pill"><span>Комментариев пока нет...</span></div>';
       }
     });
+
+    // Long-press context menu for own comments
+    var holdTimer = null;
+    var holdComment = null;
+
+    function clearHold() {
+      clearTimeout(holdTimer);
+      if (holdComment) {
+        var b = holdComment.querySelector('.comment-bubble');
+        if (b) b.classList.remove('hold-highlight');
+      }
+      holdComment = null;
+    }
+
+    commentsArea.addEventListener('touchstart', function(e) {
+      var comment = e.target.closest('.comment.is-own');
+      if (!comment || comment.querySelector('.comment-edit-wrap')) return;
+      holdComment = comment;
+      holdTimer = setTimeout(function() {
+        var bubble = comment.querySelector('.comment-bubble');
+        bubble.classList.add('hold-highlight');
+        showContextMenu(comment, e.touches[0]);
+      }, 500);
+    }, { passive: true });
+
+    commentsArea.addEventListener('touchend', clearHold);
+    commentsArea.addEventListener('touchmove', clearHold);
+    commentsArea.addEventListener('touchcancel', clearHold);
+
+    // Desktop: right-click on own comment
+    commentsArea.addEventListener('contextmenu', function(e) {
+      var comment = e.target.closest('.comment.is-own');
+      if (!comment || comment.querySelector('.comment-edit-wrap')) return;
+      e.preventDefault();
+      showContextMenu(comment, e);
+    });
+
+    function showContextMenu(comment, pos) {
+      closeContextMenu();
+      var key = comment.getAttribute('data-key');
+      var text = comment.getAttribute('data-text');
+      var clientX = pos.clientX || pos.pageX;
+      var clientY = pos.clientY || pos.pageY;
+
+      // Overlay
+      var overlay = document.createElement('div');
+      overlay.className = 'context-menu-overlay';
+      overlay.addEventListener('click', closeContextMenu);
+
+      // Menu
+      var menu = document.createElement('div');
+      menu.className = 'context-menu';
+      menu.innerHTML =
+        '<button class="context-menu-item" data-action="edit">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
+          'Изменить</button>' +
+        '<button class="context-menu-item danger" data-action="delete">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>' +
+          'Удалить</button>';
+
+      document.body.appendChild(overlay);
+      document.body.appendChild(menu);
+
+      // Position menu
+      var mw = menu.offsetWidth;
+      var mh = menu.offsetHeight;
+      var x = Math.min(clientX, window.innerWidth - mw - 12);
+      var y = clientY - mh - 8;
+      if (y < 8) y = clientY + 8;
+      x = Math.max(12, x);
+      menu.style.left = x + 'px';
+      menu.style.top = y + 'px';
+
+      // Handle actions
+      menu.addEventListener('click', function(e) {
+        var item = e.target.closest('.context-menu-item');
+        if (!item) return;
+        var action = item.getAttribute('data-action');
+        closeContextMenu();
+
+        if (action === 'delete') {
+          if (confirm('Удалить комментарий?')) {
+            db.ref('comments/' + postId + '/' + key).remove().catch(function(err) {
+              console.error('Delete error:', err);
+              showError('Не удалось удалить комментарий.');
+            });
+          }
+        }
+
+        if (action === 'edit') {
+          startEditMode(key, text);
+        }
+      });
+    }
+
+    function closeContextMenu() {
+      var overlay = document.querySelector('.context-menu-overlay');
+      var menu = document.querySelector('.context-menu');
+      if (overlay) overlay.remove();
+      if (menu) menu.remove();
+      clearHold();
+    }
   }
 
   function renderComment(c) {
@@ -484,19 +1070,31 @@ body::before {
     const text = escapeHtml(c.text || '');
     const time = c.timestamp ? formatTime(c.timestamp) : '';
     const initials = getInitials(c.name || 'A');
+    const isOwn = c.userId === currentUser.id;
+    const editedMark = c.edited ? ' <span class="edited-mark">ред.</span>' : '';
     const avatarContent = c.photo
       ? '<img src="' + escapeHtml(c.photo) + '" alt="" loading="lazy">'
       : initials;
 
-    return '<div class="comment">' +
-      '<div class="comment-header">' +
-        '<div class="comment-avatar">' + avatarContent + '</div>' +
-        '<div class="comment-meta">' +
-          '<div class="comment-name">' + name + '</div>' +
-          '<div class="comment-time">' + time + '</div>' +
+    // Build profile link — prefer username, fallback to userId
+    var nameHtml;
+    if (c.username) {
+      nameHtml = '<a href="https://max.ru/' + escapeHtml(c.username) + '" target="_blank">' + name + '</a>';
+    } else if (c.userId && !String(c.userId).startsWith('anon_')) {
+      nameHtml = '<a href="https://max.ru/user/' + escapeHtml(c.userId) + '" target="_blank">' + name + '</a>';
+    } else {
+      nameHtml = name;
+    }
+
+    return '<div class="comment' + (isOwn ? ' is-own' : '') + '" data-key="' + escapeHtml(c.key) + '" data-text="' + text + '">' +
+      '<div class="comment-avatar">' + avatarContent + '</div>' +
+      '<div class="comment-bubble">' +
+        '<div class="comment-name">' + nameHtml + '</div>' +
+        '<div class="comment-body">' +
+          '<div class="comment-text">' + text + '</div>' +
+          '<span class="comment-time">' + time + editedMark + '</span>' +
         '</div>' +
       '</div>' +
-      '<div class="comment-text">' + text + '</div>' +
     '</div>';
   }
 
