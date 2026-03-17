@@ -215,11 +215,59 @@ body::before {
   opacity: 0.5;
 }
 
-/* Comments count */
-.comments-count {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  padding: 0 4px 12px;
+/* Scroll-down button (Telegram-style) */
+.scroll-down-btn {
+  position: fixed;
+  right: 16px;
+  bottom: 70px;
+  z-index: 99;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.scroll-down-btn.visible {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+.scroll-down-btn:active {
+  transform: scale(0.92);
+}
+.scroll-down-btn svg {
+  width: 22px;
+  height: 22px;
+  color: #8a8a8a;
+}
+.scroll-down-badge {
+  position: absolute;
+  top: -6px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: #007AFF;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: 'Figtree', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 /* No comments pill */
@@ -658,10 +706,15 @@ body::before {
     </div>
   </div>
 
-  <div class="comments-count" id="commentsCount"></div>
-
 
 </div>
+
+<button class="scroll-down-btn" id="scrollDownBtn" aria-label="Вниз">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="6 9 12 15 18 9"/>
+  </svg>
+  <span class="scroll-down-badge" id="scrollDownBadge" style="display:none;"></span>
+</button>
 
 <div class="input-area">
   <div class="input-wrap">
@@ -805,10 +858,11 @@ body::before {
 
   // DOM elements
   const commentsArea = document.getElementById('commentsArea');
-  const commentsCount = document.getElementById('commentsCount');
   const messageInput = document.getElementById('messageInput');
   const sendBtn = document.getElementById('sendBtn');
   const topBarPill = document.getElementById('topBarPill');
+  const scrollDownBtn = document.getElementById('scrollDownBtn');
+  const scrollDownBadge = document.getElementById('scrollDownBadge');
 
   // Back button
   document.getElementById('backBtn').addEventListener('click', function() {
@@ -925,6 +979,46 @@ body::before {
     }
   }
 
+  // Scroll-down button logic
+  var totalComments = 0;
+
+  function countCommentsBelow() {
+    var commentEls = commentsArea.querySelectorAll('.comment');
+    var count = 0;
+    var cutoff = window.innerHeight - 60; // above input area
+    for (var i = 0; i < commentEls.length; i++) {
+      var rect = commentEls[i].getBoundingClientRect();
+      // Count if the middle of the comment is below the visible area
+      var mid = (rect.top + rect.bottom) / 2;
+      if (mid > cutoff) count++;
+    }
+    return count;
+  }
+
+  function updateScrollDownBtn() {
+    var below = countCommentsBelow();
+    var isScrollable = document.body.scrollHeight > window.innerHeight + 100;
+    var isNearBottom = (window.innerHeight + window.scrollY) >= document.body.scrollHeight - 80;
+
+    if (below > 0 && isScrollable && !isNearBottom) {
+      scrollDownBtn.classList.add('visible');
+      scrollDownBadge.textContent = below;
+      scrollDownBadge.style.display = '';
+    } else if (isScrollable && !isNearBottom) {
+      scrollDownBtn.classList.add('visible');
+      scrollDownBadge.style.display = 'none';
+    } else {
+      scrollDownBtn.classList.remove('visible');
+    }
+  }
+
+  scrollDownBtn.addEventListener('click', function() {
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  });
+
+  window.addEventListener('scroll', updateScrollDownBtn, { passive: true });
+  window.addEventListener('resize', updateScrollDownBtn, { passive: true });
+
   // Listen for comments in real-time
   if (db) {
     const ref = db.ref('comments/' + postId).orderByChild('timestamp');
@@ -936,7 +1030,8 @@ body::before {
 
       if (!data) {
         commentsArea.innerHTML = '<div class="no-comments-pill"><span>Комментариев пока нет...</span></div>';
-        commentsCount.textContent = '';
+        totalComments = 0;
+        updateScrollDownBtn();
         return;
       }
 
@@ -944,9 +1039,7 @@ body::before {
         .map(function(entry) { return Object.assign({ key: entry[0] }, entry[1]); })
         .sort(function(a, b) { return (a.timestamp || 0) - (b.timestamp || 0); });
 
-      const count = comments.length;
-      const word = pluralize(count, 'комментарий', 'комментария', 'комментариев');
-      commentsCount.textContent = count + ' ' + word;
+      totalComments = comments.length;
 
       commentsArea.innerHTML = comments.map(function(c) {
         return renderComment(c);
@@ -954,6 +1047,7 @@ body::before {
 
       // Scroll to bottom on new comment
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      setTimeout(updateScrollDownBtn, 100);
     });
 
     ref.once('value', function() {
