@@ -23,9 +23,9 @@
   --text: #2C2C28;
   --text-muted: #8A8A80;
   --border: rgba(0, 0, 0, 0.06);
-  --glass: rgba(255, 255, 255, 0.55);
-  --glass-border: rgba(255, 255, 255, 0.65);
-  --shadow: 0 8px 32px rgba(30, 58, 95, 0.08);
+  --glass: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --shadow: 0 4px 16px rgba(30, 80, 140, 0.1);
   --radius: 16px;
   --radius-sm: 12px;
 }
@@ -33,35 +33,58 @@
 html { font-size: 16px; }
 
 body {
-  background: linear-gradient(165deg, #EDF1F7 0%, #FAFBFD 25%, #E8ECF3 50%, #FAFBFD 75%, #E5EAF2 100%);
+  background: linear-gradient(180deg, #D6ECFF 0%, #B8DFFF 30%, #A8D8FF 60%, #C2E6FF 100%);
   background-attachment: fixed;
   color: var(--text);
   font-family: 'Figtree', sans-serif;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   overflow-x: hidden;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url("chat-pattern.svg");
+  background-size: 280px 280px;
+  background-repeat: repeat;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .container {
   max-width: 600px;
   margin: 0 auto;
   padding: 16px 16px 120px;
+  position: relative;
+  z-index: 1;
 }
 
-/* Header */
-.header {
-  text-align: center;
-  padding: 20px 0 16px;
+/* Post card */
+.post-card {
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
 }
-.header h1 {
-  font-size: 1.3rem;
-  font-weight: 700;
+.post-card-title {
+  font-weight: 600;
+  font-size: 0.85rem;
   color: var(--sage);
+  margin-bottom: 8px;
 }
-.header .post-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  margin-top: 4px;
+.post-card-text {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 /* Comments count */
@@ -69,6 +92,21 @@ body {
   font-size: 0.85rem;
   color: var(--text-muted);
   padding: 0 4px 12px;
+}
+
+/* No comments pill */
+.no-comments-pill {
+  text-align: center;
+  padding: 24px 0;
+}
+.no-comments-pill span {
+  display: inline-block;
+  background: rgba(0, 0, 0, 0.12);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 6px 16px;
+  border-radius: 20px;
 }
 
 /* Comment card */
@@ -141,20 +179,7 @@ body {
   white-space: pre-wrap;
 }
 
-/* Empty state */
-.empty-state {
-  text-align: center;
-  padding: 48px 20px;
-  color: var(--text-muted);
-}
-.empty-state .icon {
-  font-size: 2.5rem;
-  margin-bottom: 12px;
-  opacity: 0.5;
-}
-.empty-state p {
-  font-size: 0.95rem;
-}
+/* Empty state (unused, kept for fallback) */
 
 /* Loading */
 .loading {
@@ -179,10 +204,10 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(250, 250, 246, 0.92);
+  background: rgba(200, 225, 255, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border);
+  border-top: 1px solid rgba(255, 255, 255, 0.4);
   padding: 12px 16px;
   padding-bottom: max(12px, env(safe-area-inset-bottom));
   z-index: 100;
@@ -259,9 +284,9 @@ body {
 <body>
 
 <div class="container">
-  <div class="header">
-    <h1>Комментарии</h1>
-    <div class="post-label" id="postLabel"></div>
+  <div class="post-card" id="postCard" style="display:none;">
+    <div class="post-card-title" id="postCardTitle"></div>
+    <div class="post-card-text" id="postCardText"></div>
   </div>
 
   <div class="error-banner" id="errorBanner"></div>
@@ -269,7 +294,7 @@ body {
   <div id="commentsArea">
     <div class="loading">
       <div class="spinner"></div>
-      <p>Загрузка комментариев...</p>
+      <p>Загрузка...</p>
     </div>
   </div>
 
@@ -314,16 +339,24 @@ body {
     console.error(e);
   }
 
-  // Get post ID from URL param
+  // Get post ID and content from URL params
   const params = new URLSearchParams(window.location.search);
   const postId = params.get('post') || 'default';
   const postTitle = params.get('title') || '';
+  const postText = params.get('text') || '';
 
-  const postLabel = document.getElementById('postLabel');
-  if (postTitle) {
-    postLabel.textContent = postTitle;
-  } else {
-    postLabel.textContent = 'Пост #' + postId;
+  // Render post card
+  const postCard = document.getElementById('postCard');
+  const postCardTitle = document.getElementById('postCardTitle');
+  const postCardText = document.getElementById('postCardText');
+
+  if (postText) {
+    postCardTitle.textContent = postTitle || 'Пост #' + postId;
+    postCardText.textContent = postText;
+    postCard.style.display = '';
+  } else if (postTitle) {
+    postCardTitle.textContent = postTitle;
+    postCard.style.display = '';
   }
 
   // Max Web App user data
@@ -418,7 +451,7 @@ body {
       commentsLoaded = true;
 
       if (!data) {
-        commentsArea.innerHTML = '<div class="empty-state"><div class="icon">💬</div><p>Пока нет комментариев.<br>Будьте первым!</p></div>';
+        commentsArea.innerHTML = '<div class="no-comments-pill"><span>Комментариев пока нет...</span></div>';
         commentsCount.textContent = '';
         return;
       }
@@ -441,7 +474,7 @@ body {
 
     ref.once('value', function() {
       if (!commentsLoaded) {
-        commentsArea.innerHTML = '<div class="empty-state"><div class="icon">💬</div><p>Пока нет комментариев.<br>Будьте первым!</p></div>';
+        commentsArea.innerHTML = '<div class="no-comments-pill"><span>Комментариев пока нет...</span></div>';
       }
     });
   }
