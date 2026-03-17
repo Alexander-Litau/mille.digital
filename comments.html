@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Комментарии</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231E3A5F'/%3E%3Ctext x='8' y='46' font-family='Arial,Helvetica,sans-serif' font-weight='800' font-size='36' fill='%23ffffff'%3EM%3C/text%3E%3Ctext x='38' y='46' font-family='Arial,Helvetica,sans-serif' font-weight='800' font-size='36' fill='%23ff9e02'%3EL%3C/text%3E%3C/svg%3E">
+<script src="https://st.max.ru/js/max-web-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --brand: #ff9e02;
+  --brand-light: #ffc55c;
+  --brand-soft: rgba(255, 158, 2, 0.07);
+  --sage: #1E3A5F;
+  --sage-light: #D8E2EE;
+  --bg: #FAFAF6;
+  --text: #2C2C28;
+  --text-muted: #8A8A80;
+  --border: rgba(0, 0, 0, 0.06);
+  --glass: rgba(255, 255, 255, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.65);
+  --shadow: 0 8px 32px rgba(30, 58, 95, 0.08);
+  --radius: 16px;
+  --radius-sm: 12px;
+}
+
+html { font-size: 16px; }
+
+body {
+  background: linear-gradient(165deg, #EDF1F7 0%, #FAFBFD 25%, #E8ECF3 50%, #FAFBFD 75%, #E5EAF2 100%);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: 'Figtree', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px 16px 120px;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  padding: 20px 0 16px;
+}
+.header h1 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--sage);
+}
+.header .post-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* Comments count */
+.comments-count {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  padding: 0 4px 12px;
+}
+
+/* Comment card */
+.comment {
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.comment-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--sage) 0%, var(--brand) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.comment-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.comment-meta {
+  flex: 1;
+  min-width: 0;
+}
+.comment-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--sage);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.comment-time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.comment-text {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--text);
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text-muted);
+}
+.empty-state .icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+.empty-state p {
+  font-size: 0.95rem;
+}
+
+/* Loading */
+.loading {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text-muted);
+}
+.loading .spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Input area */
+.input-area {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(250, 250, 246, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 100;
+}
+.input-wrap {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+.input-wrap textarea {
+  flex: 1;
+  border: 1px solid var(--glass-border);
+  background: var(--glass);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-family: 'Figtree', sans-serif;
+  font-size: 0.92rem;
+  color: var(--text);
+  resize: none;
+  outline: none;
+  min-height: 42px;
+  max-height: 120px;
+  line-height: 1.4;
+  transition: border-color 0.2s;
+}
+.input-wrap textarea:focus {
+  border-color: var(--brand);
+}
+.input-wrap textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.send-btn {
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-light) 100%);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.15s, opacity 0.15s;
+}
+.send-btn:active {
+  transform: scale(0.92);
+}
+.send-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.send-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Error banner */
+.error-banner {
+  background: #fff0f0;
+  border: 1px solid #ffc8c8;
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  color: #c0392b;
+  font-size: 0.85rem;
+  display: none;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>Комментарии</h1>
+    <div class="post-label" id="postLabel"></div>
+  </div>
+
+  <div class="error-banner" id="errorBanner"></div>
+
+  <div id="commentsArea">
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Загрузка комментариев...</p>
+    </div>
+  </div>
+
+  <div class="comments-count" id="commentsCount"></div>
+</div>
+
+<div class="input-area">
+  <div class="input-wrap">
+    <textarea id="messageInput" rows="1" placeholder="Написать комментарий..." maxlength="2000"></textarea>
+    <button class="send-btn" id="sendBtn" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+(function() {
+  // ═══════════ FIREBASE CONFIG ═══════════
+  // TODO: Замените на свой конфиг из Firebase Console
+  // https://console.firebase.google.com → Создать проект → Realtime Database → Создать БД
+  const firebaseConfig = {
+    apiKey: "AIzaSyCcsKLkVOJG_T8FdPe-IZr1R_mn2PRq6WQ",
+    authDomain: "mille-digital-comments.firebaseapp.com",
+    databaseURL: "https://mille-digital-comments-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "mille-digital-comments",
+    storageBucket: "mille-digital-comments.firebasestorage.app",
+    messagingSenderId: "711983505370",
+    appId: "1:711983505370:web:44a6d7dd052e252c67eae3"
+  };
+  // ═══════════════════════════════════════
+
+  // Init Firebase
+  let db;
+  try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+  } catch (e) {
+    showError('Ошибка инициализации Firebase. Проверьте конфиг.');
+    console.error(e);
+  }
+
+  // Get post ID from URL param
+  const params = new URLSearchParams(window.location.search);
+  const postId = params.get('post') || 'default';
+  const postTitle = params.get('title') || '';
+
+  const postLabel = document.getElementById('postLabel');
+  if (postTitle) {
+    postLabel.textContent = postTitle;
+  } else {
+    postLabel.textContent = 'Пост #' + postId;
+  }
+
+  // Max Web App user data
+  let currentUser = { id: null, name: 'Аноним', photo: null };
+
+  try {
+    if (window.TelegramWebviewProxy || window.Telegram?.WebApp?.initDataUnsafe?.user) {
+      const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
+      if (tgUser) {
+        currentUser.id = String(tgUser.id);
+        currentUser.name = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') || 'Аноним';
+        currentUser.photo = tgUser.photo_url || null;
+      }
+    }
+  } catch(e) {}
+
+  // Try Max Web App
+  try {
+    if (window.MaxWebApp?.initDataUnsafe?.user) {
+      const maxUser = window.MaxWebApp.initDataUnsafe.user;
+      if (maxUser) {
+        currentUser.id = String(maxUser.id);
+        currentUser.name = [maxUser.first_name, maxUser.last_name].filter(Boolean).join(' ') || 'Аноним';
+        currentUser.photo = maxUser.photo_url || null;
+      }
+    }
+  } catch(e) {}
+
+  // If no user ID, generate anonymous one
+  if (!currentUser.id) {
+    let anonId = localStorage.getItem('comments_anon_id');
+    if (!anonId) {
+      anonId = 'anon_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+      localStorage.setItem('comments_anon_id', anonId);
+    }
+    currentUser.id = anonId;
+  }
+
+  // DOM elements
+  const commentsArea = document.getElementById('commentsArea');
+  const commentsCount = document.getElementById('commentsCount');
+  const messageInput = document.getElementById('messageInput');
+  const sendBtn = document.getElementById('sendBtn');
+
+  // Auto-resize textarea
+  messageInput.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    sendBtn.disabled = !this.value.trim();
+  });
+
+  // Send on Enter (Shift+Enter for newline)
+  messageInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (this.value.trim()) sendComment();
+    }
+  });
+
+  sendBtn.addEventListener('click', sendComment);
+
+  function sendComment() {
+    const text = messageInput.value.trim();
+    if (!text || !db) return;
+
+    sendBtn.disabled = true;
+    const ref = db.ref('comments/' + postId);
+    ref.push({
+      userId: currentUser.id,
+      name: currentUser.name,
+      photo: currentUser.photo,
+      text: text,
+      timestamp: firebase.database.ServerValue.TIMESTAMP
+    }).then(function() {
+      messageInput.value = '';
+      messageInput.style.height = 'auto';
+      sendBtn.disabled = true;
+    }).catch(function(err) {
+      console.error('Send error:', err);
+      sendBtn.disabled = !messageInput.value.trim();
+      showError('Не удалось отправить. Попробуйте ещё раз.');
+    });
+  }
+
+  // Listen for comments in real-time
+  if (db) {
+    const ref = db.ref('comments/' + postId).orderByChild('timestamp');
+    let commentsLoaded = false;
+
+    ref.on('value', function(snapshot) {
+      const data = snapshot.val();
+      commentsLoaded = true;
+
+      if (!data) {
+        commentsArea.innerHTML = '<div class="empty-state"><div class="icon">💬</div><p>Пока нет комментариев.<br>Будьте первым!</p></div>';
+        commentsCount.textContent = '';
+        return;
+      }
+
+      const comments = Object.entries(data)
+        .map(function(entry) { return Object.assign({ key: entry[0] }, entry[1]); })
+        .sort(function(a, b) { return (a.timestamp || 0) - (b.timestamp || 0); });
+
+      const count = comments.length;
+      const word = pluralize(count, 'комментарий', 'комментария', 'комментариев');
+      commentsCount.textContent = count + ' ' + word;
+
+      commentsArea.innerHTML = comments.map(function(c) {
+        return renderComment(c);
+      }).join('');
+
+      // Scroll to bottom on new comment
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    });
+
+    ref.once('value', function() {
+      if (!commentsLoaded) {
+        commentsArea.innerHTML = '<div class="empty-state"><div class="icon">💬</div><p>Пока нет комментариев.<br>Будьте первым!</p></div>';
+      }
+    });
+  }
+
+  function renderComment(c) {
+    const name = escapeHtml(c.name || 'Аноним');
+    const text = escapeHtml(c.text || '');
+    const time = c.timestamp ? formatTime(c.timestamp) : '';
+    const initials = getInitials(c.name || 'A');
+    const avatarContent = c.photo
+      ? '<img src="' + escapeHtml(c.photo) + '" alt="" loading="lazy">'
+      : initials;
+
+    return '<div class="comment">' +
+      '<div class="comment-header">' +
+        '<div class="comment-avatar">' + avatarContent + '</div>' +
+        '<div class="comment-meta">' +
+          '<div class="comment-name">' + name + '</div>' +
+          '<div class="comment-time">' + time + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="comment-text">' + text + '</div>' +
+    '</div>';
+  }
+
+  function getInitials(name) {
+    return name.split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().slice(0, 2);
+  }
+
+  function formatTime(ts) {
+    var d = new Date(ts);
+    var now = new Date();
+    var diff = now - d;
+    if (diff < 60000) return 'только что';
+    if (diff < 3600000) return Math.floor(diff / 60000) + ' мин. назад';
+    if (diff < 86400000) return Math.floor(diff / 3600000) + ' ч. назад';
+
+    var day = d.getDate();
+    var months = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+    var month = months[d.getMonth()];
+    var hours = String(d.getHours()).padStart(2, '0');
+    var mins = String(d.getMinutes()).padStart(2, '0');
+
+    if (d.getFullYear() === now.getFullYear()) {
+      return day + ' ' + month + ', ' + hours + ':' + mins;
+    }
+    return day + ' ' + month + ' ' + d.getFullYear() + ', ' + hours + ':' + mins;
+  }
+
+  function pluralize(n, one, few, many) {
+    var abs = Math.abs(n) % 100;
+    var lastDigit = abs % 10;
+    if (abs > 10 && abs < 20) return many;
+    if (lastDigit > 1 && lastDigit < 5) return few;
+    if (lastDigit === 1) return one;
+    return many;
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  function showError(msg) {
+    var banner = document.getElementById('errorBanner');
+    banner.textContent = msg;
+    banner.style.display = 'block';
+    setTimeout(function() { banner.style.display = 'none'; }, 5000);
+  }
+
+  // Expand Max Web App
+  try {
+    if (window.Telegram?.WebApp) window.Telegram.WebApp.expand();
+    if (window.MaxWebApp) window.MaxWebApp.expand();
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>
