@@ -850,9 +850,9 @@ body::before {
   console.log('[comments] hash:', window.location.hash);
   console.log('[comments] WebApp.initData:', window.WebApp?.initData);
   console.log('[comments] WebApp.initDataUnsafe:', JSON.stringify(window.WebApp?.initDataUnsafe));
-  const isRealPost = postId !== 'default';
-  const postTitle = params.get('title') || (isRealPost ? '' : '');
-  const postText = params.get('text') || '';
+
+  const postTitle = params.get('title') || '';
+  let postText = params.get('text') || '';
   const postImage = params.get('image') || '';
   const postVideo = params.get('video') || '';
   const postViews = params.get('views') || '';
@@ -864,6 +864,18 @@ body::before {
   const postCardText = document.getElementById('postCardText');
   const postCardMedia = document.getElementById('postCardMedia');
   const postCardFooter = document.getElementById('postCardFooter');
+
+  // Load post text from Firebase if not in URL params
+  if (!postText && postId !== 'default' && db) {
+    db.ref('posts/' + postId).once('value', function(snapshot) {
+      const postData = snapshot.val();
+      if (postData && postData.text) {
+        postCardText.textContent = postData.text;
+        postCardTitle.style.display = 'none';
+        postCard.style.display = '';
+      }
+    });
+  }
 
   if (postText || postTitle || postImage || postVideo) {
     // Media

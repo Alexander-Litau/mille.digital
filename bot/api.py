@@ -48,13 +48,22 @@ def send_message_with_keyboard(chat_id, text, buttons):
 def send_post_with_comments(chat_id, post_text):
     """Опубликовать пост с кнопкой 'Прокомментировать'."""
     post_id = f"post_{int(time.time())}_{random.randint(1000, 9999)}"
-    comments_url = f"{COMMENTS_APP_URL}?post={post_id}"
 
     buttons = [
         [{"type": "link", "text": "Прокомментировать", "url": f"{COMMENTS_DEEPLINK}?startapp={post_id}"}]
     ]
 
     result = send_message_with_keyboard(chat_id, post_text, buttons)
+
+    # Сохраняем текст поста в Firebase для отображения в комментариях
+    try:
+        import json
+        fb_url = f"{FIREBASE_DB_URL}/posts/{post_id}.json"
+        fb_data = {"text": post_text, "timestamp": int(time.time() * 1000)}
+        requests.put(fb_url, json=fb_data, timeout=10)
+        print(f"[firebase] пост {post_id} сохранён")
+    except Exception as e:
+        print(f"[firebase] ошибка сохранения поста: {e}")
 
     # Извлекаем message_id из ответа API
     message_id = None
