@@ -1559,11 +1559,17 @@ a.comment-avatar:active {
     document.body.appendChild(overlay);
   };
 
-  // Request profile via bot — writes to Firebase, bot sends contact card
+  // Request profile via bot — writes to Firebase, bot sends contact card (stays in app)
   window.requestProfileViaBot = function(targetUserId, targetName) {
     if (!currentUser.id) {
       showError('Не удалось определить пользователя');
       return;
+    }
+    // Disable button to prevent double-tap
+    var btn = document.querySelector('.profile-card-btn.primary');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>Отправляем...';
     }
     var requestRef = db.ref('profile_requests').push();
     requestRef.set({
@@ -1573,15 +1579,21 @@ a.comment-avatar:active {
       post_id: postId,
       timestamp: Date.now()
     }).then(function() {
-      // Close overlay and mini-app
-      var overlay = document.querySelector('.profile-card-overlay');
-      if (overlay) overlay.remove();
-      try {
-        if (window.WebApp && window.WebApp.close) {
-          window.WebApp.close();
-        }
-      } catch(e) {}
+      // Show success state in the card
+      if (btn) {
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>Профиль отправлен в чат с ботом';
+        btn.style.color = '#34C759';
+      }
+      // Auto-close card after 1.5s
+      setTimeout(function() {
+        var overlay = document.querySelector('.profile-card-overlay');
+        if (overlay) overlay.remove();
+      }, 1500);
     }).catch(function(err) {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Попробовать ещё раз';
+      }
       showError('Ошибка: ' + err.message);
     });
   };

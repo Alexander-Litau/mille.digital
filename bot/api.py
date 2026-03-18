@@ -220,7 +220,6 @@ def send_contact_profile(chat_id, target_user_id, target_name, post_id=""):
     try:
         params = {"chat_id": chat_id}
         body = {
-            "text": f"Профиль 👉 {target_name}",
             "attachments": [contact_attachment],
         }
         print(f"[send_contact] chat_id={chat_id} target={target_user_id} name={target_name}")
@@ -228,7 +227,7 @@ def send_contact_profile(chat_id, target_user_id, target_name, post_id=""):
         if not r.ok:
             print(f"[send_contact] ERROR {r.status_code}: {r.text}")
             # Если контакт не работает, отправим просто текст
-            body2 = {"text": f"Профиль 👉 {target_name}"}
+            body2 = {"text": f"Профиль 👆 {target_name}"}
             requests.post(f"{API_BASE}/messages", headers=_headers(), params=params, json=body2)
         else:
             r.raise_for_status()
