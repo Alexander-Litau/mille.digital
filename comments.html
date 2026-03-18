@@ -806,22 +806,50 @@ body::before {
     console.error(e);
   }
 
-  // Get post ID: from URL params, Max WebApp start_param, or Telegram start_param
+  // Get post ID from all possible sources
   const params = new URLSearchParams(window.location.search);
   let postId = params.get('post') || params.get('startapp') || 'default';
+
+  // Try reading start_param from WebApp SDK (Max creates window.WebApp)
   try {
-    // Try reading start_param from Max/Telegram WebApp SDK
-    const webAppParam = window.WebApp?.initDataUnsafe?.start_param
-      || window.MaxWebApp?.initDataUnsafe?.start_param
-      || window.Telegram?.WebApp?.initDataUnsafe?.start_param;
+    const webAppParam = window.WebApp?.initDataUnsafe?.start_param;
     if (webAppParam) postId = String(webAppParam);
   } catch(e) {}
-  // Also check URL hash as fallback
+
+  // Fallback: parse start_param directly from hash (WebAppData contains it)
   if (postId === 'default' && window.location.hash) {
-    const hashParam = window.location.hash.replace('#', '');
-    if (hashParam) postId = hashParam;
+    try {
+      const hashStr = window.location.hash.slice(1);
+      // Hash may contain WebAppData=... which is URL-encoded params
+      const hashParams = new URLSearchParams(hashStr);
+      const webAppData = hashParams.get('WebAppData');
+      if (webAppData) {
+        const dataParams = new URLSearchParams(webAppData);
+        const sp = dataParams.get('start_param');
+        if (sp) postId = sp;
+      }
+      // Also try direct start_param in hash
+      const directSp = hashParams.get('start_param');
+      if (directSp) postId = directSp;
+    } catch(e) {}
   }
+
+  // Fallback: try initData string directly
+  if (postId === 'default') {
+    try {
+      const initData = window.WebApp?.initData;
+      if (initData) {
+        const idParams = new URLSearchParams(initData);
+        const sp = idParams.get('start_param');
+        if (sp) postId = sp;
+      }
+    } catch(e) {}
+  }
+
   console.log('[comments] postId:', postId);
+  console.log('[comments] hash:', window.location.hash);
+  console.log('[comments] WebApp.initData:', window.WebApp?.initData);
+  console.log('[comments] WebApp.initDataUnsafe:', JSON.stringify(window.WebApp?.initDataUnsafe));
   const isRealPost = postId !== 'default';
   const postTitle = params.get('title') || (isRealPost ? '' : '');
   const postText = params.get('text') || '';
