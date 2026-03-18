@@ -887,7 +887,7 @@ a.comment-avatar:active {
       if (postData.channel_name) {
         if (postData.chat_id) {
           var chatLink = document.createElement('a');
-          var chatUrl = 'https://web.max.ru/' + postData.chat_id;
+          var chatUrl = 'https://max.ru/' + postData.chat_id;
           chatLink.href = chatUrl;
           chatLink.onclick = function(e) { e.preventDefault(); openMaxUrl(chatUrl); };
           chatLink.textContent = postData.channel_name;
@@ -1334,7 +1334,7 @@ a.comment-avatar:active {
     // Build profile link — prefer username, fallback to userId
     var profileUrl = '';
     if (c.userId && !String(c.userId).startsWith('anon_')) {
-      profileUrl = 'https://web.max.ru/' + escapeHtml(c.userId);
+      profileUrl = 'https://max.ru/' + escapeHtml(c.userId);
     }
 
     var nameHtml = profileUrl
