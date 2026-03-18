@@ -1083,6 +1083,9 @@ a.comment-avatar:active {
     postCard.style.display = '';
   }
 
+  // Bot username for deeplink
+  var botUsername = 'id381209292606_1_bot';
+
   // Max Web App user data
   let currentUser = { id: null, name: 'Аноним', photo: null, username: null };
 
@@ -1543,7 +1546,7 @@ a.comment-avatar:active {
           '<div class="profile-card-name">' + escapeHtml(name) + '</div>' +
         '</div>' +
         '<div class="profile-card-actions">' +
-          '<button class="profile-card-btn primary" onclick="requestProfileViaBot(\'' + userId + '\',\'' + name.replace(/'/g, "\\'") + '\')">' +
+          '<button class="profile-card-btn primary" onclick="requestProfileViaBot(\'' + userId + '\',\'' + name.replace(/'/g, "\\'") + '\',this)">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
             'Открыть профиль' +
           '</button>' +
@@ -1560,18 +1563,18 @@ a.comment-avatar:active {
   };
 
   // Request profile via bot — writes to Firebase, bot sends contact card (stays in app)
-  window.requestProfileViaBot = function(targetUserId, targetName) {
+  window.requestProfileViaBot = function(targetUserId, targetName, btnEl) {
     if (!currentUser.id) {
       showError('Не удалось определить пользователя');
       return;
     }
-    // Disable button to prevent double-tap
-    var btn = document.querySelector('.profile-card-btn.primary');
+    var btn = btnEl || document.querySelector('.profile-card-btn.primary');
     if (btn) {
       btn.disabled = true;
       btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>Отправляем...';
     }
     var requestRef = db.ref('profile_requests').push();
+    var requestKey = requestRef.key;
     requestRef.set({
       requester_user_id: currentUser.id,
       target_user_id: targetUserId,
@@ -1579,22 +1582,56 @@ a.comment-avatar:active {
       post_id: postId,
       timestamp: Date.now()
     }).then(function() {
-      // Show success state in the card
-      if (btn) {
-        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>Профиль отправлен в чат с ботом';
-        btn.style.color = '#34C759';
-      }
-      // Auto-close card after 1.5s
-      setTimeout(function() {
-        var overlay = document.querySelector('.profile-card-overlay');
-        if (overlay) overlay.remove();
-      }, 1500);
+      // Wait for bot to process (check if request was handled or failed)
+      var checkCount = 0;
+      var checkInterval = setInterval(function() {
+        checkCount++;
+        db.ref('profile_requests/' + requestKey).once('value', function(snap) {
+          if (!snap.exists()) {
+            // Request was processed — success
+            clearInterval(checkInterval);
+            if (btn) {
+              btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>Профиль отправлен в чат с ботом';
+              btn.style.color = '#34C759';
+            }
+            setTimeout(function() {
+              var overlay = document.querySelector('.profile-card-overlay');
+              if (overlay) overlay.remove();
+            }, 1500);
+          } else if (snap.val() && snap.val().error === 'no_chat') {
+            // Bot couldn't find chat — user needs to start bot
+            clearInterval(checkInterval);
+            snap.ref.remove();
+            var actions = document.querySelector('.profile-card-actions');
+            if (actions) {
+              actions.innerHTML =
+                '<div style="padding:12px 16px;text-align:center;">' +
+                  '<div style="font-size:0.85rem;color:#888;margin-bottom:10px;">Чтобы получать профили, запустите бота</div>' +
+                  '<button class="profile-card-btn primary" onclick="openMaxUrl(\'https://max.ru/' + botUsername + '\')" style="justify-content:center;">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>' +
+                    'Открыть бота' +
+                  '</button>' +
+                '</div>';
+            }
+          } else if (checkCount >= 10) {
+            // Timeout — assume success
+            clearInterval(checkInterval);
+            if (btn) {
+              btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>Профиль отправлен в чат с ботом';
+              btn.style.color = '#34C759';
+            }
+            setTimeout(function() {
+              var overlay = document.querySelector('.profile-card-overlay');
+              if (overlay) overlay.remove();
+            }, 1500);
+          }
+        });
+      }, 1000);
     }).catch(function(err) {
       if (btn) {
         btn.disabled = false;
         btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Попробовать ещё раз';
       }
-      showError('Ошибка: ' + err.message);
     });
   };
 })();

@@ -202,8 +202,9 @@ def process_profile_requests():
                 chat_id = get_user_chat_id(requester_user_id)
                 if not chat_id:
                     print(f"[profile] chat_id не найден для user_id={requester_user_id}")
-                    # Удаляем запрос
-                    req.delete(f"{FIREBASE_DB_URL}/profile_requests/{request_id}.json", timeout=10)
+                    # Помечаем ошибку — mini-app покажет кнопку "Открыть бота"
+                    req.patch(f"{FIREBASE_DB_URL}/profile_requests/{request_id}.json",
+                              json={"error": "no_chat"}, timeout=10)
                     continue
 
                 # Отправляем контакт
