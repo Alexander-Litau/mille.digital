@@ -678,41 +678,40 @@ a.comment-avatar:active {
   bottom: 0;
   left: 0;
   right: 0;
-  background: transparent;
-  padding: 8px 8px;
-  padding-bottom: max(14px, calc(env(safe-area-inset-bottom) + 6px));
+  background: #e8e8ed;
+  padding: 6px 8px;
+  padding-bottom: max(10px, calc(env(safe-area-inset-bottom) + 4px));
   z-index: 100;
 }
 .input-wrap {
   max-width: 600px;
   margin: 0 auto;
   display: flex;
-  gap: 6px;
+  gap: 4px;
   align-items: flex-end;
 }
 
-/* Icon buttons (attach, emoji) */
+/* Icon buttons (attach, emoji, camera, mic) */
 .input-icon-btn {
   width: 36px;
   height: 36px;
   border: none;
   border-radius: 50%;
   background: none;
-  color: var(--text-muted);
+  color: #8e8e93;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   padding: 0;
-  transition: color 0.2s;
 }
 .input-icon-btn:active {
-  color: var(--sage);
+  opacity: 0.5;
 }
 .input-icon-btn svg {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
 }
 
 /* Text input field — Max-style */
@@ -770,27 +769,6 @@ a.comment-avatar:active {
   height: 22px;
 }
 
-/* Side icon buttons (attach, camera, mic) */
-.input-icon-btn {
-  width: 36px;
-  height: 40px;
-  border: none;
-  background: none;
-  color: #8e8e93;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  padding: 0;
-}
-.input-icon-btn svg {
-  width: 24px;
-  height: 24px;
-}
-.input-icon-btn:active {
-  opacity: 0.5;
-}
 .input-side-btn {
   transition: opacity 0.15s, width 0.15s;
 }
