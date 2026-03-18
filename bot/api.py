@@ -10,7 +10,7 @@ def _headers():
 
 def get_updates(marker=None, timeout=30):
     """Long polling для получения обновлений от пользователей."""
-    params = {"timeout": timeout, "types": "message_created,message_callback"}
+    params = {"timeout": timeout, "types": "message_created,message_callback,bot_started"}
     if marker:
         params["marker"] = marker
     try:

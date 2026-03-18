@@ -290,6 +290,33 @@ def publish_or_schedule(user_id, bot_chat_id, target_chat_id):
     reset_user(user_id)
 
 
+def handle_bot_started(update):
+    """Обработать событие запуска бота пользователем."""
+    user = update.get("user", {})
+    user_id = str(user.get("user_id", ""))
+    chat_id = update.get("chat_id")
+
+    if not user_id or not chat_id:
+        return
+
+    print(f"[bot_started] user_id={user_id} chat_id={chat_id}")
+
+    # Сохраняем маппинг
+    scheduler.save_user_chat(user_id, chat_id)
+    reset_user(user_id)
+
+    # Отправляем приветствие
+    api.send_message(
+        chat_id,
+        "Привет! Я помогу опубликовать пост с комментариями.\n\n"
+        "Просто напишите мне текст поста, и я помогу его опубликовать.\n\n"
+        "Команды:\n"
+        "/post — создать новый пост\n"
+        "/chats — управление каналами\n"
+        "/help — помощь",
+    )
+
+
 def parse_datetime(text):
     """Парсинг даты из текста. Поддерживает ДД.ММ.ГГГГ ЧЧ:ММ и другие форматы."""
     formats = [
@@ -330,6 +357,8 @@ def main():
                     handle_message(update)
                 elif update_type == "message_callback":
                     handle_callback(update)
+                elif update_type == "bot_started":
+                    handle_bot_started(update)
     except KeyboardInterrupt:
         print("\nОстановка бота...")
         scheduler.stop_scheduler()
