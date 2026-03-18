@@ -196,6 +196,13 @@ body::before {
   color: var(--text);
   margin-bottom: 6px;
 }
+.post-card-title a {
+  color: inherit;
+  text-decoration: none;
+}
+.post-card-title a:active {
+  opacity: 0.6;
+}
 .post-card-text {
   font-size: 0.93rem;
   line-height: 1.45;
@@ -312,7 +319,7 @@ body::before {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.comment-avatar {
+.comment-avatar, a.comment-avatar {
   width: 34px;
   height: 34px;
   border-radius: 50%;
@@ -325,6 +332,10 @@ body::before {
   font-size: 0.8rem;
   flex-shrink: 0;
   overflow: hidden;
+  text-decoration: none;
+}
+a.comment-avatar:active {
+  opacity: 0.7;
 }
 .comment-avatar img {
   width: 100%;
@@ -872,9 +883,20 @@ body::before {
       if (postData.text) {
         postCardText.textContent = postData.text;
       }
-      // Channel name as title
+      // Channel name as clickable title
       if (postData.channel_name) {
-        postCardTitle.textContent = postData.channel_name;
+        if (postData.chat_id) {
+          var chatLink = document.createElement('a');
+          chatLink.href = 'https://max.ru/chat/' + postData.chat_id;
+          chatLink.target = '_blank';
+          chatLink.textContent = postData.channel_name;
+          chatLink.style.color = 'inherit';
+          chatLink.style.textDecoration = 'none';
+          postCardTitle.innerHTML = '';
+          postCardTitle.appendChild(chatLink);
+        } else {
+          postCardTitle.textContent = postData.channel_name;
+        }
         postCardTitle.style.display = '';
       } else {
         postCardTitle.style.display = 'none';
@@ -1309,17 +1331,23 @@ body::before {
       : initials;
 
     // Build profile link — prefer username, fallback to userId
-    var nameHtml;
+    var profileUrl = '';
     if (c.username) {
-      nameHtml = '<a href="https://max.ru/' + escapeHtml(c.username) + '" target="_blank">' + name + '</a>';
+      profileUrl = 'https://max.ru/' + escapeHtml(c.username);
     } else if (c.userId && !String(c.userId).startsWith('anon_')) {
-      nameHtml = '<a href="https://max.ru/user/' + escapeHtml(c.userId) + '" target="_blank">' + name + '</a>';
-    } else {
-      nameHtml = name;
+      profileUrl = 'https://max.ru/user/' + escapeHtml(c.userId);
     }
 
+    var nameHtml = profileUrl
+      ? '<a href="' + profileUrl + '" target="_blank">' + name + '</a>'
+      : name;
+
+    var avatarHtml = profileUrl
+      ? '<a href="' + profileUrl + '" target="_blank" class="comment-avatar">' + avatarContent + '</a>'
+      : '<div class="comment-avatar">' + avatarContent + '</div>';
+
     return '<div class="comment' + (isOwn ? ' is-own' : '') + '" data-key="' + escapeHtml(c.key) + '" data-text="' + text + '">' +
-      '<div class="comment-avatar">' + avatarContent + '</div>' +
+      avatarHtml +
       '<div class="comment-bubble">' +
         '<div class="comment-name">' + nameHtml + '</div>' +
         '<div class="comment-body">' +
