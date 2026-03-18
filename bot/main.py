@@ -191,7 +191,7 @@ def handle_callback(update):
     payload = callback.get("payload", "")
     callback_id = callback.get("callback_id", "")
     user_id = str(callback.get("user", {}).get("user_id", ""))
-    chat_id = callback.get("message", {}).get("recipient", {}).get("chat_id")
+    chat_id = update.get("message", {}).get("recipient", {}).get("chat_id")
     print(f"[callback] payload={payload} callback_id={callback_id} user_id={user_id} chat_id={chat_id}")
 
     if not user_id or not chat_id:
