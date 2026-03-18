@@ -33,14 +33,22 @@
 html { font-size: 16px; }
 
 body {
-  background: linear-gradient(180deg, #D6ECFF 0%, #B8DFFF 30%, #A8D8FF 60%, #C2E6FF 100%);
-  background-attachment: fixed;
+  background: #B8DFFF;
   color: var(--text);
   font-family: 'Figtree', sans-serif;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   overflow-x: hidden;
   position: relative;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(180deg, #D6ECFF 0%, #B8DFFF 30%, #A8D8FF 60%, #C2E6FF 100%);
+  pointer-events: none;
+  z-index: -1;
 }
 
 body::before {
@@ -526,7 +534,7 @@ body::before {
   right: 0;
   background: transparent;
   padding: 8px 8px;
-  padding-bottom: max(8px, env(safe-area-inset-bottom));
+  padding-bottom: max(14px, calc(env(safe-area-inset-bottom) + 6px));
   z-index: 100;
 }
 .input-wrap {
@@ -772,20 +780,25 @@ body::before {
   const params = new URLSearchParams(window.location.search);
   let postId = params.get('post') || params.get('startapp') || 'default';
   try {
-    if (postId === 'default') {
-      const webAppParam = window.WebApp?.initDataUnsafe?.start_param
-        || window.MaxWebApp?.initDataUnsafe?.start_param
-        || window.Telegram?.WebApp?.initDataUnsafe?.start_param;
-      if (webAppParam) postId = webAppParam;
-    }
+    // Try reading start_param from Max/Telegram WebApp SDK
+    const webAppParam = window.WebApp?.initDataUnsafe?.start_param
+      || window.MaxWebApp?.initDataUnsafe?.start_param
+      || window.Telegram?.WebApp?.initDataUnsafe?.start_param;
+    if (webAppParam) postId = String(webAppParam);
   } catch(e) {}
+  // Also check URL hash as fallback
+  if (postId === 'default' && window.location.hash) {
+    const hashParam = window.location.hash.replace('#', '');
+    if (hashParam) postId = hashParam;
+  }
   console.log('[comments] postId:', postId);
-  const postTitle = params.get('title') || (params.get('post') ? '' : 'ВЕСТИ-ИРКУТСК');
-  const postText = params.get('text') || (params.get('post') ? '' : 'В Усолье-Сибирском капитально ремонтируют школу № 17 — одну из старейших в городе\n\nЕе открыли в 1965 году и с того времени проводили только косметическое обновление. По стенам здания пошли трещины, из окон дует, а крыша рассыпается. На капитальный ремонт образовательного учреждения выделили 149 млн рублей. Строители приступили к нему в феврале, начали с кровли.\n\nУчебный процесс пока останавливать не стали, ведь трудятся подрядчики во внеучебное время. Основные работы начнутся летом, поэтому на следующий учебный год детей и педколлектив распределят по другим учебным заведения города. Завершить ремонт планируют в августе 2027 года.\n\nВ Усолье-Сибирском побывала наша съемочная группа. Сюжет о капитальном ремонте школы и о нюансах работ во время учебного процесса смотрите в выпуске программы «Вести-Иркутск» в 11:30 на телеканале «Россия 1».');
+  const isRealPost = postId !== 'default';
+  const postTitle = params.get('title') || (isRealPost ? '' : '');
+  const postText = params.get('text') || '';
   const postImage = params.get('image') || '';
   const postVideo = params.get('video') || '';
-  const postViews = params.get('views') || (params.get('post') ? '' : '2,2K');
-  const postTime = params.get('time') || (params.get('post') ? '' : '07:20');
+  const postViews = params.get('views') || '';
+  const postTime = params.get('time') || '';
 
   // Render post card
   const postCard = document.getElementById('postCard');
