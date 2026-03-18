@@ -51,7 +51,7 @@ def send_post_with_comments(chat_id, post_text):
     comments_url = f"{COMMENTS_APP_URL}?post={post_id}"
 
     buttons = [
-        [{"type": "open_app", "text": "Прокомментировать", "web_app": comments_url}]
+        [{"type": "open_app", "text": "Прокомментировать", "web_app": COMMENTS_APP_URL, "payload": post_id}]
     ]
 
     result = send_message_with_keyboard(chat_id, post_text, buttons)
@@ -89,7 +89,7 @@ def update_comments_button(message_id, post_id, count):
         btn_text = f"{count} {_pluralize_comments(count)}"
 
     buttons = [
-        [{"type": "open_app", "text": btn_text, "web_app": comments_url}]
+        [{"type": "open_app", "text": btn_text, "web_app": COMMENTS_APP_URL, "payload": post_id}]
     ]
     attachments = [{"type": "inline_keyboard", "payload": {"buttons": buttons}}]
 

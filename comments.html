@@ -768,9 +768,14 @@ body::before {
     console.error(e);
   }
 
-  // Get post ID and content from URL params
+  // Get post ID: from URL params, Max WebApp payload, or Telegram start_param
   const params = new URLSearchParams(window.location.search);
-  const postId = params.get('post') || 'default';
+  let postId = params.get('post') || 'default';
+  try {
+    const maxPayload = window.MaxWebApp?.initDataUnsafe?.start_param
+      || window.Telegram?.WebApp?.initDataUnsafe?.start_param;
+    if (maxPayload && postId === 'default') postId = maxPayload;
+  } catch(e) {}
   const postTitle = params.get('title') || (params.get('post') ? '' : 'ВЕСТИ-ИРКУТСК');
   const postText = params.get('text') || (params.get('post') ? '' : 'В Усолье-Сибирском капитально ремонтируют школу № 17 — одну из старейших в городе\n\nЕе открыли в 1965 году и с того времени проводили только косметическое обновление. По стенам здания пошли трещины, из окон дует, а крыша рассыпается. На капитальный ремонт образовательного учреждения выделили 149 млн рублей. Строители приступили к нему в феврале, начали с кровли.\n\nУчебный процесс пока останавливать не стали, ведь трудятся подрядчики во внеучебное время. Основные работы начнутся летом, поэтому на следующий учебный год детей и педколлектив распределят по другим учебным заведения города. Завершить ремонт планируют в августе 2027 года.\n\nВ Усолье-Сибирском побывала наша съемочная группа. Сюжет о капитальном ремонте школы и о нюансах работ во время учебного процесса смотрите в выпуске программы «Вести-Иркутск» в 11:30 на телеканале «Россия 1».');
   const postImage = params.get('image') || '';
