@@ -77,11 +77,17 @@ def save_post_to_firebase(post_id, post_text, chat_id, message_id=None):
 
     # Получаем инфо о канале
     chat_info = get_chat_info(chat_id)
+    print(f"[firebase] chat_info: {chat_info}")
     if chat_info:
         fb_data["channel_name"] = chat_info.get("title", "")
         icon = chat_info.get("icon")
         if icon and isinstance(icon, dict):
             fb_data["channel_icon"] = icon.get("url", "")
+        # Сохраняем ссылку на канал
+        if chat_info.get("username"):
+            fb_data["channel_username"] = chat_info["username"]
+        elif chat_info.get("link"):
+            fb_data["channel_link"] = chat_info["link"]
 
     # Получаем статистику сообщения (просмотры)
     if message_id:
