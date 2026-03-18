@@ -31,7 +31,10 @@ def send_message(chat_id, text, attachments=None):
     body = {"text": text}
     if attachments:
         body["attachments"] = attachments
+    print(f"[send_message] chat_id={chat_id} body={body}")
     r = requests.post(f"{API_BASE}/messages", headers=_headers(), params=params, json=body)
+    if not r.ok:
+        print(f"[send_message] ERROR {r.status_code}: {r.text}")
     r.raise_for_status()
     return r.json()
 
