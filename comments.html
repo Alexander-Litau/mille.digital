@@ -486,6 +486,111 @@ a.comment-avatar:active {
   flex-shrink: 0;
 }
 
+/* Profile card popup */
+.profile-card-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 999;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeOverlay 0.15s ease;
+}
+.profile-card {
+  background: #fff;
+  border-radius: 20px;
+  width: min(300px, 85vw);
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+  animation: popMenu 0.2s ease;
+}
+.profile-card-header {
+  background: linear-gradient(135deg, var(--sage) 0%, #2a5a8f 100%);
+  padding: 28px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.profile-card-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.6rem;
+  overflow: hidden;
+  border: 3px solid rgba(255,255,255,0.3);
+}
+.profile-card-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.profile-card-name {
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-align: center;
+}
+.profile-card-actions {
+  padding: 8px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.profile-card-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: 'Figtree', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text);
+  border-radius: 12px;
+  transition: background 0.1s;
+}
+.profile-card-btn:active {
+  background: rgba(0,0,0,0.05);
+}
+.profile-card-btn svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: #007AFF;
+}
+.profile-card-btn.primary {
+  color: #007AFF;
+  font-weight: 500;
+}
+.profile-card-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  border: none;
+  background: none;
+  width: 100%;
+  cursor: pointer;
+  font-family: 'Figtree', sans-serif;
+  font-size: 0.9rem;
+  color: #a0a0a0;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+.profile-card-close:active {
+  background: rgba(0,0,0,0.03);
+}
+
 /* Edit banner inside input field */
 .edit-banner {
   display: flex;
@@ -1331,15 +1436,16 @@ a.comment-avatar:active {
       ? '<img src="' + escapeHtml(c.photo) + '" alt="" loading="lazy">'
       : initials;
 
-    // Profile click — request via Firebase, bot sends contact
+    // Profile click — show profile card popup
     var hasProfile = c.userId && !String(c.userId).startsWith('anon_') && !isOwn;
+    var photoAttr = c.photo ? ' data-photo="' + escapeHtml(c.photo) + '"' : '';
 
     var nameHtml = hasProfile
-      ? '<a href="#" onclick="requestProfile(\'' + escapeHtml(String(c.userId)) + '\',\'' + name.replace(/'/g, "\\'") + '\');return false;">' + name + '</a>'
+      ? '<a href="#" onclick="showProfileCard(\'' + escapeHtml(String(c.userId)) + '\',\'' + name.replace(/'/g, "\\'") + '\'' + (c.photo ? ',\'' + escapeHtml(c.photo) + '\'' : '') + ');return false;">' + name + '</a>'
       : name;
 
     var avatarHtml = hasProfile
-      ? '<a href="#" onclick="requestProfile(\'' + escapeHtml(String(c.userId)) + '\',\'' + name.replace(/'/g, "\\'") + '\');return false;" class="comment-avatar">' + avatarContent + '</a>'
+      ? '<a href="#" onclick="showProfileCard(\'' + escapeHtml(String(c.userId)) + '\',\'' + name.replace(/'/g, "\\'") + '\'' + (c.photo ? ',\'' + escapeHtml(c.photo) + '\'' : '') + ');return false;" class="comment-avatar">' + avatarContent + '</a>'
       : '<div class="comment-avatar">' + avatarContent + '</div>';
 
     return '<div class="comment' + (isOwn ? ' is-own' : '') + '" data-key="' + escapeHtml(c.key) + '" data-text="' + text + '">' +
@@ -1417,13 +1523,48 @@ a.comment-avatar:active {
     window.open(url, '_blank');
   };
 
+  // Show profile card popup
+  window.showProfileCard = function(userId, name, photo) {
+    // Remove existing card if any
+    var existing = document.querySelector('.profile-card-overlay');
+    if (existing) existing.remove();
+
+    var initials = name.split(' ').map(function(w) { return w[0]; }).join('').toUpperCase().slice(0, 2);
+    var avatarInner = photo
+      ? '<img src="' + photo + '" alt="">'
+      : initials;
+
+    var overlay = document.createElement('div');
+    overlay.className = 'profile-card-overlay';
+    overlay.innerHTML =
+      '<div class="profile-card">' +
+        '<div class="profile-card-header">' +
+          '<div class="profile-card-avatar">' + avatarInner + '</div>' +
+          '<div class="profile-card-name">' + escapeHtml(name) + '</div>' +
+        '</div>' +
+        '<div class="profile-card-actions">' +
+          '<button class="profile-card-btn primary" onclick="requestProfileViaBot(\'' + userId + '\',\'' + name.replace(/'/g, "\\'") + '\')">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
+            'Открыть профиль' +
+          '</button>' +
+        '</div>' +
+        '<button class="profile-card-close" onclick="this.closest(\'.profile-card-overlay\').remove()">Закрыть</button>' +
+      '</div>';
+
+    // Close on overlay tap (outside card)
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) overlay.remove();
+    });
+
+    document.body.appendChild(overlay);
+  };
+
   // Request profile via bot — writes to Firebase, bot sends contact card
-  window.requestProfile = function(targetUserId, targetName) {
+  window.requestProfileViaBot = function(targetUserId, targetName) {
     if (!currentUser.id) {
       showError('Не удалось определить пользователя');
       return;
     }
-    // Write profile request to Firebase
     var requestRef = db.ref('profile_requests').push();
     requestRef.set({
       requester_user_id: currentUser.id,
@@ -1432,7 +1573,9 @@ a.comment-avatar:active {
       post_id: postId,
       timestamp: Date.now()
     }).then(function() {
-      // Close mini-app — user will see bot's message
+      // Close overlay and mini-app
+      var overlay = document.querySelector('.profile-card-overlay');
+      if (overlay) overlay.remove();
       try {
         if (window.WebApp && window.WebApp.close) {
           window.WebApp.close();
