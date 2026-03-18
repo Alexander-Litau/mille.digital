@@ -62,7 +62,7 @@ def get_message_info(message_id):
         r = requests.get(f"{API_BASE}/messages/{message_id}", headers=_headers(), timeout=10)
         r.raise_for_status()
         data = r.json()
-        print(f"[get_message_info] mid={message_id} response_keys={list(data.keys()) if isinstance(data, dict) else 'not_dict'}")
+        print(f"[get_message_info] mid={message_id} stat={data.get('stat')} body_keys={list(data.get('body', {}).keys()) if isinstance(data.get('body'), dict) else 'none'}")
         return data
     except Exception as e:
         print(f"[get_message_info] ошибка: {e}")
