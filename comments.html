@@ -715,34 +715,29 @@ a.comment-avatar:active {
   height: 22px;
 }
 
-/* Text input field */
+/* Text input field — Max-style */
 .input-field-wrap {
   flex: 1;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  padding: 0 4px 0 0;
-  min-height: 36px;
-  transition: border-color 0.2s;
+  background: #fff;
+  border-radius: 22px;
+  padding: 0;
+  min-height: 40px;
   overflow: hidden;
 }
 .input-field-wrap .edit-banner {
   width: 100%;
   flex-basis: 100%;
 }
-.input-field-wrap:focus-within {
-  border-color: rgba(0, 122, 255, 0.4);
-}
 .input-field-wrap textarea {
   flex: 1;
   border: none;
   background: transparent;
-  padding: 8px 0 8px 14px;
+  padding: 10px 0 10px 14px;
   font-family: 'Figtree', sans-serif;
-  font-size: 0.92rem;
+  font-size: 0.95rem;
   color: var(--text);
   resize: none;
   outline: none;
@@ -751,28 +746,53 @@ a.comment-avatar:active {
   line-height: 1.4;
 }
 .input-field-wrap textarea::placeholder {
-  color: var(--text-muted);
+  color: #b0b0b0;
 }
 
-/* Emoji button inside input */
+/* Icon buttons inside input (emoji) */
 .input-emoji-btn {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border: none;
   border-radius: 50%;
   background: none;
-  color: var(--text-muted);
+  color: #b0b0b0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   padding: 0;
-  margin-bottom: 2px;
+  margin-bottom: 3px;
 }
 .input-emoji-btn svg {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
+}
+
+/* Side icon buttons (attach, camera, mic) */
+.input-icon-btn {
+  width: 36px;
+  height: 40px;
+  border: none;
+  background: none;
+  color: #8e8e93;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+}
+.input-icon-btn svg {
+  width: 24px;
+  height: 24px;
+}
+.input-icon-btn:active {
+  opacity: 0.5;
+}
+.input-side-btn {
+  transition: opacity 0.15s, width 0.15s;
 }
 
 /* Send button */
@@ -888,6 +908,20 @@ a.comment-avatar:active {
         </svg>
       </button>
     </div>
+    <button class="input-icon-btn input-side-btn" id="cameraBtnSide" type="button" aria-label="Камера">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+        <circle cx="12" cy="13" r="4"/>
+      </svg>
+    </button>
+    <button class="input-icon-btn input-side-btn" id="micBtnSide" type="button" aria-label="Микрофон">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
+        <path d="M19 10v2a7 7 0 01-14 0v-2"/>
+        <line x1="12" y1="19" x2="12" y2="23"/>
+        <line x1="8" y1="23" x2="16" y2="23"/>
+      </svg>
+    </button>
     <button class="send-btn" id="sendBtn" disabled>
       <svg viewBox="0 0 24 24" fill="currentColor">
         <path d="M3.4 20.4l17.45-7.48a1 1 0 000-1.84L3.4 3.6a.993.993 0 00-1.39.91L2 9.12c0 .5.37.93.87.99L17 12 2.87 13.88c-.5.07-.87.5-.87 1l.01 4.61c0 .71.73 1.2 1.39.91z"/>
@@ -1142,11 +1176,23 @@ a.comment-avatar:active {
     window.history.back();
   });
 
+  // Side buttons (camera, mic) — hide when typing
+  var cameraBtnSide = document.getElementById('cameraBtnSide');
+  var micBtnSide = document.getElementById('micBtnSide');
+
+  function updateSideButtons(hasText) {
+    var hide = hasText;
+    if (cameraBtnSide) cameraBtnSide.style.display = hide ? 'none' : '';
+    if (micBtnSide) micBtnSide.style.display = hide ? 'none' : '';
+  }
+
   // Auto-resize textarea
   messageInput.addEventListener('input', function() {
     this.style.height = 'auto';
     this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-    sendBtn.disabled = !this.value.trim();
+    var hasText = !!this.value.trim();
+    sendBtn.disabled = !hasText;
+    updateSideButtons(hasText);
   });
 
   // Send on Enter (Shift+Enter for newline)
