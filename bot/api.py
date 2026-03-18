@@ -126,11 +126,12 @@ def _pluralize_comments(n):
 
 def answer_callback(callback_id, text=None):
     """Ответить на нажатие inline-кнопки."""
-    body = {"callback_id": callback_id}
+    params = {"callback_id": callback_id}
+    body = {}
     if text:
-        body["message"] = text
+        body["notification"] = text
     try:
-        r = requests.post(f"{API_BASE}/answers", headers=_headers(), json=body)
+        r = requests.post(f"{API_BASE}/answers", headers=_headers(), params=params, json=body)
         r.raise_for_status()
     except Exception as e:
         print(f"[answer_callback] ошибка: {e}")
