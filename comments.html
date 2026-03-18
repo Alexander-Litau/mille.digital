@@ -1334,7 +1334,7 @@ a.comment-avatar:active {
     // Build profile link — prefer username, fallback to userId
     var profileUrl = '';
     if (c.userId && !String(c.userId).startsWith('anon_')) {
-      profileUrl = 'https://max.ru/' + escapeHtml(c.userId);
+      profileUrl = 'max://user/' + escapeHtml(c.userId);
     }
 
     var nameHtml = profileUrl
