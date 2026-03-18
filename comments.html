@@ -887,8 +887,9 @@ a.comment-avatar:active {
       if (postData.channel_name) {
         if (postData.chat_id) {
           var chatLink = document.createElement('a');
-          chatLink.href = 'https://web.max.ru/' + postData.chat_id;
-          chatLink.target = '_blank';
+          var chatUrl = 'https://web.max.ru/' + postData.chat_id;
+          chatLink.href = chatUrl;
+          chatLink.onclick = function(e) { e.preventDefault(); openMaxUrl(chatUrl); };
           chatLink.textContent = postData.channel_name;
           chatLink.style.color = 'inherit';
           chatLink.style.textDecoration = 'none';
@@ -1337,11 +1338,11 @@ a.comment-avatar:active {
     }
 
     var nameHtml = profileUrl
-      ? '<a href="' + profileUrl + '" target="_blank">' + name + '</a>'
+      ? '<a href="' + profileUrl + '" onclick="openMaxUrl(this.href);return false;">' + name + '</a>'
       : name;
 
     var avatarHtml = profileUrl
-      ? '<a href="' + profileUrl + '" target="_blank" class="comment-avatar">' + avatarContent + '</a>'
+      ? '<a href="' + profileUrl + '" onclick="openMaxUrl(this.href);return false;" class="comment-avatar">' + avatarContent + '</a>'
       : '<div class="comment-avatar">' + avatarContent + '</div>';
 
     return '<div class="comment' + (isOwn ? ' is-own' : '') + '" data-key="' + escapeHtml(c.key) + '" data-text="' + text + '">' +
@@ -1407,6 +1408,17 @@ a.comment-avatar:active {
     if (window.WebApp) window.WebApp.expand();
     if (window.Telegram?.WebApp) window.Telegram.WebApp.expand();
   } catch(e) {}
+
+  // Global function to open links inside Max
+  window.openMaxUrl = function(url) {
+    try {
+      if (window.WebApp && window.WebApp.openMaxLink) {
+        window.WebApp.openMaxLink(url);
+        return;
+      }
+    } catch(e) {}
+    window.open(url, '_blank');
+  };
 })();
 </script>
 </body>
