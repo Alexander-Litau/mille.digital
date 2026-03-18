@@ -887,8 +887,7 @@ a.comment-avatar:active {
       if (postData.channel_name) {
         if (postData.chat_id) {
           var chatLink = document.createElement('a');
-          var channelPath = postData.channel_username || postData.channel_link || postData.chat_id;
-          var chatUrl = 'https://max.ru/' + channelPath;
+          var chatUrl = postData.channel_link || ('https://max.ru/' + postData.chat_id);
           chatLink.href = chatUrl;
           chatLink.onclick = function(e) { e.preventDefault(); openMaxUrl(chatUrl); };
           chatLink.textContent = postData.channel_name;
