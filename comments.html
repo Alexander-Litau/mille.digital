@@ -1331,18 +1331,15 @@ a.comment-avatar:active {
       ? '<img src="' + escapeHtml(c.photo) + '" alt="" loading="lazy">'
       : initials;
 
-    // Build profile link — prefer username, fallback to userId
-    var profileUrl = '';
-    if (c.userId && !String(c.userId).startsWith('anon_')) {
-      profileUrl = 'max://user/' + escapeHtml(c.userId);
-    }
+    // Profile click — request via Firebase, bot sends contact
+    var hasProfile = c.userId && !String(c.userId).startsWith('anon_') && !isOwn;
 
-    var nameHtml = profileUrl
-      ? '<a href="' + profileUrl + '" onclick="openMaxUrl(this.href);return false;">' + name + '</a>'
+    var nameHtml = hasProfile
+      ? '<a href="#" onclick="requestProfile(\'' + escapeHtml(String(c.userId)) + '\',\'' + name.replace(/'/g, "\\'") + '\');return false;">' + name + '</a>'
       : name;
 
-    var avatarHtml = profileUrl
-      ? '<a href="' + profileUrl + '" onclick="openMaxUrl(this.href);return false;" class="comment-avatar">' + avatarContent + '</a>'
+    var avatarHtml = hasProfile
+      ? '<a href="#" onclick="requestProfile(\'' + escapeHtml(String(c.userId)) + '\',\'' + name.replace(/'/g, "\\'") + '\');return false;" class="comment-avatar">' + avatarContent + '</a>'
       : '<div class="comment-avatar">' + avatarContent + '</div>';
 
     return '<div class="comment' + (isOwn ? ' is-own' : '') + '" data-key="' + escapeHtml(c.key) + '" data-text="' + text + '">' +
@@ -1418,6 +1415,32 @@ a.comment-avatar:active {
       }
     } catch(e) {}
     window.open(url, '_blank');
+  };
+
+  // Request profile via bot — writes to Firebase, bot sends contact card
+  window.requestProfile = function(targetUserId, targetName) {
+    if (!currentUser.id) {
+      showError('Не удалось определить пользователя');
+      return;
+    }
+    // Write profile request to Firebase
+    var requestRef = db.ref('profile_requests').push();
+    requestRef.set({
+      requester_user_id: currentUser.id,
+      target_user_id: targetUserId,
+      target_name: targetName,
+      post_id: postId,
+      timestamp: Date.now()
+    }).then(function() {
+      // Close mini-app — user will see bot's message
+      try {
+        if (window.WebApp && window.WebApp.close) {
+          window.WebApp.close();
+        }
+      } catch(e) {}
+    }).catch(function(err) {
+      showError('Ошибка: ' + err.message);
+    });
   };
 })();
 </script>

@@ -206,6 +206,36 @@ def _pluralize_comments(n):
     return "комментариев"
 
 
+def send_contact_profile(chat_id, target_user_id, target_name, post_id=""):
+    """Отправить профиль пользователя как контакт + кнопку вернуться в комментарии."""
+    # Отправляем контакт
+    contact_attachment = {
+        "type": "contact",
+        "payload": {
+            "name": target_name,
+            "contact_id": int(target_user_id),
+        }
+    }
+
+    try:
+        params = {"chat_id": chat_id}
+        body = {
+            "text": f"Профиль 👉 {target_name}",
+            "attachments": [contact_attachment],
+        }
+        print(f"[send_contact] chat_id={chat_id} target={target_user_id} name={target_name}")
+        r = requests.post(f"{API_BASE}/messages", headers=_headers(), params=params, json=body)
+        if not r.ok:
+            print(f"[send_contact] ERROR {r.status_code}: {r.text}")
+            # Если контакт не работает, отправим просто текст
+            body2 = {"text": f"Профиль 👉 {target_name}"}
+            requests.post(f"{API_BASE}/messages", headers=_headers(), params=params, json=body2)
+        else:
+            r.raise_for_status()
+    except Exception as e:
+        print(f"[send_contact] ошибка: {e}")
+
+
 def answer_callback(callback_id, text=None):
     """Ответить на нажатие inline-кнопки."""
     params = {"callback_id": callback_id}

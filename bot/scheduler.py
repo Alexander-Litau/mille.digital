@@ -37,8 +37,36 @@ def init_db():
             created_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS user_chats (
+            user_id TEXT PRIMARY KEY,
+            chat_id INTEGER NOT NULL
+        )
+    """)
     conn.commit()
     conn.close()
+
+
+def save_user_chat(user_id, chat_id):
+    """Сохранить маппинг user_id → chat_id (диалог с ботом)."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute(
+        "INSERT OR REPLACE INTO user_chats (user_id, chat_id) VALUES (?, ?)",
+        (str(user_id), chat_id),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_user_chat_id(user_id):
+    """Получить chat_id диалога пользователя с ботом."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT chat_id FROM user_chats WHERE user_id = ?", (str(user_id),))
+    row = c.fetchone()
+    conn.close()
+    return row[0] if row else None
 
 
 def add_scheduled_post(chat_id, text, publish_at):
@@ -151,6 +179,50 @@ def publish_pending():
             print(f"[scheduler] ошибка публикации поста #{post_db_id}: {e}")
 
 
+def process_profile_requests():
+    """Проверить Firebase на запросы профилей и отправить контакты."""
+    try:
+        import requests as req
+        from config import FIREBASE_DB_URL, COMMENTS_DEEPLINK
+        url = f"{FIREBASE_DB_URL}/profile_requests.json"
+        r = req.get(url, timeout=10)
+        r.raise_for_status()
+        data = r.json()
+        if not data:
+            return
+
+        for request_id, request_data in data.items():
+            try:
+                requester_user_id = str(request_data.get("requester_user_id", ""))
+                target_user_id = request_data.get("target_user_id")
+                target_name = request_data.get("target_name", "Пользователь")
+                post_id = request_data.get("post_id", "")
+
+                # Найти chat_id для отправки сообщения
+                chat_id = get_user_chat_id(requester_user_id)
+                if not chat_id:
+                    print(f"[profile] chat_id не найден для user_id={requester_user_id}")
+                    # Удаляем запрос
+                    req.delete(f"{FIREBASE_DB_URL}/profile_requests/{request_id}.json", timeout=10)
+                    continue
+
+                # Отправляем контакт
+                api.send_contact_profile(chat_id, target_user_id, target_name, post_id)
+                print(f"[profile] отправлен профиль {target_name} (id={target_user_id}) -> user {requester_user_id}")
+
+                # Удаляем запрос
+                req.delete(f"{FIREBASE_DB_URL}/profile_requests/{request_id}.json", timeout=10)
+            except Exception as e:
+                print(f"[profile] ошибка обработки запроса {request_id}: {e}")
+                # Удаляем проблемный запрос
+                try:
+                    req.delete(f"{FIREBASE_DB_URL}/profile_requests/{request_id}.json", timeout=10)
+                except:
+                    pass
+    except Exception as e:
+        print(f"[profile] ошибка чтения запросов: {e}")
+
+
 def update_comment_buttons():
     """Проверить Firebase и обновить кнопки комментариев + статистику на всех постах."""
     posts = get_all_published_posts()
@@ -181,6 +253,8 @@ def start_scheduler():
     _scheduler.add_job(publish_pending, "interval", seconds=30)
     # Обновляем кнопки комментариев каждые 5 сек
     _scheduler.add_job(update_comment_buttons, "interval", seconds=5)
+    # Проверяем запросы профилей каждые 2 сек
+    _scheduler.add_job(process_profile_requests, "interval", seconds=2)
     _scheduler.start()
     print("[scheduler] планировщик запущен")
 

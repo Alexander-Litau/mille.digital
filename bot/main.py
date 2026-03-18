@@ -44,6 +44,9 @@ def handle_message(update):
     if not user_id or not chat_id or not text:
         return
 
+    # Сохраняем маппинг user_id → chat_id
+    scheduler.save_user_chat(user_id, chat_id)
+
     u = get_user(user_id)
 
     # Команда /start
@@ -196,6 +199,9 @@ def handle_callback(update):
 
     if not user_id or not chat_id:
         return
+
+    # Сохраняем маппинг user_id → chat_id
+    scheduler.save_user_chat(user_id, chat_id)
 
     u = get_user(user_id)
     api.answer_callback(callback_id)
