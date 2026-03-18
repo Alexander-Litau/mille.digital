@@ -302,6 +302,11 @@ body::before {
   animation: fadeIn 0.3s ease;
 }
 
+/* Own comments: right side */
+.comment.is-own {
+  flex-direction: row-reverse;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -337,7 +342,13 @@ body::before {
   box-shadow: 0 1px 2px rgba(0,0,0,0.08);
 }
 
-/* Bubble tail */
+/* Own comment bubble: green tint, right-side radius */
+.comment.is-own .comment-bubble {
+  background: #EEFFDE;
+  border-radius: 12px 12px 4px 12px;
+}
+
+/* Bubble tail — left (others) */
 .comment-bubble::before {
   content: '';
   position: absolute;
@@ -350,6 +361,15 @@ body::before {
   border-radius: 0 0 0 3px;
 }
 
+/* Bubble tail — right (own) */
+.comment.is-own .comment-bubble::before {
+  left: auto;
+  right: -6px;
+  background: #EEFFDE;
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
+  border-radius: 0 0 3px 0;
+}
+
 .comment-name {
   font-weight: 600;
   font-size: 0.8rem;
@@ -358,6 +378,10 @@ body::before {
   overflow: hidden;
   text-overflow: ellipsis;
   margin-bottom: 1px;
+}
+/* Hide name for own comments */
+.comment.is-own .comment-name {
+  display: none;
 }
 .comment-name a {
   color: inherit;
@@ -505,6 +529,12 @@ body::before {
 }
 .comment-bubble.hold-highlight::before {
   background: #f0f4f8;
+}
+.comment.is-own .comment-bubble.hold-highlight {
+  background: #d8f0c8;
+}
+.comment.is-own .comment-bubble.hold-highlight::before {
+  background: #d8f0c8;
 }
 
 /* Empty state (unused, kept for fallback) */
