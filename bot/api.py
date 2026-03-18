@@ -27,10 +27,11 @@ def get_updates(marker=None, timeout=30):
 
 def send_message(chat_id, text, attachments=None):
     """Отправить сообщение в чат/канал."""
-    body = {"chat_id": chat_id, "text": text}
+    params = {"chat_id": chat_id}
+    body = {"text": text}
     if attachments:
         body["attachments"] = attachments
-    r = requests.post(f"{API_BASE}/messages", headers=_headers(), json=body)
+    r = requests.post(f"{API_BASE}/messages", headers=_headers(), params=params, json=body)
     r.raise_for_status()
     return r.json()
 
