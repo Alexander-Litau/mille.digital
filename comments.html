@@ -865,14 +865,59 @@ body::before {
   const postCardMedia = document.getElementById('postCardMedia');
   const postCardFooter = document.getElementById('postCardFooter');
 
-  // Load post text from Firebase if not in URL params
-  if (!postText && postId !== 'default' && db) {
-    db.ref('posts/' + postId).once('value', function(snapshot) {
-      const postData = snapshot.val();
-      if (postData && postData.text) {
+  // Load post data from Firebase
+  if (postId !== 'default' && db) {
+    function renderPostFromFirebase(postData) {
+      if (!postData) return;
+      if (postData.text) {
         postCardText.textContent = postData.text;
+      }
+      // Channel name as title
+      if (postData.channel_name) {
+        postCardTitle.textContent = postData.channel_name;
+        postCardTitle.style.display = '';
+      } else {
         postCardTitle.style.display = 'none';
-        postCard.style.display = '';
+      }
+      // Footer: views + time
+      if (postData.views || postData.msg_timestamp || postData.timestamp) {
+        var viewsCount = document.getElementById('postCardViewsCount');
+        var viewsWrap = document.getElementById('postCardViews');
+        if (postData.views) {
+          viewsCount.textContent = postData.views >= 1000
+            ? (postData.views / 1000).toFixed(1).replace('.0', '') + 'K'
+            : postData.views;
+          viewsWrap.style.display = '';
+        } else {
+          viewsWrap.style.display = 'none';
+        }
+        var ts = postData.msg_timestamp || postData.timestamp;
+        if (ts) {
+          var d = new Date(typeof ts === 'number' && ts > 9999999999 ? ts : ts * 1000);
+          var hours = String(d.getHours()).padStart(2, '0');
+          var mins = String(d.getMinutes()).padStart(2, '0');
+          document.getElementById('postCardTime').textContent = hours + ':' + mins;
+        }
+        postCardFooter.style.display = '';
+      }
+      postCard.style.display = '';
+    }
+
+    // Initial load
+    db.ref('posts/' + postId).once('value', function(snapshot) {
+      renderPostFromFirebase(snapshot.val());
+    });
+
+    // Live updates (views change)
+    db.ref('posts/' + postId + '/views').on('value', function(snapshot) {
+      var views = snapshot.val();
+      if (views !== null) {
+        var viewsCount = document.getElementById('postCardViewsCount');
+        viewsCount.textContent = views >= 1000
+          ? (views / 1000).toFixed(1).replace('.0', '') + 'K'
+          : views;
+        document.getElementById('postCardViews').style.display = '';
+        postCardFooter.style.display = '';
       }
     });
   }

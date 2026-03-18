@@ -152,7 +152,7 @@ def publish_pending():
 
 
 def update_comment_buttons():
-    """Проверить Firebase и обновить кнопки комментариев на всех постах."""
+    """Проверить Firebase и обновить кнопки комментариев + статистику на всех постах."""
     posts = get_all_published_posts()
     for post_id, message_id, chat_id, last_count in posts:
         try:
@@ -163,6 +163,8 @@ def update_comment_buttons():
                 api.update_comments_button(message_id, post_id, current_count)
                 update_comment_count(post_id, current_count)
                 print(f"[comments] пост {post_id}: {last_count} -> {current_count}")
+            # Обновляем статистику (просмотры) в Firebase
+            api.update_post_stats_firebase(post_id, message_id)
         except Exception as e:
             print(f"[comments] ошибка обновления поста {post_id}: {e}")
 

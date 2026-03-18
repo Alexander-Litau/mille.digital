@@ -45,6 +45,76 @@ def send_message_with_keyboard(chat_id, text, buttons):
     return send_message(chat_id, text, attachments=attachments)
 
 
+def get_chat_info(chat_id):
+    """Получить информацию о чате/канале."""
+    try:
+        r = requests.get(f"{API_BASE}/chats/{chat_id}", headers=_headers(), timeout=10)
+        r.raise_for_status()
+        return r.json()
+    except Exception as e:
+        print(f"[get_chat_info] ошибка: {e}")
+        return {}
+
+
+def get_message_info(message_id):
+    """Получить информацию о сообщении (включая stat для каналов)."""
+    try:
+        r = requests.get(f"{API_BASE}/messages/{message_id}", headers=_headers(), timeout=10)
+        r.raise_for_status()
+        return r.json()
+    except Exception as e:
+        print(f"[get_message_info] ошибка: {e}")
+        return {}
+
+
+def save_post_to_firebase(post_id, post_text, chat_id, message_id=None):
+    """Сохранить пост в Firebase с информацией о канале и статистикой."""
+    fb_data = {
+        "text": post_text,
+        "timestamp": int(time.time() * 1000),
+        "chat_id": chat_id,
+    }
+
+    # Получаем инфо о канале
+    chat_info = get_chat_info(chat_id)
+    if chat_info:
+        fb_data["channel_name"] = chat_info.get("title", "")
+        icon = chat_info.get("icon")
+        if icon and isinstance(icon, dict):
+            fb_data["channel_icon"] = icon.get("url", "")
+
+    # Получаем статистику сообщения (просмотры)
+    if message_id:
+        fb_data["message_id"] = message_id
+        msg_info = get_message_info(message_id)
+        if msg_info:
+            stat = msg_info.get("stat")
+            if stat and isinstance(stat, dict):
+                fb_data["views"] = stat.get("views", 0)
+            fb_data["msg_timestamp"] = msg_info.get("timestamp", fb_data["timestamp"])
+
+    try:
+        fb_url = f"{FIREBASE_DB_URL}/posts/{post_id}.json"
+        requests.put(fb_url, json=fb_data, timeout=10)
+        print(f"[firebase] пост {post_id} сохранён: channel={fb_data.get('channel_name')}")
+    except Exception as e:
+        print(f"[firebase] ошибка сохранения поста: {e}")
+
+
+def update_post_stats_firebase(post_id, message_id):
+    """Обновить статистику поста в Firebase (просмотры)."""
+    msg_info = get_message_info(message_id)
+    if not msg_info:
+        return
+    stat = msg_info.get("stat")
+    if stat and isinstance(stat, dict):
+        try:
+            fb_url = f"{FIREBASE_DB_URL}/posts/{post_id}/views.json"
+            requests.put(fb_url, json=stat.get("views", 0), timeout=10)
+        except Exception as e:
+            print(f"[firebase] ошибка обновления статистики: {e}")
+
+
 def send_post_with_comments(chat_id, post_text):
     """Опубликовать пост с кнопкой 'Прокомментировать'."""
     post_id = f"post_{int(time.time())}_{random.randint(1000, 9999)}"
@@ -55,20 +125,13 @@ def send_post_with_comments(chat_id, post_text):
 
     result = send_message_with_keyboard(chat_id, post_text, buttons)
 
-    # Сохраняем текст поста в Firebase для отображения в комментариях
-    try:
-        import json
-        fb_url = f"{FIREBASE_DB_URL}/posts/{post_id}.json"
-        fb_data = {"text": post_text, "timestamp": int(time.time() * 1000)}
-        requests.put(fb_url, json=fb_data, timeout=10)
-        print(f"[firebase] пост {post_id} сохранён")
-    except Exception as e:
-        print(f"[firebase] ошибка сохранения поста: {e}")
-
     # Извлекаем message_id из ответа API
     message_id = None
     msg = result.get("message", {})
     message_id = msg.get("body", {}).get("mid") or msg.get("mid")
+
+    # Сохраняем пост в Firebase с инфо о канале и статистикой
+    save_post_to_firebase(post_id, post_text, chat_id, message_id)
 
     return result, post_id, message_id
 
