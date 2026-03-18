@@ -61,7 +61,9 @@ def get_message_info(message_id):
     try:
         r = requests.get(f"{API_BASE}/messages/{message_id}", headers=_headers(), timeout=10)
         r.raise_for_status()
-        return r.json()
+        data = r.json()
+        print(f"[get_message_info] mid={message_id} response_keys={list(data.keys()) if isinstance(data, dict) else 'not_dict'}")
+        return data
     except Exception as e:
         print(f"[get_message_info] ошибка: {e}")
         return {}
