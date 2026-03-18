@@ -72,9 +72,12 @@ def edit_message(message_id, text=None, attachments=None):
         body["text"] = text
     if attachments is not None:
         body["attachments"] = attachments
+    print(f"[edit_message] message_id={message_id} body={body}")
     r = requests.put(
         f"{API_BASE}/messages", headers=_headers(), params=params, json=body
     )
+    if not r.ok:
+        print(f"[edit_message] ERROR {r.status_code}: {r.text}")
     r.raise_for_status()
     return r.json()
 

@@ -843,27 +843,28 @@ body::before {
   // Max Web App user data
   let currentUser = { id: null, name: 'Аноним', photo: null, username: null };
 
+  // Try window.WebApp (Max Web App SDK creates this)
   try {
-    if (window.TelegramWebviewProxy || window.Telegram?.WebApp?.initDataUnsafe?.user) {
+    if (window.WebApp?.initDataUnsafe?.user) {
+      const webAppUser = window.WebApp.initDataUnsafe.user;
+      if (webAppUser) {
+        currentUser.id = String(webAppUser.id);
+        currentUser.name = [webAppUser.first_name, webAppUser.last_name].filter(Boolean).join(' ') || 'Аноним';
+        currentUser.photo = webAppUser.photo_url || null;
+        currentUser.username = webAppUser.username || null;
+      }
+    }
+  } catch(e) { console.log('[user] WebApp error:', e); }
+
+  // Fallback: try Telegram WebApp
+  try {
+    if (!currentUser.id && window.Telegram?.WebApp?.initDataUnsafe?.user) {
       const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
       if (tgUser) {
         currentUser.id = String(tgUser.id);
         currentUser.name = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') || 'Аноним';
         currentUser.photo = tgUser.photo_url || null;
         currentUser.username = tgUser.username || null;
-      }
-    }
-  } catch(e) {}
-
-  // Try Max Web App
-  try {
-    if (window.MaxWebApp?.initDataUnsafe?.user) {
-      const maxUser = window.MaxWebApp.initDataUnsafe.user;
-      if (maxUser) {
-        currentUser.id = String(maxUser.id);
-        currentUser.name = [maxUser.first_name, maxUser.last_name].filter(Boolean).join(' ') || 'Аноним';
-        currentUser.photo = maxUser.photo_url || null;
-        currentUser.username = maxUser.username || null;
       }
     }
   } catch(e) {}
@@ -889,8 +890,8 @@ body::before {
   // Back button
   document.getElementById('backBtn').addEventListener('click', function() {
     try {
+      if (window.WebApp) window.WebApp.close();
       if (window.Telegram?.WebApp) window.Telegram.WebApp.close();
-      if (window.MaxWebApp) window.MaxWebApp.close();
     } catch(e) {}
     window.history.back();
   });
@@ -1262,8 +1263,8 @@ body::before {
 
   // Expand Max Web App
   try {
+    if (window.WebApp) window.WebApp.expand();
     if (window.Telegram?.WebApp) window.Telegram.WebApp.expand();
-    if (window.MaxWebApp) window.MaxWebApp.expand();
   } catch(e) {}
 })();
 </script>

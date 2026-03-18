@@ -177,8 +177,8 @@ def start_scheduler():
     _scheduler = BackgroundScheduler()
     # Проверяем отложенные посты каждые 30 сек
     _scheduler.add_job(publish_pending, "interval", seconds=30)
-    # Обновляем кнопки комментариев каждые 60 сек
-    _scheduler.add_job(update_comment_buttons, "interval", seconds=60)
+    # Обновляем кнопки комментариев каждые 5 сек
+    _scheduler.add_job(update_comment_buttons, "interval", seconds=5)
     _scheduler.start()
     print("[scheduler] планировщик запущен")
 
