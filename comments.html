@@ -678,25 +678,25 @@ a.comment-avatar:active {
   bottom: 0;
   left: 0;
   right: 0;
-  background: #e8e8ed;
-  padding: 6px 8px;
-  padding-bottom: max(10px, calc(env(safe-area-inset-bottom) + 4px));
+  background: #eff0f5;
+  padding: 8px 6px;
+  padding-bottom: max(12px, calc(env(safe-area-inset-bottom) + 6px));
   z-index: 100;
 }
 .input-wrap {
   max-width: 600px;
   margin: 0 auto;
   display: flex;
-  gap: 4px;
-  align-items: flex-end;
+  gap: 2px;
+  align-items: center;
 }
 
 /* Icon buttons (attach, emoji, camera, mic) */
 .input-icon-btn {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border: none;
-  border-radius: 50%;
+  border-radius: 0;
   background: none;
   color: #8e8e93;
   cursor: pointer;
@@ -710,20 +710,20 @@ a.comment-avatar:active {
   opacity: 0.5;
 }
 .input-icon-btn svg {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
 }
 
-/* Text input field — Max-style */
+/* Text input field — Max-style rectangle with rounded corners */
 .input-field-wrap {
   flex: 1;
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: center;
   background: #fff;
-  border-radius: 22px;
+  border-radius: 10px;
   padding: 0;
-  min-height: 40px;
+  min-height: 38px;
   overflow: hidden;
 }
 .input-field-wrap .edit-banner {
@@ -734,9 +734,9 @@ a.comment-avatar:active {
   flex: 1;
   border: none;
   background: transparent;
-  padding: 10px 0 10px 14px;
+  padding: 9px 0 9px 12px;
   font-family: 'Figtree', sans-serif;
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--text);
   resize: none;
   outline: none;
@@ -748,25 +748,25 @@ a.comment-avatar:active {
   color: #b0b0b0;
 }
 
-/* Icon buttons inside input (emoji) */
+/* Emoji button inside input field */
 .input-emoji-btn {
   width: 34px;
   height: 34px;
   border: none;
-  border-radius: 50%;
+  border-radius: 0;
   background: none;
-  color: #b0b0b0;
+  color: #8e8e93;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   padding: 0;
-  margin-bottom: 3px;
+  margin-right: 2px;
 }
 .input-emoji-btn svg {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
 }
 
 .input-side-btn {
@@ -871,14 +871,14 @@ a.comment-avatar:active {
 <div class="input-area">
   <div class="input-wrap">
     <button class="input-icon-btn" type="button" aria-label="Прикрепить">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
       </svg>
     </button>
     <div class="input-field-wrap">
       <textarea id="messageInput" rows="1" placeholder="Комментарий" maxlength="2000"></textarea>
       <button class="input-emoji-btn" type="button" aria-label="Эмодзи">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/>
           <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
           <line x1="9" y1="9" x2="9.01" y2="9"/>
@@ -887,17 +887,16 @@ a.comment-avatar:active {
       </button>
     </div>
     <button class="input-icon-btn input-side-btn" id="cameraBtnSide" type="button" aria-label="Камера">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
-        <circle cx="12" cy="13" r="4"/>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"/>
+        <circle cx="12" cy="12" r="3.5"/>
       </svg>
     </button>
     <button class="input-icon-btn input-side-btn" id="micBtnSide" type="button" aria-label="Микрофон">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
-        <path d="M19 10v2a7 7 0 01-14 0v-2"/>
-        <line x1="12" y1="19" x2="12" y2="23"/>
-        <line x1="8" y1="23" x2="16" y2="23"/>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="2" width="6" height="12" rx="3"/>
+        <path d="M19 10v1a7 7 0 01-14 0v-1"/>
+        <line x1="12" y1="18" x2="12" y2="22"/>
       </svg>
     </button>
     <button class="send-btn" id="sendBtn" disabled>
