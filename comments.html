@@ -1385,8 +1385,31 @@ a.comment-avatar:active {
   window.addEventListener('scroll', updateScrollDownBtn, { passive: true });
   window.addEventListener('resize', updateScrollDownBtn, { passive: true });
 
+  // Если нет привязки к посту — показываем рекламу
+  if (postId === 'default') {
+    commentsArea.innerHTML = '<div style="padding:20px 16px;text-align:center;">' +
+      '<div style="background:#fff;border-radius:16px;padding:24px 20px;box-shadow:0 2px 12px rgba(0,0,0,0.08);">' +
+        '<div style="font-size:1.3rem;font-weight:700;color:#2c3e50;margin-bottom:8px;">MIL.LE Digital</div>' +
+        '<div style="font-size:0.8rem;color:#7f8c8d;margin-bottom:16px;">Агентство комплексного Digital-присутствия</div>' +
+        '<div style="text-align:left;font-size:0.85rem;color:#34495e;line-height:1.6;">' +
+          '<div style="margin-bottom:10px;">Что мы делаем в Max:</div>' +
+          '<div style="margin-bottom:6px;">📈 Продвигаем каналы — подписчики, охваты, вовлечённость</div>' +
+          '<div style="margin-bottom:6px;">🤖 Создаём чат-ботов и мини-приложения</div>' +
+          '<div style="margin-bottom:6px;">🎯 Ведём трафик на каналы в Max</div>' +
+          '<div style="margin-bottom:6px;">💼 Приводим клиентов через Max</div>' +
+        '</div>' +
+        '<a href="https://milledigital.ru/mini-app.html" onclick="if(window.WebApp&&window.WebApp.openLink){event.preventDefault();window.WebApp.openLink(\'https://milledigital.ru/mini-app.html\');}" ' +
+          'style="display:inline-block;margin-top:16px;padding:12px 24px;background:var(--brand);color:#fff;border-radius:12px;text-decoration:none;font-weight:600;font-size:0.9rem;">' +
+          'Подробнее о нас' +
+        '</a>' +
+      '</div>' +
+    '</div>';
+    // Скрываем поле ввода комментария
+    document.querySelector('.input-area').style.display = 'none';
+  }
+
   // Listen for comments in real-time
-  if (db) {
+  if (db && postId !== 'default') {
     const ref = db.ref('comments/' + postId).orderByChild('timestamp');
     let commentsLoaded = false;
 
