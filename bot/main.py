@@ -323,8 +323,11 @@ def handle_bot_started(update):
     scheduler.save_user_chat(user_id, chat_id)
     reset_user(user_id)
 
-    # Отправляем приветствие с рекламой
-    api.send_message(
+    # Отправляем приветствие с рекламой и кнопкой на мини-приложение
+    buttons = [
+        [{"type": "link", "text": "MIL.LE Digital — наши услуги", "url": "https://milledigital.ru/mini-app.html"}]
+    ]
+    api.send_message_with_keyboard(
         chat_id,
         "Привет! Это бот от MIL.LE Digital — агентства комплексного Digital-присутствия.\n\n"
         "Что мы делаем:\n"
@@ -332,8 +335,8 @@ def handle_bot_started(update):
         "- Создаём чат-ботов и мини-приложения\n"
         "- Ведём трафик на каналы в Max\n"
         "- Приводим клиентов через Max\n\n"
-        "Хотите так же? Напишите нам — разберём вашу ситуацию и честно скажем, что имеет смысл, а что нет.\n\n"
-        "Подробнее о нас: /about",
+        "Хотите так же? Напишите нам — разберём вашу ситуацию и честно скажем, что имеет смысл, а что нет.",
+        buttons,
     )
 
 
