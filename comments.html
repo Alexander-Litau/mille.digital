@@ -1217,10 +1217,6 @@ a.comment-avatar:active {
   const postCardMedia = document.getElementById('postCardMedia');
   const postCardFooter = document.getElementById('postCardFooter');
 
-  // Admin: channel owner can delete any comment
-  var ADMIN_IDS = ['381209292606'];
-  var isAdmin = ADMIN_IDS.indexOf(currentUser.id) !== -1;
-
   // Load post data from Firebase
   if (postId !== 'default' && db) {
     function renderPostFromFirebase(postData) {
@@ -1368,6 +1364,10 @@ a.comment-avatar:active {
     }
     currentUser.id = anonId;
   }
+
+  // Admin: channel owner can delete any comment
+  var ADMIN_IDS = ['381209292606'];
+  var isAdmin = ADMIN_IDS.indexOf(currentUser.id) !== -1;
 
   // DOM elements
   const commentsArea = document.getElementById('commentsArea');
