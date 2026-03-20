@@ -1,11 +1,82 @@
 import requests
 import time
 import random
+import html as html_module
 from config import API_BASE, BOT_TOKEN, COMMENTS_APP_URL, COMMENTS_DEEPLINK, FIREBASE_DB_URL
 
 
 def _headers():
     return {"Authorization": BOT_TOKEN, "Content-Type": "application/json"}
+
+
+def markup_to_html(text, markup):
+    """Конвертировать текст + markup массив в HTML-текст.
+
+    markup — список вида:
+      [{'from': 0, 'length': 6, 'type': 'strong'},
+       {'from': 7, 'length': 6, 'type': 'emphasized'},
+       {'from': 10, 'length': 5, 'type': 'link', 'url': '...'}]
+
+    Возвращает HTML-строку с тегами.
+    """
+    if not markup:
+        return text
+
+    # Маппинг типов разметки на HTML-теги
+    tag_map = {
+        "strong": ("b", None),
+        "emphasized": ("i", None),
+        "strikethrough": ("s", None),
+        "underline": ("u", None),
+        "monospace": ("code", None),
+        "code": ("code", None),
+        "link": ("a", "url"),       # <a href="...">
+        "mention": ("a", "url"),
+    }
+
+    # Собираем события открытия/закрытия тегов
+    events = []  # (позиция, приоритет, 'open'/'close', tag, attr)
+    for m in markup:
+        mtype = m.get("type", "")
+        start = m.get("from", 0)
+        length = m.get("length", 0)
+        end = start + length
+
+        if mtype not in tag_map:
+            continue
+
+        tag, url_key = tag_map[mtype]
+        url = m.get(url_key) if url_key else None
+
+        # open: сортируем по позиции, потом open перед close при той же позиции
+        events.append((start, 0, "open", tag, url))
+        events.append((end, 1, "close", tag, None))
+
+    # Сортируем: по позиции, потом close перед open при одной позиции
+    events.sort(key=lambda e: (e[0], e[1]))
+
+    # Строим результат
+    result = []
+    pos = 0
+    for ev_pos, _, ev_type, tag, url in events:
+        # Добавляем текст до этой позиции (экранируем HTML)
+        if ev_pos > pos:
+            result.append(html_module.escape(text[pos:ev_pos]))
+            pos = ev_pos
+
+        if ev_type == "open":
+            if tag == "a" and url:
+                result.append(f'<a href="{html_module.escape(url)}">')
+            else:
+                result.append(f"<{tag}>")
+        else:
+            result.append(f"</{tag}>")
+
+    # Остаток текста
+    if pos < len(text):
+        result.append(html_module.escape(text[pos:]))
+
+    return "".join(result)
 
 
 def get_updates(marker=None, timeout=30):
@@ -28,9 +99,11 @@ def get_updates(marker=None, timeout=30):
 def send_message(chat_id, text, attachments=None, markup=None):
     """Отправить сообщение в чат/канал."""
     params = {"chat_id": chat_id}
-    body = {"text": text}
     if markup:
-        body["markup"] = markup
+        # Конвертируем markup в HTML и отправляем с format: html
+        body = {"text": markup_to_html(text, markup), "format": "html"}
+    else:
+        body = {"text": text}
     if attachments:
         body["attachments"] = attachments
     print(f"[send_message] chat_id={chat_id} body={body}")
