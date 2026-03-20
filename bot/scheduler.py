@@ -1,12 +1,16 @@
 import sqlite3
 import json
-from datetime import datetime
-from zoneinfo import ZoneInfo
+from datetime import datetime, timedelta, timezone
 from apscheduler.schedulers.background import BackgroundScheduler
 from config import DB_PATH, TIMEZONE
 import api
 
-TZ = ZoneInfo(TIMEZONE)
+try:
+    from zoneinfo import ZoneInfo
+    TZ = ZoneInfo(TIMEZONE)
+except ImportError:
+    # Python < 3.9 fallback: Irkutsk = UTC+8
+    TZ = timezone(timedelta(hours=8))
 
 
 def init_db():
@@ -99,6 +103,13 @@ def get_pending_posts():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     now = datetime.now(TZ).replace(tzinfo=None).isoformat()
+
+    # Логируем все ожидающие посты
+    c.execute("SELECT id, publish_at FROM scheduled_posts WHERE published = 0")
+    waiting = c.fetchall()
+    if waiting:
+        print(f"[scheduler] now={now}, ожидают: {[(r[0], r[1]) for r in waiting]}")
+
     c.execute(
         "SELECT id, chat_id, text, text_format FROM scheduled_posts WHERE published = 0 AND publish_at <= ?",
         (now,),

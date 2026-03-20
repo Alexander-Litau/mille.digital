@@ -39,6 +39,11 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   position: relative;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+body.ready {
+  opacity: 1;
 }
 
 body::after {
@@ -1751,6 +1756,7 @@ a.comment-avatar:active {
         '</a>' +
       '</div>' +
     '</div>';
+    document.body.classList.add('ready');
   }
 
   // Listen for comments in real-time
@@ -1761,6 +1767,7 @@ a.comment-avatar:active {
     ref.on('value', function(snapshot) {
       const data = snapshot.val();
       commentsLoaded = true;
+      document.body.classList.add('ready');
 
       if (!data) {
         commentsArea.innerHTML = '<div class="no-comments-pill"><span>Комментариев пока нет...</span></div>';
@@ -2190,6 +2197,9 @@ a.comment-avatar:active {
     if (window.WebApp) window.WebApp.expand();
     if (window.Telegram?.WebApp) window.Telegram.WebApp.expand();
   } catch(e) {}
+
+  // Fallback: show page after 3s even if Firebase is slow
+  setTimeout(function() { document.body.classList.add('ready'); }, 3000);
 
   // Global function to open links inside Max
   window.openMaxUrl = function(url) {
