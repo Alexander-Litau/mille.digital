@@ -334,16 +334,32 @@ def handle_bot_started(update):
     buttons = [
         [{"type": "link", "text": "MIL.LE Digital — наши услуги", "url": "https://milledigital.ru/mini-app.html"}]
     ]
-    api.send_message_with_keyboard(
-        chat_id,
+
+    welcome_text = (
         "Привет! Это бот от MIL.LE Digital — агентства комплексного Digital-присутствия.\n\n"
         "Что мы делаем:\n"
         "- Продвигаем каналы в Max\n"
         "- Создаём чат-ботов и мини-приложения\n"
         "- Ведём трафик на каналы в Max\n"
         "- Приводим клиентов через Max\n\n"
-        "Хотите так же? Напишите нам — разберём вашу ситуацию и честно скажем, что имеет смысл, а что нет.",
+        "А ещё мы подключаем к каналам комментарии — как у основателя нашего агентства Александра Литау.\n\n"
+        "Хотите так же? Напишите нам — разберём вашу ситуацию и честно скажем, что имеет смысл, а что нет."
+    )
+
+    # Делаем "Александра Литау" кликабельной ссылкой на канал
+    link_text = "Александра Литау"
+    link_start = welcome_text.index(link_text)
+    welcome_format = {
+        "markup": [
+            {"type": "link", "from": link_start, "length": len(link_text), "url": "https://max.ru/u/f9LHodD0cOJjpA8IcT8R5DX13-0VsNHW-4ulnpIjGedGegtriCUrdGrIveo"}
+        ]
+    }
+
+    api.send_message_with_keyboard(
+        chat_id,
+        welcome_text,
         buttons,
+        text_format=welcome_format,
     )
 
 
