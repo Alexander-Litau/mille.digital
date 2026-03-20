@@ -350,7 +350,7 @@ def handle_bot_started(update):
     link_text = "Александра Литау"
     link_start = welcome_text.index(link_text)
     welcome_markup = [
-        {"type": "link", "from": link_start, "length": len(link_text), "url": "https://max.ru/u/f9LHodD0cOJjpA8IcT8R5DX13-0VsNHW-4ulnpIjGedGegtriCUrdGrIveo"}
+        {"type": "link", "from": link_start, "length": len(link_text), "url": "https://max.ru/id381209292606_biz"}
     ]
 
     api.send_message_with_keyboard(
