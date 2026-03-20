@@ -757,6 +757,82 @@ a.comment-avatar:active {
   height: 20px;
 }
 
+/* Reactions */
+.comment-reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+.comment.is-own .comment-reactions {
+  justify-content: flex-end;
+}
+.reaction-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.06);
+  border: 1.5px solid transparent;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  -webkit-user-select: none;
+  user-select: none;
+  line-height: 1.5;
+}
+.reaction-pill:active {
+  transform: scale(0.93);
+}
+.reaction-pill.is-mine {
+  background: rgba(58,140,222,0.12);
+  border-color: rgba(58,140,222,0.4);
+}
+.reaction-pill .reaction-emoji {
+  font-size: 1rem;
+}
+.reaction-pill .reaction-count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #666;
+  min-width: 8px;
+  text-align: center;
+}
+.reaction-pill.is-mine .reaction-count {
+  color: #3a8cde;
+}
+
+/* Emoji picker bar (shown above context menu) */
+.emoji-bar {
+  position: fixed;
+  z-index: 1001;
+  display: flex;
+  gap: 2px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 6px 8px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  animation: popMenu 0.18s ease;
+}
+.emoji-bar-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.1s, transform 0.1s;
+}
+.emoji-bar-btn:active {
+  background: rgba(0,0,0,0.08);
+  transform: scale(1.15);
+}
+
 /* Empty state (unused, kept for fallback) */
 
 /* Loading */
@@ -1730,7 +1806,7 @@ a.comment-avatar:active {
     }
 
     commentsArea.addEventListener('touchstart', function(e) {
-      if (e.target.closest('a, img, video, button')) return;
+      if (e.target.closest('a, img, video, button, .reaction-pill')) return;
 
       var comment = e.target.closest('.comment');
       if (!comment || comment.querySelector('.comment-edit-wrap')) return;
@@ -1795,7 +1871,7 @@ a.comment-avatar:active {
 
     // Desktop: click on reply quote — scroll to original
     commentsArea.addEventListener('click', function(e) {
-      if (e.target.closest('a, img, video, button, .comment-edit-wrap')) return;
+      if (e.target.closest('a, img, video, button, .reaction-pill, .comment-edit-wrap')) return;
       var replyQuote = e.target.closest('.comment-reply-quote');
       if (replyQuote) {
         scrollToComment(replyQuote.getAttribute('data-reply-key'));
@@ -1852,18 +1928,53 @@ a.comment-avatar:active {
       menu.className = 'context-menu';
       menu.innerHTML = menuItems;
 
+      // Emoji bar
+      var REACTION_EMOJIS = ['\u2764\uFE0F', '\uD83D\uDC4D', '\uD83D\uDE02', '\uD83E\uDD2F', '\uD83D\uDE22', '\uD83D\uDD25', '\uD83C\uDF89'];
+      var emojiBar = document.createElement('div');
+      emojiBar.className = 'emoji-bar';
+      REACTION_EMOJIS.forEach(function(em) {
+        var btn = document.createElement('button');
+        btn.className = 'emoji-bar-btn';
+        btn.textContent = em;
+        btn.addEventListener('click', function() {
+          toggleReaction(key, em);
+          closeContextMenu();
+        });
+        emojiBar.appendChild(btn);
+      });
+
       document.body.appendChild(overlay);
+      document.body.appendChild(emojiBar);
       document.body.appendChild(menu);
 
-      // Position menu
+      // Position menu + emoji bar
       var mw = menu.offsetWidth;
       var mh = menu.offsetHeight;
-      var x = Math.min(clientX, window.innerWidth - mw - 12);
-      var y = clientY - mh - 8;
-      if (y < 8) y = clientY + 8;
-      x = Math.max(12, x);
-      menu.style.left = x + 'px';
-      menu.style.top = y + 'px';
+      var ew = emojiBar.offsetWidth;
+      var eh = emojiBar.offsetHeight;
+
+      // Center emoji bar horizontally
+      var ex = Math.min(Math.max(12, clientX - ew / 2), window.innerWidth - ew - 12);
+
+      // Try to place above touch point: emoji bar, then menu below it
+      var totalH = eh + 6 + mh;
+      var ey, my;
+      if (clientY - totalH - 8 > 8) {
+        // Enough space above
+        ey = clientY - totalH - 8;
+        my = ey + eh + 6;
+      } else {
+        // Place below touch point
+        ey = clientY + 8;
+        my = ey + eh + 6;
+      }
+
+      emojiBar.style.left = ex + 'px';
+      emojiBar.style.top = ey + 'px';
+
+      var mx = Math.min(Math.max(12, clientX - mw / 2), window.innerWidth - mw - 12);
+      menu.style.left = mx + 'px';
+      menu.style.top = my + 'px';
 
       // Handle actions
       menu.addEventListener('click', function(e) {
@@ -1897,8 +2008,10 @@ a.comment-avatar:active {
     function closeContextMenu() {
       var overlay = document.querySelector('.context-menu-overlay');
       var menu = document.querySelector('.context-menu');
+      var emojiBar = document.querySelector('.emoji-bar');
       if (overlay) overlay.remove();
       if (menu) menu.remove();
+      if (emojiBar) emojiBar.remove();
       clearHold();
     }
   }
@@ -1948,6 +2061,29 @@ a.comment-avatar:active {
       '</div>';
     }
 
+    // Reactions
+    var reactionsHtml = '';
+    if (c.reactions) {
+      var pills = [];
+      Object.keys(c.reactions).forEach(function(emoji) {
+        var users = c.reactions[emoji];
+        if (!users || typeof users !== 'object') return;
+        var userIds = Object.keys(users);
+        var count = userIds.length;
+        if (count === 0) return;
+        var isMine = userIds.indexOf(currentUser.id) !== -1;
+        pills.push(
+          '<span class="reaction-pill' + (isMine ? ' is-mine' : '') + '" onclick="toggleReaction(\'' + escapeHtml(c.key) + '\',\'' + emoji + '\')">' +
+            '<span class="reaction-emoji">' + emoji + '</span>' +
+            '<span class="reaction-count">' + count + '</span>' +
+          '</span>'
+        );
+      });
+      if (pills.length) {
+        reactionsHtml = '<div class="comment-reactions">' + pills.join('') + '</div>';
+      }
+    }
+
     return '<div class="comment' + (isOwn ? ' is-own' : '') + '" data-key="' + escapeHtml(c.key) + '" data-text="' + text + '">' +
       avatarHtml +
       '<div class="comment-bubble">' +
@@ -1958,6 +2094,7 @@ a.comment-avatar:active {
           (text ? '<div class="comment-text">' + text + '</div>' : '') +
           '<span class="comment-time">' + time + editedMark + '</span>' +
         '</div>' +
+        reactionsHtml +
       '</div>' +
     '</div>';
   }
@@ -2007,6 +2144,20 @@ a.comment-avatar:active {
     banner.style.display = 'block';
     setTimeout(function() { banner.style.display = 'none'; }, 5000);
   }
+
+  // Toggle emoji reaction on a comment
+  function toggleReaction(commentKey, emoji) {
+    if (!db || !currentUser.id) return;
+    var ref = db.ref('comments/' + postId + '/' + commentKey + '/reactions/' + emoji + '/' + currentUser.id);
+    ref.once('value', function(snap) {
+      if (snap.exists()) {
+        ref.remove();
+      } else {
+        ref.set(true);
+      }
+    });
+  }
+  window.toggleReaction = toggleReaction;
 
   function showDeleteConfirm(onConfirm) {
     var overlay = document.createElement('div');
