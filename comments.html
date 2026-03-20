@@ -1217,10 +1217,18 @@ a.comment-avatar:active {
   const postCardMedia = document.getElementById('postCardMedia');
   const postCardFooter = document.getElementById('postCardFooter');
 
+  // Admin: channel owner can delete any comment
+  var ADMIN_IDS = ['381209292606'];
+  var isAdmin = ADMIN_IDS.indexOf(currentUser.id) !== -1;
+
   // Load post data from Firebase
   if (postId !== 'default' && db) {
     function renderPostFromFirebase(postData) {
       if (!postData) return;
+      // Check if current user is the channel owner
+      if (postData.owner_id && String(postData.owner_id) === currentUser.id) {
+        isAdmin = true;
+      }
       if (postData.text) {
         postCardText.textContent = postData.text;
       }
@@ -1831,7 +1839,10 @@ a.comment-avatar:active {
         menuItems +=
           '<button class="context-menu-item" data-action="edit">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
-            'Изменить</button>' +
+            'Изменить</button>';
+      }
+      if (isOwn || isAdmin) {
+        menuItems +=
           '<button class="context-menu-item danger" data-action="delete">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>' +
             'Удалить</button>';
