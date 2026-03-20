@@ -294,7 +294,7 @@ def show_hour_picker(chat_id, date_str):
     buttons = []
     row = []
     for h in range(24):
-        if is_today and h <= current_hour:
+        if is_today and h < current_hour:
             continue
         row.append({"type": "callback", "text": f"{h:02d}:00", "payload": f"hour_{h}"})
         if len(row) == 4:
