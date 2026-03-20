@@ -1602,7 +1602,7 @@ a.comment-avatar:active {
       }
     });
 
-    // Long-press context menu for own comments + tap animation + reply
+    // Long-press context menu + tap animation
     var holdTimer = null;
     var holdComment = null;
     var holdFired = false;
@@ -1618,7 +1618,6 @@ a.comment-avatar:active {
     }
 
     commentsArea.addEventListener('touchstart', function(e) {
-      // Ignore taps on links, avatars, images
       if (e.target.closest('a, img, video, button')) return;
 
       var comment = e.target.closest('.comment');
@@ -1632,46 +1631,27 @@ a.comment-avatar:active {
       }
 
       holdFired = false;
-
-      // Long-press only for own comments
-      if (comment.classList.contains('is-own')) {
-        holdComment = comment;
-        holdTimer = setTimeout(function() {
-          holdFired = true;
-          var sel = window.getSelection();
-          if (sel) sel.removeAllRanges();
-          if (bubble) bubble.classList.add('hold-highlight');
-          showContextMenu(comment, e.touches[0]);
-        }, 500);
-      }
+      holdComment = comment;
+      holdTimer = setTimeout(function() {
+        holdFired = true;
+        var sel = window.getSelection();
+        if (sel) sel.removeAllRanges();
+        if (bubble) bubble.classList.add('hold-highlight');
+        showContextMenu(comment, e.touches[0]);
+      }, 500);
     }, { passive: true });
 
     commentsArea.addEventListener('touchend', function(e) {
-      // Release tap animation
       if (tapBubble) {
         tapBubble.classList.remove('tap-press');
         tapBubble = null;
       }
 
-      // If long-press fired or moved — don't trigger reply
-      if (!holdFired) {
-        if (e.target.closest('a, img, video, button, .comment-edit-wrap')) {
-          // ignore
-        } else {
-          // Tap on reply quote — scroll to original
-          var replyQuote = e.target.closest('.comment-reply-quote');
-          if (replyQuote) {
-            scrollToComment(replyQuote.getAttribute('data-reply-key'));
-          } else {
-            var comment = e.target.closest('.comment');
-            if (comment) {
-              var key = comment.getAttribute('data-key');
-              var text = comment.getAttribute('data-text');
-              var nameEl = comment.querySelector('.comment-name');
-              var replyName = comment.classList.contains('is-own') ? currentUser.name : (nameEl ? nameEl.textContent : 'Аноним');
-              startReplyMode(key, replyName, text);
-            }
-          }
+      // Short tap on reply quote — scroll to original
+      if (!holdFired && !e.target.closest('a, img, video, button, .comment-edit-wrap')) {
+        var replyQuote = e.target.closest('.comment-reply-quote');
+        if (replyQuote) {
+          scrollToComment(replyQuote.getAttribute('data-reply-key'));
         }
       }
 
@@ -1693,32 +1673,21 @@ a.comment-avatar:active {
       clearHold();
     });
 
-    // Desktop: right-click on own comment
+    // Desktop: right-click on any comment
     commentsArea.addEventListener('contextmenu', function(e) {
-      var comment = e.target.closest('.comment.is-own');
+      var comment = e.target.closest('.comment');
       if (!comment || comment.querySelector('.comment-edit-wrap')) return;
       e.preventDefault();
       showContextMenu(comment, e);
     });
 
-    // Desktop: click to reply
+    // Desktop: click on reply quote — scroll to original
     commentsArea.addEventListener('click', function(e) {
       if (e.target.closest('a, img, video, button, .comment-edit-wrap')) return;
-
-      // Click on reply quote — scroll to original comment
       var replyQuote = e.target.closest('.comment-reply-quote');
       if (replyQuote) {
         scrollToComment(replyQuote.getAttribute('data-reply-key'));
-        return;
       }
-
-      var comment = e.target.closest('.comment');
-      if (!comment) return;
-      var key = comment.getAttribute('data-key');
-      var text = comment.getAttribute('data-text');
-      var nameEl = comment.querySelector('.comment-name');
-      var replyName = comment.classList.contains('is-own') ? currentUser.name : (nameEl ? nameEl.textContent : 'Аноним');
-      startReplyMode(key, replyName, text);
     });
 
     function scrollToComment(key) {
@@ -1737,6 +1706,9 @@ a.comment-avatar:active {
       closeContextMenu();
       var key = comment.getAttribute('data-key');
       var text = comment.getAttribute('data-text');
+      var isOwn = comment.classList.contains('is-own');
+      var nameEl = comment.querySelector('.comment-name');
+      var replyName = isOwn ? currentUser.name : (nameEl ? nameEl.textContent : 'Аноним');
       var clientX = pos.clientX || pos.pageX;
       var clientY = pos.clientY || pos.pageY;
 
@@ -1745,16 +1717,25 @@ a.comment-avatar:active {
       overlay.className = 'context-menu-overlay';
       overlay.addEventListener('click', closeContextMenu);
 
-      // Menu
+      // Menu items
+      var menuItems =
+        '<button class="context-menu-item" data-action="reply">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg>' +
+          'Ответить</button>';
+
+      if (isOwn) {
+        menuItems +=
+          '<button class="context-menu-item" data-action="edit">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
+            'Изменить</button>' +
+          '<button class="context-menu-item danger" data-action="delete">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>' +
+            'Удалить</button>';
+      }
+
       var menu = document.createElement('div');
       menu.className = 'context-menu';
-      menu.innerHTML =
-        '<button class="context-menu-item" data-action="edit">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
-          'Изменить</button>' +
-        '<button class="context-menu-item danger" data-action="delete">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>' +
-          'Удалить</button>';
+      menu.innerHTML = menuItems;
 
       document.body.appendChild(overlay);
       document.body.appendChild(menu);
@@ -1775,6 +1756,10 @@ a.comment-avatar:active {
         if (!item) return;
         var action = item.getAttribute('data-action');
         closeContextMenu();
+
+        if (action === 'reply') {
+          startReplyMode(key, replyName, text);
+        }
 
         if (action === 'delete') {
           if (confirm('Удалить комментарий?')) {
