@@ -968,6 +968,60 @@ a.comment-avatar:active {
   background: rgba(255,255,255,0.3);
 }
 
+/* Delete confirmation dialog */
+.confirm-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 3000;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeOverlay 0.15s ease;
+}
+.confirm-dialog {
+  background: #fff;
+  border-radius: 16px;
+  width: min(280px, 85vw);
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+  animation: popMenu 0.2s ease;
+  text-align: center;
+}
+.confirm-dialog-body {
+  padding: 20px 20px 16px;
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.4;
+}
+.confirm-dialog-actions {
+  display: flex;
+  border-top: 1px solid rgba(0,0,0,0.08);
+}
+.confirm-dialog-btn {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  background: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.confirm-dialog-btn:active {
+  background: rgba(0,0,0,0.05);
+}
+.confirm-dialog-btn + .confirm-dialog-btn {
+  border-left: 1px solid rgba(0,0,0,0.08);
+}
+.confirm-dialog-btn.cancel {
+  color: #007AFF;
+  font-weight: 500;
+}
+.confirm-dialog-btn.danger {
+  color: #e05555;
+  font-weight: 600;
+}
+
 /* Send button */
 .send-btn {
   width: 36px;
@@ -1317,6 +1371,11 @@ a.comment-avatar:active {
 
   // Back button
   document.getElementById('backBtn').addEventListener('click', function() {
+    // If lightbox is open, close it instead of the app
+    if (lightboxOpen) {
+      closeLightbox();
+      return;
+    }
     try {
       if (window.WebApp) window.WebApp.close();
       if (window.Telegram?.WebApp) window.Telegram.WebApp.close();
@@ -1803,14 +1862,12 @@ a.comment-avatar:active {
 
         if (action === 'delete') {
           closeContextMenu();
-          setTimeout(function() {
-            if (confirm('Удалить комментарий?')) {
-              db.ref('comments/' + postId + '/' + key).remove().catch(function(err) {
-                console.error('Delete error:', err);
-                showError('Не удалось удалить комментарий.');
-              });
-            }
-          }, 50);
+          showDeleteConfirm(function() {
+            db.ref('comments/' + postId + '/' + key).remove().catch(function(err) {
+              console.error('Delete error:', err);
+              showError('Не удалось удалить комментарий.');
+            });
+          });
           return;
         }
 
@@ -1940,6 +1997,32 @@ a.comment-avatar:active {
     setTimeout(function() { banner.style.display = 'none'; }, 5000);
   }
 
+  function showDeleteConfirm(onConfirm) {
+    var overlay = document.createElement('div');
+    overlay.className = 'confirm-overlay';
+    overlay.innerHTML =
+      '<div class="confirm-dialog">' +
+        '<div class="confirm-dialog-body">Удалить комментарий?</div>' +
+        '<div class="confirm-dialog-actions">' +
+          '<button class="confirm-dialog-btn cancel">Отмена</button>' +
+          '<button class="confirm-dialog-btn danger">Удалить</button>' +
+        '</div>' +
+      '</div>';
+
+    function close() { overlay.remove(); }
+
+    overlay.querySelector('.cancel').addEventListener('click', close);
+    overlay.querySelector('.danger').addEventListener('click', function() {
+      close();
+      onConfirm();
+    });
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) close();
+    });
+
+    document.body.appendChild(overlay);
+  }
+
   // Expand Max Web App
   try {
     if (window.WebApp) window.WebApp.expand();
@@ -1958,6 +2041,27 @@ a.comment-avatar:active {
   };
 
   // Fullscreen lightbox for images/videos
+  var lightboxOpen = false;
+
+  function closeLightbox() {
+    var overlay = document.querySelector('.lightbox-overlay');
+    if (overlay) overlay.remove();
+    if (lightboxOpen) {
+      lightboxOpen = false;
+      // Go back in history to remove the lightbox state
+      if (history.state && history.state.lightbox) {
+        history.back();
+      }
+    }
+  }
+
+  window.addEventListener('popstate', function(e) {
+    // If lightbox is open and user presses back — close lightbox, not the app
+    if (lightboxOpen) {
+      closeLightbox();
+    }
+  });
+
   document.addEventListener('click', function(e) {
     var img = e.target.closest('.comment-image');
     if (!img) return;
@@ -1987,14 +2091,14 @@ a.comment-avatar:active {
       overlay.appendChild(fullImg);
     }
 
-    function closeLightbox() {
-      overlay.remove();
-    }
-
-    closeBtn.addEventListener('click', closeLightbox);
+    closeBtn.addEventListener('click', function() { closeLightbox(); });
     overlay.addEventListener('click', function(ev) {
       if (ev.target === overlay) closeLightbox();
     });
+
+    // Push history state so back button closes lightbox, not the app
+    history.pushState({ lightbox: true }, '');
+    lightboxOpen = true;
 
     document.body.appendChild(overlay);
   });
