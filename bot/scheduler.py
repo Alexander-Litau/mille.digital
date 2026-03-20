@@ -1,4 +1,5 @@
 import sqlite3
+import json
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from config import DB_PATH
@@ -19,6 +20,12 @@ def init_db():
             created_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    # Миграция: добавить колонку text_format если её нет
+    try:
+        c.execute("ALTER TABLE scheduled_posts ADD COLUMN text_format TEXT")
+    except sqlite3.OperationalError:
+        pass  # Колонка уже существует
+
     c.execute("""
         CREATE TABLE IF NOT EXISTS saved_chats (
             user_id TEXT NOT NULL,
@@ -69,13 +76,14 @@ def get_user_chat_id(user_id):
     return row[0] if row else None
 
 
-def add_scheduled_post(chat_id, text, publish_at):
+def add_scheduled_post(chat_id, text, publish_at, text_format=None):
     """Добавить отложенный пост. publish_at — datetime объект."""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
+    format_json = json.dumps(text_format) if text_format else None
     c.execute(
-        "INSERT INTO scheduled_posts (chat_id, text, publish_at) VALUES (?, ?, ?)",
-        (chat_id, text, publish_at.isoformat()),
+        "INSERT INTO scheduled_posts (chat_id, text, publish_at, text_format) VALUES (?, ?, ?, ?)",
+        (chat_id, text, publish_at.isoformat(), format_json),
     )
     post_db_id = c.lastrowid
     conn.commit()
@@ -89,7 +97,7 @@ def get_pending_posts():
     c = conn.cursor()
     now = datetime.now().isoformat()
     c.execute(
-        "SELECT id, chat_id, text FROM scheduled_posts WHERE published = 0 AND publish_at <= ?",
+        "SELECT id, chat_id, text, text_format FROM scheduled_posts WHERE published = 0 AND publish_at <= ?",
         (now,),
     )
     rows = c.fetchall()
@@ -168,9 +176,10 @@ def get_saved_chats(user_id):
 def publish_pending():
     """Проверить и опубликовать все ожидающие посты."""
     posts = get_pending_posts()
-    for post_db_id, chat_id, text in posts:
+    for post_db_id, chat_id, text, format_json in posts:
         try:
-            result, post_id, message_id = api.send_post_with_comments(chat_id, text)
+            text_format = json.loads(format_json) if format_json else None
+            result, post_id, message_id = api.send_post_with_comments(chat_id, text, text_format)
             mark_published(post_db_id)
             if message_id:
                 save_published_post(post_id, message_id, chat_id)

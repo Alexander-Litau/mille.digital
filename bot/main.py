@@ -37,6 +37,7 @@ def handle_message(update):
     msg = update.get("message", {})
     body = msg.get("body", {})
     text = body.get("text", "").strip()
+    text_format = body.get("format")  # Форматирование (жирный, курсив и т.д.)
     sender = msg.get("sender", {})
     user_id = str(sender.get("user_id", ""))
     chat_id = msg.get("recipient", {}).get("chat_id")
@@ -145,6 +146,7 @@ def handle_message(update):
     # Ожидание текста поста
     if state == "waiting_text":
         u["draft_text"] = text
+        u["draft_format"] = text_format
         u["state"] = "waiting_when"
 
         buttons = [
@@ -192,6 +194,7 @@ def handle_message(update):
     # Если пользователь просто написал текст без команды — предложить создать пост
     if state == "idle":
         u["draft_text"] = text
+        u["draft_format"] = text_format
         u["state"] = "waiting_when"
         buttons = [
             [
@@ -272,6 +275,7 @@ def publish_or_schedule(user_id, bot_chat_id, target_chat_id):
     """Опубликовать пост сейчас или запланировать."""
     u = get_user(user_id)
     draft_text = u.get("draft_text", "")
+    draft_format = u.get("draft_format")
     draft_time = u.get("draft_time")
 
     if not draft_text:
@@ -280,8 +284,8 @@ def publish_or_schedule(user_id, bot_chat_id, target_chat_id):
         return
 
     if draft_time:
-        # Запланировать
-        post_db_id = scheduler.add_scheduled_post(target_chat_id, draft_text, draft_time)
+        # Запланировать (сохраняем формат в JSON)
+        post_db_id = scheduler.add_scheduled_post(target_chat_id, draft_text, draft_time, draft_format)
         time_str = draft_time.strftime("%d.%m.%Y в %H:%M")
         api.send_message(
             bot_chat_id,
@@ -291,7 +295,7 @@ def publish_or_schedule(user_id, bot_chat_id, target_chat_id):
     else:
         # Опубликовать сейчас
         try:
-            result, post_id, message_id = api.send_post_with_comments(target_chat_id, draft_text)
+            result, post_id, message_id = api.send_post_with_comments(target_chat_id, draft_text, draft_format)
             if message_id:
                 scheduler.save_published_post(post_id, message_id, target_chat_id)
             api.send_message(

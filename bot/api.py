@@ -25,10 +25,12 @@ def get_updates(marker=None, timeout=30):
         return {}
 
 
-def send_message(chat_id, text, attachments=None):
+def send_message(chat_id, text, attachments=None, text_format=None):
     """Отправить сообщение в чат/канал."""
     params = {"chat_id": chat_id}
     body = {"text": text}
+    if text_format:
+        body["format"] = text_format
     if attachments:
         body["attachments"] = attachments
     print(f"[send_message] chat_id={chat_id} body={body}")
@@ -39,10 +41,10 @@ def send_message(chat_id, text, attachments=None):
     return r.json()
 
 
-def send_message_with_keyboard(chat_id, text, buttons):
+def send_message_with_keyboard(chat_id, text, buttons, text_format=None):
     """Отправить сообщение с inline-клавиатурой."""
     attachments = [{"type": "inline_keyboard", "payload": {"buttons": buttons}}]
-    return send_message(chat_id, text, attachments=attachments)
+    return send_message(chat_id, text, attachments=attachments, text_format=text_format)
 
 
 def get_chat_info(chat_id):
@@ -121,7 +123,7 @@ def update_post_stats_firebase(post_id, message_id):
             print(f"[firebase] ошибка обновления статистики: {e}")
 
 
-def send_post_with_comments(chat_id, post_text):
+def send_post_with_comments(chat_id, post_text, text_format=None):
     """Опубликовать пост с кнопкой 'Прокомментировать'."""
     post_id = f"post_{int(time.time())}_{random.randint(1000, 9999)}"
 
@@ -129,7 +131,7 @@ def send_post_with_comments(chat_id, post_text):
         [{"type": "link", "text": "Прокомментировать", "url": f"{COMMENTS_DEEPLINK}?startapp={post_id}"}]
     ]
 
-    result = send_message_with_keyboard(chat_id, post_text, buttons)
+    result = send_message_with_keyboard(chat_id, post_text, buttons, text_format=text_format)
 
     # Извлекаем message_id из ответа API
     message_id = None
