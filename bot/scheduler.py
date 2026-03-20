@@ -76,11 +76,11 @@ def get_user_chat_id(user_id):
     return row[0] if row else None
 
 
-def add_scheduled_post(chat_id, text, publish_at, text_format=None):
+def add_scheduled_post(chat_id, text, publish_at, markup=None):
     """Добавить отложенный пост. publish_at — datetime объект."""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    format_json = json.dumps(text_format) if text_format else None
+    format_json = json.dumps(markup) if markup else None
     c.execute(
         "INSERT INTO scheduled_posts (chat_id, text, publish_at, text_format) VALUES (?, ?, ?, ?)",
         (chat_id, text, publish_at.isoformat(), format_json),
@@ -178,8 +178,8 @@ def publish_pending():
     posts = get_pending_posts()
     for post_db_id, chat_id, text, format_json in posts:
         try:
-            text_format = json.loads(format_json) if format_json else None
-            result, post_id, message_id = api.send_post_with_comments(chat_id, text, text_format)
+            markup = json.loads(format_json) if format_json else None
+            result, post_id, message_id = api.send_post_with_comments(chat_id, text, markup)
             mark_published(post_db_id)
             if message_id:
                 save_published_post(post_id, message_id, chat_id)
