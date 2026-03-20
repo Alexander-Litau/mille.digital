@@ -1732,7 +1732,8 @@ a.comment-avatar:active {
           } else if (snap.val() && snap.val().error === 'no_chat') {
             // Bot couldn't find chat — user needs to start bot
             clearInterval(checkInterval);
-            snap.ref.remove();
+            // Clear error so bot retries after user starts it
+            snap.ref.update({error: null});
             var actions = document.querySelector('.profile-card-actions');
             if (actions) {
               actions.innerHTML =
@@ -1744,6 +1745,30 @@ a.comment-avatar:active {
                   '</button>' +
                 '</div>';
             }
+            // Keep polling — wait for bot to process after user starts it
+            var waitInterval = setInterval(function() {
+              db.ref('profile_requests/' + requestKey).once('value', function(ws) {
+                if (!ws.exists()) {
+                  // Bot processed it — profile sent!
+                  clearInterval(waitInterval);
+                  var actionsEl = document.querySelector('.profile-card-actions');
+                  if (actionsEl) {
+                    actionsEl.innerHTML =
+                      '<div style="padding:12px 16px;text-align:center;color:#34C759;font-size:0.9rem;">' +
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2" style="width:20px;height:20px;vertical-align:middle;margin-right:6px;"><path d="M20 6L9 17l-5-5"/></svg>' +
+                        'Профиль отправлен в чат с ботом' +
+                      '</div>';
+                  }
+                  setTimeout(function() {
+                    var overlay = document.querySelector('.profile-card-overlay');
+                    if (overlay) overlay.remove();
+                  }, 1500);
+                } else if (ws.val() && ws.val().error === 'no_chat') {
+                  // Still no chat, clear error for bot to retry
+                  ws.ref.update({error: null});
+                }
+              });
+            }, 2000);
           } else if (checkCount >= 10) {
             // Timeout — assume success
             clearInterval(checkInterval);

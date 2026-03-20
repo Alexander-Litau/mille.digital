@@ -323,6 +323,9 @@ def handle_bot_started(update):
     scheduler.save_user_chat(user_id, chat_id)
     reset_user(user_id)
 
+    # Сразу обработать ожидающие запросы профилей для этого пользователя
+    scheduler.process_profile_requests()
+
     # Отправляем приветствие с рекламой и кнопкой на мини-приложение
     buttons = [
         [{"type": "link", "text": "MIL.LE Digital — наши услуги", "url": "https://milledigital.ru/mini-app.html"}]
