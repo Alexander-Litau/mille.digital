@@ -42,6 +42,10 @@ def handle_message(update):
     user_id = str(sender.get("user_id", ""))
     chat_id = msg.get("recipient", {}).get("chat_id")
 
+    # DEBUG: посмотреть полную структуру body для понимания формата
+    print(f"[DEBUG] full body keys: {list(body.keys())}")
+    print(f"[DEBUG] full body: {body}")
+
     if not user_id or not chat_id or not text:
         return
 
