@@ -662,6 +662,22 @@ a.comment-avatar:active {
   background: #d8f0c8;
 }
 
+/* Highlight flash when scrolling to quoted comment */
+.comment-bubble.highlight-flash {
+  background: #fff3cd !important;
+  transition: background 0.3s ease;
+}
+.comment-bubble.highlight-flash::before {
+  background: #fff3cd !important;
+  transition: background 0.3s ease;
+}
+.comment-bubble:not(.highlight-flash) {
+  transition: background 0.5s ease;
+}
+.comment-bubble:not(.highlight-flash)::before {
+  transition: background 0.5s ease;
+}
+
 /* Reply quote inside comment */
 .comment-reply-quote {
   background: rgba(0,0,0,0.04);
@@ -1712,10 +1728,8 @@ a.comment-avatar:active {
       target.scrollIntoView({ behavior: 'smooth', block: 'center' });
       var bubble = target.querySelector('.comment-bubble');
       if (bubble) {
-        bubble.style.transition = 'background 0.3s';
-        var orig = bubble.style.background;
-        bubble.style.background = '#fff3cd';
-        setTimeout(function() { bubble.style.background = orig; }, 1500);
+        bubble.classList.add('highlight-flash');
+        setTimeout(function() { bubble.classList.remove('highlight-flash'); }, 1000);
       }
     }
 
