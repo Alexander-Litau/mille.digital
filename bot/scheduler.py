@@ -1,9 +1,12 @@
 import sqlite3
 import json
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from apscheduler.schedulers.background import BackgroundScheduler
-from config import DB_PATH
+from config import DB_PATH, TIMEZONE
 import api
+
+TZ = ZoneInfo(TIMEZONE)
 
 
 def init_db():
@@ -95,7 +98,7 @@ def get_pending_posts():
     """Получить все неопубликованные посты, время которых наступило."""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    now = datetime.now().isoformat()
+    now = datetime.now(TZ).replace(tzinfo=None).isoformat()
     c.execute(
         "SELECT id, chat_id, text, text_format FROM scheduled_posts WHERE published = 0 AND publish_at <= ?",
         (now,),

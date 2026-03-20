@@ -12,8 +12,12 @@
 
 import re
 from datetime import datetime
+from zoneinfo import ZoneInfo
+from config import TIMEZONE
 import api
 import scheduler
+
+TZ = ZoneInfo(TIMEZONE)
 
 # ─── Состояния пользователей ───
 # user_id -> {state, draft_text, draft_time, ...}
@@ -160,26 +164,6 @@ def handle_message(update):
         )
         return
 
-    # Ожидание даты/времени
-    if state == "waiting_schedule_time":
-        dt = parse_datetime(text)
-        if not dt:
-            api.send_message(
-                chat_id,
-                "Не могу разобрать дату. Отправьте в формате:\n"
-                "ДД.ММ.ГГГГ ЧЧ:ММ\nНапример: 25.03.2026 14:30",
-            )
-            return
-
-        if dt <= datetime.now():
-            api.send_message(chat_id, "Дата должна быть в будущем. Попробуйте ещё раз:")
-            return
-
-        u["draft_time"] = dt
-        u["state"] = "waiting_where"
-        ask_where(user_id, chat_id)
-        return
-
     # Ожидание куда постить
     if state == "waiting_where":
         try:
@@ -233,17 +217,135 @@ def handle_callback(update):
         ask_where(user_id, chat_id)
 
     elif payload == "when_schedule" and u.get("state") == "waiting_when":
-        u["state"] = "waiting_schedule_time"
-        api.send_message(
-            chat_id,
-            "Когда опубликовать? Отправьте дату и время:\n"
-            "Формат: ДД.ММ.ГГГГ ЧЧ:ММ\n"
-            "Например: 25.03.2026 14:30",
+        u["state"] = "waiting_schedule_day"
+        show_day_picker(chat_id)
+
+    elif payload.startswith("day_") and u.get("state") == "waiting_schedule_day":
+        # payload: day_2026-03-25
+        u["draft_date"] = payload.replace("day_", "")
+        u["state"] = "waiting_schedule_hour"
+        show_hour_picker(chat_id, u["draft_date"])
+
+    elif payload.startswith("hour_") and u.get("state") == "waiting_schedule_hour":
+        # payload: hour_14
+        u["draft_hour"] = int(payload.replace("hour_", ""))
+        u["state"] = "waiting_schedule_minute"
+        show_minute_picker(chat_id, u["draft_date"], u["draft_hour"])
+
+    elif payload.startswith("min_") and u.get("state") == "waiting_schedule_minute":
+        # payload: min_30
+        minute = int(payload.replace("min_", ""))
+        dt = datetime.strptime(u["draft_date"], "%Y-%m-%d").replace(
+            hour=u["draft_hour"], minute=minute
         )
+        now = datetime.now(TZ).replace(tzinfo=None)
+        if dt <= now:
+            api.send_message(chat_id, "Это время уже прошло. Выберите другое.")
+            u["state"] = "waiting_schedule_day"
+            show_day_picker(chat_id)
+        else:
+            u["draft_time"] = dt
+            u["state"] = "waiting_where"
+            ask_where(user_id, chat_id)
 
     elif payload.startswith("chat_") and u.get("state") == "waiting_where":
         target_chat_id = int(payload.replace("chat_", ""))
         publish_or_schedule(user_id, chat_id, target_chat_id)
+
+
+def show_day_picker(chat_id):
+    """Показать кнопки выбора дня."""
+    from datetime import timedelta
+    now = datetime.now(TZ).replace(tzinfo=None)
+    today = now.date()
+
+    day_names = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+    month_names = [
+        "", "янв", "фев", "мар", "апр", "мая", "июн",
+        "июл", "авг", "сен", "окт", "ноя", "дек"
+    ]
+
+    buttons = []
+    row = []
+    for i in range(7):
+        d = today + timedelta(days=i)
+        if i == 0:
+            label = "Сегодня"
+        elif i == 1:
+            label = "Завтра"
+        else:
+            wd = day_names[d.weekday()]
+            label = f"{wd}, {d.day} {month_names[d.month]}"
+        row.append({"type": "callback", "text": label, "payload": f"day_{d.isoformat()}"})
+        if len(row) == 2 or i == 6:
+            buttons.append(row)
+            row = []
+
+    api.send_message_with_keyboard(chat_id, "Выберите день:", buttons)
+
+
+def show_hour_picker(chat_id, date_str):
+    """Показать кнопки выбора часа."""
+    now = datetime.now(TZ).replace(tzinfo=None)
+    selected_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    is_today = selected_date == now.date()
+    current_hour = now.hour if is_today else -1
+
+    buttons = []
+    row = []
+    for h in range(24):
+        if is_today and h <= current_hour:
+            continue
+        row.append({"type": "callback", "text": f"{h:02d}:00", "payload": f"hour_{h}"})
+        if len(row) == 4:
+            buttons.append(row)
+            row = []
+    if row:
+        buttons.append(row)
+
+    if not buttons:
+        api.send_message(chat_id, "На сегодня уже нет доступных часов. Выберите другой день.")
+        show_day_picker(chat_id)
+        return
+
+    month_names = [
+        "", "янв", "фев", "мар", "апр", "мая", "июн",
+        "июл", "авг", "сен", "окт", "ноя", "дек"
+    ]
+    label = f"{selected_date.day} {month_names[selected_date.month]}"
+    api.send_message_with_keyboard(chat_id, f"{label} — выберите час:", buttons)
+
+
+def show_minute_picker(chat_id, date_str, hour):
+    """Показать кнопки выбора минут."""
+    now = datetime.now(TZ).replace(tzinfo=None)
+    selected_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    is_now_hour = selected_date == now.date() and hour == now.hour
+
+    minutes = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
+    buttons = []
+    row = []
+    for m in minutes:
+        if is_now_hour and m <= now.minute:
+            continue
+        row.append({"type": "callback", "text": f"{hour:02d}:{m:02d}", "payload": f"min_{m}"})
+        if len(row) == 4:
+            buttons.append(row)
+            row = []
+    if row:
+        buttons.append(row)
+
+    if not buttons:
+        api.send_message(chat_id, "На этот час уже нет доступных минут. Выберите другой час.")
+        show_hour_picker(chat_id, date_str)
+        return
+
+    month_names = [
+        "", "янв", "фев", "мар", "апр", "мая", "июн",
+        "июл", "авг", "сен", "окт", "ноя", "дек"
+    ]
+    label = f"{selected_date.day} {month_names[selected_date.month]}"
+    api.send_message_with_keyboard(chat_id, f"{label}, {hour:02d}:?? — выберите минуты:", buttons)
 
 
 def ask_where(user_id, chat_id):

@@ -16,5 +16,8 @@ COMMENTS_DEEPLINK = f"https://max.ru/{BOT_USERNAME}"
 # Firebase Realtime Database URL (из comments.html)
 FIREBASE_DB_URL = "https://mille-digital-comments-default-rtdb.asia-southeast1.firebasedatabase.app"
 
+# Часовой пояс для отложенного постинга (Иркутск, UTC+8)
+TIMEZONE = "Asia/Irkutsk"
+
 # Файл базы данных SQLite
 DB_PATH = os.path.join(os.path.dirname(__file__), "bot_data.db")
