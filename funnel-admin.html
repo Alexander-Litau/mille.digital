@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mil.le digital — Воронка: Аналитика</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --brand: #ff9e02;
+  --brand-light: #ffc55c;
+  --brand-soft: rgba(255,158,2,0.07);
+  --brand-glow: rgba(255,158,2,0.2);
+  --sage: #1E3A5F;
+  --sage-light: #D8E2EE;
+  --sage-bg: #EDF1F7;
+  --bg: #FAFAF6;
+  --bg-warm: #F5EDE0;
+  --text: #2C2C28;
+  --text-muted: #8A8A80;
+  --glass: rgba(255,255,255,0.55);
+  --glass-border: rgba(255,255,255,0.65);
+  --green: #34C759;
+  --red: #e05555;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ─── Auth Screen ─── */
+.auth-screen {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh; padding: 20px;
+}
+.auth-box {
+  background: white; border-radius: 16px; padding: 40px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08); max-width: 400px; width: 100%;
+  text-align: center;
+}
+.auth-box h1 { color: var(--sage); font-size: 1.5rem; margin-bottom: 8px; }
+.auth-box p { color: var(--text-muted); margin-bottom: 24px; font-size: 0.9rem; }
+.auth-box input {
+  width: 100%; padding: 12px 16px; border: 2px solid var(--sage-light);
+  border-radius: 10px; font-size: 1rem; outline: none; transition: border 0.2s;
+}
+.auth-box input:focus { border-color: var(--brand); }
+.auth-box button {
+  width: 100%; padding: 12px; margin-top: 12px; border: none; border-radius: 10px;
+  background: var(--sage); color: white; font-size: 1rem; font-weight: 600;
+  cursor: pointer; transition: background 0.2s;
+}
+.auth-box button:hover { background: #2a4f7a; }
+.auth-error { color: var(--red); font-size: 0.85rem; margin-top: 8px; display: none; }
+
+/* ─── Main Layout ─── */
+.app { display: none; }
+.header {
+  background: var(--sage); color: white; padding: 16px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.header h1 { font-size: 1.2rem; font-weight: 600; }
+.header span { color: var(--brand); }
+.header .logout {
+  background: none; border: 1px solid rgba(255,255,255,0.3); color: white;
+  padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem;
+}
+.tabs {
+  display: flex; background: white; border-bottom: 1px solid var(--sage-light);
+  padding: 0 24px; overflow-x: auto;
+}
+.tab {
+  padding: 14px 20px; cursor: pointer; font-size: 0.9rem; font-weight: 500;
+  color: var(--text-muted); border-bottom: 3px solid transparent;
+  white-space: nowrap; transition: all 0.2s;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--sage); border-bottom-color: var(--brand); }
+.content { padding: 24px; max-width: 1200px; margin: 0 auto; }
+.section { display: none; }
+.section.active { display: block; }
+
+/* ─── Metric Cards ─── */
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.metric-card {
+  background: white; border-radius: 12px; padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.metric-card .label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.metric-card .value { font-size: 2rem; font-weight: 700; color: var(--sage); margin: 4px 0; }
+.metric-card .sub { font-size: 0.85rem; color: var(--text-muted); }
+
+/* ─── Funnel Chart ─── */
+.funnel-bars { margin-bottom: 24px; }
+.funnel-bar-row {
+  display: flex; align-items: center; margin-bottom: 8px; gap: 12px;
+}
+.funnel-bar-label { width: 140px; font-size: 0.85rem; color: var(--text); text-align: right; flex-shrink: 0; }
+.funnel-bar-track { flex: 1; height: 32px; background: var(--sage-bg); border-radius: 6px; overflow: hidden; position: relative; }
+.funnel-bar-fill { height: 100%; border-radius: 6px; transition: width 0.6s ease; display: flex; align-items: center; padding-left: 10px; }
+.funnel-bar-fill.doc { background: var(--brand); }
+.funnel-bar-fill.text { background: var(--sage); }
+.funnel-bar-fill.survey { background: #2AABEE; }
+.funnel-bar-fill.action { background: var(--green); }
+.funnel-bar-value { font-size: 0.8rem; font-weight: 600; color: white; white-space: nowrap; }
+.funnel-bar-pct { width: 60px; font-size: 0.85rem; color: var(--text-muted); text-align: right; flex-shrink: 0; }
+
+/* ─── Charts ─── */
+.chart-container { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 24px; }
+.chart-container h3 { color: var(--sage); margin-bottom: 16px; font-size: 1rem; }
+.chart-wrap { height: 250px; }
+
+/* ─── Funnel Map ─── */
+.funnel-map { display: flex; flex-direction: column; gap: 0; align-items: center; }
+.funnel-node {
+  background: white; border-radius: 12px; padding: 16px 20px; width: 100%; max-width: 500px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+  display: flex; align-items: center; gap: 14px; position: relative;
+}
+.funnel-node:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+.funnel-node .icon {
+  width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center;
+  justify-content: center; font-size: 1.2rem; flex-shrink: 0;
+}
+.funnel-node .icon.pdf { background: var(--brand-soft); color: var(--brand); }
+.funnel-node .icon.msg { background: var(--sage-bg); color: var(--sage); }
+.funnel-node .icon.poll { background: rgba(42,171,238,0.1); color: #2AABEE; }
+.funnel-node .icon.sale { background: rgba(52,199,89,0.1); color: var(--green); }
+.funnel-node .info { flex: 1; }
+.funnel-node .info .name { font-weight: 600; color: var(--sage); font-size: 0.95rem; }
+.funnel-node .info .desc { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+.funnel-node .stats { text-align: right; flex-shrink: 0; }
+.funnel-node .stats .count { font-size: 1.3rem; font-weight: 700; color: var(--sage); }
+.funnel-node .stats .pct { font-size: 0.8rem; color: var(--text-muted); }
+.funnel-arrow {
+  width: 2px; height: 24px; background: var(--sage-light); position: relative;
+}
+.funnel-arrow::after {
+  content: ''; position: absolute; bottom: -4px; left: -4px;
+  border-left: 5px solid transparent; border-right: 5px solid transparent;
+  border-top: 6px solid var(--sage-light);
+}
+
+/* ─── Users Table ─── */
+.table-controls { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.table-controls input, .table-controls select {
+  padding: 8px 14px; border: 2px solid var(--sage-light); border-radius: 8px;
+  font-size: 0.9rem; outline: none; background: white;
+}
+.table-controls input:focus, .table-controls select:focus { border-color: var(--brand); }
+.data-table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.data-table th {
+  background: var(--sage); color: white; padding: 12px 16px; text-align: left;
+  font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.data-table td { padding: 12px 16px; border-bottom: 1px solid var(--sage-bg); font-size: 0.9rem; }
+.data-table tr:hover td { background: var(--brand-soft); }
+.data-table tr { cursor: pointer; }
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600;
+}
+.badge.doc { background: var(--brand-soft); color: #c77800; }
+.badge.text { background: var(--sage-bg); color: var(--sage); }
+.badge.survey { background: rgba(42,171,238,0.1); color: #1a8ac4; }
+.badge.complete { background: rgba(52,199,89,0.1); color: #2a9d4a; }
+.badge.audit { background: rgba(255,158,2,0.15); color: #c77800; }
+
+/* ─── User Detail Modal ─── */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); display: none; align-items: center;
+  justify-content: center; z-index: 1000; padding: 20px;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: white; border-radius: 16px; padding: 28px; max-width: 600px;
+  width: 100%; max-height: 80vh; overflow-y: auto; position: relative;
+}
+.modal-close {
+  position: absolute; top: 12px; right: 16px; background: none; border: none;
+  font-size: 1.5rem; cursor: pointer; color: var(--text-muted);
+}
+.modal h2 { color: var(--sage); margin-bottom: 4px; }
+.modal .niche-label { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; }
+.timeline { position: relative; padding-left: 24px; }
+.timeline::before {
+  content: ''; position: absolute; left: 8px; top: 4px; bottom: 4px;
+  width: 2px; background: var(--sage-light);
+}
+.timeline-item { position: relative; margin-bottom: 16px; }
+.timeline-item::before {
+  content: ''; position: absolute; left: -20px; top: 4px;
+  width: 12px; height: 12px; border-radius: 50%; background: var(--sage-light);
+}
+.timeline-item.done::before { background: var(--green); }
+.timeline-item.current::before { background: var(--brand); box-shadow: 0 0 0 4px var(--brand-glow); }
+.timeline-item .step-name { font-weight: 600; font-size: 0.9rem; }
+.timeline-item .step-time { font-size: 0.8rem; color: var(--text-muted); }
+.timeline-item .step-gap { font-size: 0.75rem; color: var(--brand); margin-top: 2px; }
+
+/* ─── Audit Requests ─── */
+.audit-new { background: var(--brand-soft) !important; }
+.audit-new td { font-weight: 600; }
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .metrics { grid-template-columns: repeat(2, 1fr); }
+  .funnel-bar-label { width: 100px; font-size: 0.75rem; }
+  .table-controls { flex-direction: column; }
+  .content { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Auth Screen -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-box">
+    <h1>mil.le <span style="color:var(--brand)">digital</span></h1>
+    <p>Аналитика воронки</p>
+    <input type="password" id="authPassword" placeholder="Пароль" autocomplete="off">
+    <button onclick="tryAuth()">Войти</button>
+    <div class="auth-error" id="authError">Неверный пароль</div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div class="app" id="app">
+  <div class="header">
+    <h1>mil.le <span>digital</span> — Воронка</h1>
+    <button class="logout" onclick="logout()">Выйти</button>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="dashboard">Дашборд</div>
+    <div class="tab" data-tab="funnel-map">Карта воронки</div>
+    <div class="tab" data-tab="users">Пользователи</div>
+    <div class="tab" data-tab="audits">Заявки на аудит</div>
+  </div>
+
+  <div class="content">
+    <!-- Dashboard -->
+    <div class="section active" id="sec-dashboard">
+      <div class="metrics" id="metricsGrid"></div>
+      <div class="chart-container">
+        <h3>Воронка конверсии</h3>
+        <div class="funnel-bars" id="funnelBars"></div>
+      </div>
+      <div class="chart-container">
+        <h3>Новые пользователи по дням</h3>
+        <div class="chart-wrap"><canvas id="dailyChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Funnel Map -->
+    <div class="section" id="sec-funnel-map">
+      <div class="funnel-map" id="funnelMap"></div>
+    </div>
+
+    <!-- Users -->
+    <div class="section" id="sec-users">
+      <div class="table-controls">
+        <input type="text" id="userSearch" placeholder="Поиск по имени...">
+        <select id="stepFilter"><option value="">Все шаги</option></select>
+        <select id="nicheFilter"><option value="">Все ниши</option></select>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr><th>Имя</th><th>Ниша</th><th>Текущий шаг</th><th>Дата входа</th><th>Опрос</th><th>Аудит</th></tr>
+        </thead>
+        <tbody id="usersTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Audits -->
+    <div class="section" id="sec-audits">
+      <table class="data-table">
+        <thead>
+          <tr><th>Имя</th><th>Ниша</th><th>Дата заявки</th></tr>
+        </thead>
+        <tbody id="auditsTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- User Detail Modal -->
+<div class="modal-overlay" id="userModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <h2 id="modalName"></h2>
+    <div class="niche-label" id="modalNiche"></div>
+    <div class="timeline" id="modalTimeline"></div>
+  </div>
+</div>
+
+<script>
+// ─── Firebase Config ───
+const FIREBASE_URL = 'https://mille-digital-comments-default-rtdb.asia-southeast1.firebasedatabase.app';
+
+// ─── Step metadata ───
+const STEPS = [
+  { key: 'welcome', name: 'Приветствие', icon: '👋', type: 'msg', desc: 'Знакомство, спрашиваем имя' },
+  { key: 'ask_niche', name: 'Ниша', icon: '💼', type: 'msg', desc: 'Спрашиваем сферу бизнеса' },
+  { key: 'doc1', name: 'Документ 1', icon: '📄', type: 'pdf', desc: 'Обзор рынка MAX + 5 ошибок' },
+  { key: 'expert_insight', name: 'Экспертный инсайт', icon: '💡', type: 'msg', desc: 'Воронки в MAX vs контент' },
+  { key: 'survey', name: 'Опрос', icon: '📊', type: 'poll', desc: 'Что актуальнее для бизнеса' },
+  { key: 'doc2', name: 'Документ 2', icon: '📄', type: 'pdf', desc: 'Пошаговый план из 14 шагов' },
+  { key: 'mini_case', name: 'Мини-кейс', icon: '📈', type: 'msg', desc: 'Разбор своей воронки' },
+  { key: 'tip', name: 'Совет дня', icon: '✨', type: 'msg', desc: 'Полезный совет для канала' },
+  { key: 'doc3', name: 'Документ 3', icon: '📄', type: 'pdf', desc: 'Контент-стратегия на 30 дней' },
+  { key: 'offer', name: 'Оффер', icon: '🎯', type: 'sale', desc: 'Предложение бесплатного аудита' },
+  { key: 'followup', name: 'Дожим', icon: '🔔', type: 'sale', desc: 'Мягкое напоминание' },
+];
+
+const SURVEY_LABELS = {
+  'launch_from_scratch': 'Запуск с нуля',
+  'more_leads': 'Больше заявок',
+  'bots_automation': 'Боты и автоматизация',
+};
+
+let allUsers = {};
+let allAudits = {};
+let dailyChart = null;
+
+// ─── Auth ───
+function tryAuth() {
+  const pwd = document.getElementById('authPassword').value;
+  if (!pwd) return;
+  // Simple hash check — stored in Firebase
+  fetch(`${FIREBASE_URL}/funnel/admin/password.json`)
+    .then(r => r.json())
+    .then(stored => {
+      if (stored && pwd === stored) {
+        localStorage.setItem('funnel_auth', pwd);
+        showApp();
+      } else if (!stored) {
+        // No password set yet — save this one as the admin password
+        fetch(`${FIREBASE_URL}/funnel/admin/password.json`, {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(pwd),
+        }).then(() => {
+          localStorage.setItem('funnel_auth', pwd);
+          showApp();
+        });
+      } else {
+        document.getElementById('authError').style.display = 'block';
+      }
+    })
+    .catch(() => {
+      document.getElementById('authError').style.display = 'block';
+    });
+}
+
+function checkAuth() {
+  const saved = localStorage.getItem('funnel_auth');
+  if (saved) {
+    fetch(`${FIREBASE_URL}/funnel/admin/password.json`)
+      .then(r => r.json())
+      .then(stored => {
+        if (stored && saved === stored) showApp();
+      });
+  }
+}
+
+function logout() {
+  localStorage.removeItem('funnel_auth');
+  location.reload();
+}
+
+function showApp() {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  loadData();
+  // Auto-refresh every 30s
+  setInterval(loadData, 30000);
+}
+
+// ─── Data Loading ───
+function loadData() {
+  Promise.all([
+    fetch(`${FIREBASE_URL}/funnel/users.json`).then(r => r.json()),
+    fetch(`${FIREBASE_URL}/funnel/audit_requests.json`).then(r => r.json()),
+  ]).then(([users, audits]) => {
+    allUsers = users || {};
+    allAudits = audits || {};
+    renderDashboard();
+    renderFunnelMap();
+    renderUsersTable();
+    renderAuditsTable();
+    populateFilters();
+  });
+}
+
+// ─── Dashboard ───
+function renderDashboard() {
+  const usersList = Object.values(allUsers);
+  const total = usersList.length;
+  const active = usersList.filter(u => u.state === 'funnel_active').length;
+  const complete = usersList.filter(u => u.state === 'funnel_complete').length;
+  const auditCount = Object.keys(allAudits).length;
+  const convRate = total > 0 ? ((auditCount / total) * 100).toFixed(1) : '0';
+
+  document.getElementById('metricsGrid').innerHTML = `
+    <div class="metric-card">
+      <div class="label">Всего пользователей</div>
+      <div class="value">${total}</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">На воронке сейчас</div>
+      <div class="value">${active}</div>
+      <div class="sub">Завершили: ${complete}</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Заявок на аудит</div>
+      <div class="value" style="color:var(--brand)">${auditCount}</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Конверсия</div>
+      <div class="value">${convRate}%</div>
+      <div class="sub">старт → аудит</div>
+    </div>
+  `;
+
+  // Funnel bars
+  const stepCounts = {};
+  STEPS.forEach(s => { stepCounts[s.key] = 0; });
+  usersList.forEach(u => {
+    if (!u.steps) return;
+    STEPS.forEach(s => {
+      if (u.steps[s.key] && u.steps[s.key].sent_at) stepCounts[s.key]++;
+    });
+  });
+
+  const maxCount = Math.max(...Object.values(stepCounts), 1);
+  let barsHTML = '';
+  STEPS.forEach(s => {
+    const count = stepCounts[s.key];
+    const pct = total > 0 ? ((count / total) * 100).toFixed(0) : 0;
+    const width = maxCount > 0 ? ((count / maxCount) * 100) : 0;
+    const typeClass = s.type === 'pdf' ? 'doc' : s.type === 'poll' ? 'survey' : s.type === 'sale' ? 'action' : 'text';
+    barsHTML += `
+      <div class="funnel-bar-row">
+        <div class="funnel-bar-label">${s.name}</div>
+        <div class="funnel-bar-track">
+          <div class="funnel-bar-fill ${typeClass}" style="width:${width}%">
+            <span class="funnel-bar-value">${count}</span>
+          </div>
+        </div>
+        <div class="funnel-bar-pct">${pct}%</div>
+      </div>
+    `;
+  });
+  document.getElementById('funnelBars').innerHTML = barsHTML;
+
+  // Daily chart
+  renderDailyChart(usersList);
+}
+
+function renderDailyChart(usersList) {
+  const dayCounts = {};
+  usersList.forEach(u => {
+    if (!u.created_at) return;
+    const d = new Date(u.created_at);
+    const key = d.toISOString().split('T')[0];
+    dayCounts[key] = (dayCounts[key] || 0) + 1;
+  });
+
+  const labels = Object.keys(dayCounts).sort();
+  const data = labels.map(l => dayCounts[l]);
+
+  if (dailyChart) dailyChart.destroy();
+  const ctx = document.getElementById('dailyChart').getContext('2d');
+  dailyChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels.map(l => { const d = new Date(l); return `${d.getDate()}.${d.getMonth()+1}`; }),
+      datasets: [{
+        label: 'Новые пользователи',
+        data: data,
+        borderColor: '#ff9e02',
+        backgroundColor: 'rgba(255,158,2,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4,
+        pointBackgroundColor: '#ff9e02',
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { precision: 0 } },
+      },
+    },
+  });
+}
+
+// ─── Funnel Map ───
+function renderFunnelMap() {
+  const usersList = Object.values(allUsers);
+  const total = usersList.length;
+  let html = '';
+
+  STEPS.forEach((s, i) => {
+    let count = 0;
+    usersList.forEach(u => {
+      if (u.steps && u.steps[s.key] && u.steps[s.key].sent_at) count++;
+    });
+    const pct = total > 0 ? ((count / total) * 100).toFixed(0) : 0;
+    const iconClass = s.type === 'pdf' ? 'pdf' : s.type === 'poll' ? 'poll' : s.type === 'sale' ? 'sale' : 'msg';
+
+    html += `
+      <div class="funnel-node" onclick="showStepDetail('${s.key}')">
+        <div class="icon ${iconClass}">${s.icon}</div>
+        <div class="info">
+          <div class="name">${s.name}</div>
+          <div class="desc">${s.desc}</div>
+        </div>
+        <div class="stats">
+          <div class="count">${count}</div>
+          <div class="pct">${pct}%</div>
+        </div>
+      </div>
+    `;
+    if (i < STEPS.length - 1) html += '<div class="funnel-arrow"></div>';
+  });
+
+  document.getElementById('funnelMap').innerHTML = html;
+}
+
+function showStepDetail(stepKey) {
+  // Could open modal with message text — for now just highlight
+  const step = STEPS.find(s => s.key === stepKey);
+  if (step) alert(`${step.name}\n\n${step.desc}`);
+}
+
+// ─── Users Table ───
+function renderUsersTable() {
+  const search = (document.getElementById('userSearch').value || '').toLowerCase();
+  const stepF = document.getElementById('stepFilter').value;
+  const nicheF = document.getElementById('nicheFilter').value;
+
+  let rows = '';
+  const entries = Object.entries(allUsers);
+  entries.sort((a, b) => (b[1].created_at || 0) - (a[1].created_at || 0));
+
+  entries.forEach(([uid, u]) => {
+    const name = u.name || '—';
+    const niche = u.niche || '—';
+    const step = u.current_step || 'welcome';
+    const survey = u.survey_answer ? (SURVEY_LABELS[u.survey_answer] || u.survey_answer) : '—';
+    const audit = u.audit_requested ? 'Да' : '—';
+    const date = u.created_at ? new Date(u.created_at).toLocaleDateString('ru-RU') : '—';
+
+    // Filters
+    if (search && !name.toLowerCase().includes(search)) return;
+    if (stepF && step !== stepF) return;
+    if (nicheF && niche !== nicheF) return;
+
+    const stepMeta = STEPS.find(s => s.key === step);
+    const badgeClass = stepMeta ? (stepMeta.type === 'pdf' ? 'doc' : stepMeta.type === 'sale' ? 'complete' : 'text') : 'text';
+    const stepLabel = stepMeta ? stepMeta.name : step;
+
+    rows += `
+      <tr onclick="showUserDetail('${uid}')">
+        <td><strong>${esc(name)}</strong></td>
+        <td>${esc(niche)}</td>
+        <td><span class="badge ${badgeClass}">${stepLabel}</span></td>
+        <td>${date}</td>
+        <td>${survey}</td>
+        <td>${audit === 'Да' ? '<span class="badge audit">Аудит</span>' : '—'}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById('usersTableBody').innerHTML = rows || '<tr><td colspan="6" style="text-align:center;color:var(--text-muted)">Нет пользователей</td></tr>';
+}
+
+function populateFilters() {
+  const steps = new Set();
+  const niches = new Set();
+  Object.values(allUsers).forEach(u => {
+    if (u.current_step) steps.add(u.current_step);
+    if (u.niche) niches.add(u.niche);
+  });
+
+  const stepSel = document.getElementById('stepFilter');
+  const current = stepSel.value;
+  stepSel.innerHTML = '<option value="">Все шаги</option>';
+  STEPS.forEach(s => {
+    if (steps.has(s.key)) {
+      stepSel.innerHTML += `<option value="${s.key}">${s.name}</option>`;
+    }
+  });
+  stepSel.value = current;
+
+  const nicheSel = document.getElementById('nicheFilter');
+  const currentN = nicheSel.value;
+  nicheSel.innerHTML = '<option value="">Все ниши</option>';
+  [...niches].sort().forEach(n => {
+    nicheSel.innerHTML += `<option value="${esc(n)}">${esc(n)}</option>`;
+  });
+  nicheSel.value = currentN;
+}
+
+function showUserDetail(uid) {
+  const u = allUsers[uid];
+  if (!u) return;
+
+  document.getElementById('modalName').textContent = u.name || 'Пользователь';
+  document.getElementById('modalNiche').textContent = u.niche ? `Ниша: ${u.niche}` : '';
+
+  let html = '';
+  let prevTime = null;
+  STEPS.forEach(s => {
+    const stepData = u.steps && u.steps[s.key];
+    const sentAt = stepData ? stepData.sent_at : null;
+    const isCurrent = u.current_step === s.key;
+    const isDone = !!sentAt;
+
+    let cls = isDone ? 'done' : '';
+    if (isCurrent && u.state !== 'funnel_complete') cls = 'current';
+
+    let timeStr = '—';
+    let gapStr = '';
+    if (sentAt) {
+      const d = new Date(sentAt);
+      timeStr = d.toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+      if (prevTime) {
+        const diff = sentAt - prevTime;
+        gapStr = formatDuration(diff);
+      }
+      prevTime = sentAt;
+    }
+
+    html += `
+      <div class="timeline-item ${cls}">
+        <div class="step-name">${s.icon} ${s.name}</div>
+        <div class="step-time">${timeStr}</div>
+        ${gapStr ? `<div class="step-gap">+${gapStr}</div>` : ''}
+      </div>
+    `;
+  });
+
+  document.getElementById('modalTimeline').innerHTML = html;
+  document.getElementById('userModal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('userModal').classList.remove('show');
+}
+
+// ─── Audits Table ───
+function renderAuditsTable() {
+  const entries = Object.entries(allAudits);
+  entries.sort((a, b) => (b[1].created_at || 0) - (a[1].created_at || 0));
+
+  let rows = '';
+  const now = Date.now();
+  entries.forEach(([id, a]) => {
+    const isNew = a.created_at && (now - a.created_at < 24 * 3600 * 1000);
+    const date = a.created_at ? new Date(a.created_at).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+    rows += `
+      <tr class="${isNew ? 'audit-new' : ''}">
+        <td><strong>${esc(a.name || '—')}</strong></td>
+        <td>${esc(a.niche || '—')}</td>
+        <td>${date}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById('auditsTableBody').innerHTML = rows || '<tr><td colspan="3" style="text-align:center;color:var(--text-muted)">Нет заявок</td></tr>';
+}
+
+// ─── Helpers ───
+function esc(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function formatDuration(ms) {
+  const s = Math.floor(ms / 1000);
+  if (s < 60) return `${s}с`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}мин`;
+  const h = Math.floor(m / 60);
+  const rm = m % 60;
+  if (h < 24) return rm > 0 ? `${h}ч ${rm}мин` : `${h}ч`;
+  const d = Math.floor(h / 24);
+  const rh = h % 24;
+  return rh > 0 ? `${d}д ${rh}ч` : `${d}д`;
+}
+
+// ─── Tabs ───
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('sec-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// ─── Filters ───
+document.getElementById('userSearch').addEventListener('input', renderUsersTable);
+document.getElementById('stepFilter').addEventListener('change', renderUsersTable);
+document.getElementById('nicheFilter').addEventListener('change', renderUsersTable);
+
+// ─── Modal close on overlay click ───
+document.getElementById('userModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// ─── Enter key for auth ───
+document.getElementById('authPassword').addEventListener('keydown', e => {
+  if (e.key === 'Enter') tryAuth();
+});
+
+// ─── Init ───
+checkAuth();
+</script>
+</body>
+</html>
