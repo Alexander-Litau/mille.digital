@@ -1604,7 +1604,7 @@ const platform = tg ? 'telegram' : maxApp ? 'max' : 'web';
 
 // Initialize
 if (tg) { tg.ready(); tg.expand(); }
-if (maxApp) { maxApp.ready(); }
+if (maxApp) { maxApp.ready(); maxApp.expand(); }
 
 // Universal user data
 const appUser = app && app.initDataUnsafe && app.initDataUnsafe.user;
