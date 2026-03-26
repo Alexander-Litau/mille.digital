@@ -1597,8 +1597,10 @@ body {
 
 <script>
 // ═══════════ UNIVERSAL PLATFORM DETECTION (Telegram + MAX) ═══════════
-const tg = window.Telegram && window.Telegram.WebApp;
-const maxApp = !tg && window.WebApp;
+// MAX first: its SDK only defines window.WebApp inside MAX.
+// Telegram SDK always creates window.Telegram.WebApp, even outside Telegram.
+const maxApp = window.WebApp;
+const tg = !maxApp && window.Telegram && window.Telegram.WebApp;
 const app = tg || maxApp;
 const platform = tg ? 'telegram' : maxApp ? 'max' : 'web';
 
