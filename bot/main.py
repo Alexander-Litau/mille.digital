@@ -1,26 +1,18 @@
 #!/usr/bin/env python3
 """
-Бот для постинга в каналы/чаты Макса с автоподключением комментариев.
+Бот для подключения комментариев к постам в каналах Макса.
 
 Сценарий:
-  1. /start — приветствие
-  2. Пользователь пишет текст поста
-  3. Бот спрашивает "Когда?" → Сейчас / Запланировать
-  4. Бот спрашивает "Куда?" → пользователь вводит chat_id или выбирает сохранённый
-  5. Пост публикуется с кнопкой "Комментарии"
+  1. Пользователь публикует пост в канале через интерфейс Max
+  2. Пересылает пост боту
+  3. Бот подключает к посту кнопку комментариев
 """
 
-import re
-from datetime import datetime
-from zoneinfo import ZoneInfo
-from config import TIMEZONE
 import api
 import scheduler
 
-TZ = ZoneInfo(TIMEZONE)
-
 # ─── Состояния пользователей ───
-# user_id -> {state, draft_text, draft_time, ...}
+# user_id -> {state, ...}
 users = {}
 
 
@@ -41,12 +33,13 @@ def handle_message(update):
     msg = update.get("message", {})
     body = msg.get("body", {})
     text = body.get("text", "").strip()
-    markup = body.get("markup")  # Форматирование (жирный, курсив и т.д.)
+    markup = body.get("markup")
+    link = msg.get("link") or body.get("link")
     sender = msg.get("sender", {})
     user_id = str(sender.get("user_id", ""))
     chat_id = msg.get("recipient", {}).get("chat_id")
 
-    if not user_id or not chat_id or not text:
+    if not user_id or not chat_id:
         return
 
     # Сохраняем маппинг user_id → chat_id
@@ -54,22 +47,38 @@ def handle_message(update):
 
     u = get_user(user_id)
 
-    # Команда /start
+    # Логируем пересланные сообщения для отладки
+    if link:
+        print(f"[forward] link={link}")
+        print(f"[forward] full msg keys={list(msg.keys())}")
+        print(f"[forward] body keys={list(body.keys())}")
+
+    # ─── Пересланное сообщение — подключить комментарии ───
+    if link and link.get("type") == "forward":
+        handle_forward(user_id, chat_id, link, text)
+        return
+
+    # Если нет текста, ничего не делаем
+    if not text:
+        return
+
+    # ─── Команды ───
+
     if text == "/start":
         reset_user(user_id)
         api.send_message(
             chat_id,
-            "Привет! Я помогу опубликовать пост с комментариями.\n\n"
-            "Просто напишите мне текст поста, и я помогу его опубликовать.\n\n"
+            "Привет! Я подключаю комментарии к постам в каналах.\n\n"
+            "Как пользоваться:\n"
+            "1. Опубликуйте пост в канале\n"
+            "2. Перешлите его мне\n"
+            "3. Готово — к посту подключатся комментарии!\n\n"
             "Команды:\n"
-            "/post — создать новый пост\n"
-            "/edit — редактировать опубликованный пост\n"
             "/chats — управление каналами\n"
             "/help — помощь",
         )
         return
 
-    # Команда /about
     if text == "/about":
         buttons = [
             [{"type": "link", "text": "Открыть MIL.LE Digital", "url": "https://milledigital.ru/mini-app.html"}]
@@ -87,23 +96,19 @@ def handle_message(update):
         )
         return
 
-    # Команда /help
     if text == "/help":
         api.send_message(
             chat_id,
-            "Как пользоваться:\n\n"
-            "1. Напишите /post\n"
-            "2. Отправьте текст поста\n"
-            "3. Выберите когда опубликовать\n"
-            "4. Укажите куда отправить\n"
-            "5. Готово! К посту автоматически прикрепятся комментарии.\n\n"
-            "/chats — добавить/посмотреть каналы\n"
-            "/post — создать пост\n"
-            "/edit — редактировать опубликованный пост",
+            "Как подключить комментарии к посту:\n\n"
+            "1. Опубликуйте пост в канале через Max\n"
+            "2. Перешлите этот пост мне в личные сообщения\n"
+            "3. Я подключу к нему кнопку комментариев\n\n"
+            "Важно: бот должен быть администратором канала.\n"
+            "Редактировать пост можно прямо в канале — бот не мешает.\n\n"
+            "/chats — добавить/посмотреть каналы",
         )
         return
 
-    # Команда /chats — управление каналами
     if text == "/chats":
         saved = scheduler.get_saved_chats(user_id)
         if saved:
@@ -123,7 +128,6 @@ def handle_message(update):
             )
         return
 
-    # Команда /addchat
     if text.startswith("/addchat"):
         parts = text.split(maxsplit=2)
         if len(parts) < 2:
@@ -139,96 +143,52 @@ def handle_message(update):
         api.send_message(chat_id, f"Канал {target_chat_id} сохранён!")
         return
 
-    # Команда /edit — редактировать опубликованный пост
-    if text == "/edit":
-        posts = scheduler.get_user_published_posts(user_id)
-        if not posts:
-            api.send_message(chat_id, "У вас нет опубликованных постов для редактирования.")
-            return
-
-        buttons = []
-        for post_id, message_id, target_chat_id, post_text in posts:
-            preview = (post_text or "")[:40]
-            if len(post_text or "") > 40:
-                preview += "..."
-            if not preview:
-                preview = f"Пост {post_id}"
-            buttons.append([{"type": "callback", "text": preview, "payload": f"edit_{post_id}"}])
-
-        u["state"] = "editing_select"
-        api.send_message_with_keyboard(chat_id, "Выберите пост для редактирования:", buttons)
-        return
-
-    # Команда /post — начать создание поста
-    if text == "/post":
-        u["state"] = "waiting_text"
-        api.send_message(chat_id, "Отправьте текст поста:")
-        return
-
     # ─── Машина состояний ───
-
     state = u.get("state", "idle")
 
-    # Ожидание нового текста для редактирования
-    if state == "editing_text":
-        edit_post_id = u.get("edit_post_id")
-        edit_message_id = u.get("edit_message_id")
-        if not edit_post_id or not edit_message_id:
-            api.send_message(chat_id, "Ошибка. Попробуйте /edit заново.")
-            reset_user(user_id)
-            return
-        try:
-            api.edit_message_with_keyboard(edit_message_id, text, edit_post_id, markup=markup)
-            scheduler.update_published_post_text(edit_post_id, text)
-            api.send_message(chat_id, "Пост отредактирован!")
-        except Exception as e:
-            api.send_message(chat_id, f"Ошибка при редактировании: {e}")
-        reset_user(user_id)
-        return
-
-    # Ожидание текста поста
-    if state == "waiting_text":
-        u["draft_text"] = text
-        u["draft_markup"] = markup
-        u["state"] = "waiting_when"
-
-        buttons = [
-            [
-                {"type": "callback", "text": "Сейчас", "payload": "when_now"},
-                {"type": "callback", "text": "Запланировать", "payload": "when_schedule"},
-            ]
-        ]
-        api.send_message_with_keyboard(
-            chat_id, "Когда опубликовать?", buttons
-        )
-        return
-
-    # Ожидание куда постить
-    if state == "waiting_where":
-        try:
-            target_chat_id = int(text)
-        except ValueError:
-            api.send_message(chat_id, "Отправьте числовой ID канала/чата:")
-            return
-
-        publish_or_schedule(user_id, chat_id, target_chat_id)
-        return
-
-    # Если пользователь просто написал текст без команды — предложить создать пост
     if state == "idle":
-        u["draft_text"] = text
-        u["draft_markup"] = markup
-        u["state"] = "waiting_when"
-        buttons = [
-            [
-                {"type": "callback", "text": "Сейчас", "payload": "when_now"},
-                {"type": "callback", "text": "Запланировать", "payload": "when_schedule"},
-            ]
-        ]
-        api.send_message_with_keyboard(
-            chat_id, "Отлично! Когда опубликовать этот пост?", buttons
+        api.send_message(
+            chat_id,
+            "Перешлите мне пост из канала, и я подключу к нему комментарии.\n\n"
+            "Или отправьте /help для справки.",
         )
         return
+
+
+def handle_forward(user_id, chat_id, link, text):
+    """Обработать пересланное сообщение — подключить комментарии."""
+    # Извлекаем данные о пересланном сообщении
+    # Структура link может содержать: type, sender, chat_id, message (с mid и body)
+    fwd_message = link.get("message", {})
+    fwd_mid = fwd_message.get("mid")
+    fwd_body = fwd_message.get("body", {})
+    fwd_text = fwd_body.get("text", "") if isinstance(fwd_body, dict) else ""
+    fwd_chat_id = link.get("chat_id")
+
+    # Логируем для отладки
+    print(f"[forward] fwd_mid={fwd_mid} fwd_chat_id={fwd_chat_id} fwd_text={fwd_text[:50] if fwd_text else 'empty'}")
+
+    if not fwd_mid:
+        api.send_message(
+            chat_id,
+            "Не удалось определить ID сообщения.\n"
+            "Убедитесь, что вы пересылаете пост из канала, где бот является администратором.",
+        )
+        return
+
+    # Подключаем комментарии к оригинальному посту
+    try:
+        post_id = api.attach_comments_to_post(fwd_mid, fwd_chat_id, fwd_text or text)
+        scheduler.save_published_post(post_id, fwd_mid, fwd_chat_id or 0, user_id=user_id, post_text=fwd_text or text)
+        api.send_message(chat_id, "Комментарии подключены к посту!")
+    except Exception as e:
+        print(f"[forward] ошибка: {e}")
+        api.send_message(
+            chat_id,
+            f"Ошибка при подключении комментариев: {e}\n"
+            "Убедитесь, что бот добавлен в канал как администратор "
+            "и пост опубликован менее 24 часов назад.",
+        )
 
 
 def handle_callback(update):
@@ -244,231 +204,8 @@ def handle_callback(update):
     if not user_id or not chat_id:
         return
 
-    # Сохраняем маппинг user_id → chat_id
     scheduler.save_user_chat(user_id, chat_id)
-
-    u = get_user(user_id)
     api.answer_callback(callback_id)
-
-    if payload == "when_now" and u.get("state") == "waiting_when":
-        u["draft_time"] = None  # Сейчас
-        u["state"] = "waiting_where"
-        ask_where(user_id, chat_id)
-
-    elif payload == "when_schedule" and u.get("state") == "waiting_when":
-        u["state"] = "waiting_schedule_day"
-        show_day_picker(chat_id)
-
-    elif payload.startswith("day_") and u.get("state") == "waiting_schedule_day":
-        # payload: day_2026-03-25
-        u["draft_date"] = payload.replace("day_", "")
-        u["state"] = "waiting_schedule_hour"
-        show_hour_picker(chat_id, u["draft_date"])
-
-    elif payload.startswith("hour_") and u.get("state") == "waiting_schedule_hour":
-        # payload: hour_14
-        u["draft_hour"] = int(payload.replace("hour_", ""))
-        u["state"] = "waiting_schedule_minute"
-        show_minute_picker(chat_id, u["draft_date"], u["draft_hour"])
-
-    elif payload.startswith("min_") and u.get("state") == "waiting_schedule_minute":
-        # payload: min_30
-        minute = int(payload.replace("min_", ""))
-        dt = datetime.strptime(u["draft_date"], "%Y-%m-%d").replace(
-            hour=u["draft_hour"], minute=minute
-        )
-        now = datetime.now(TZ).replace(tzinfo=None)
-        if dt <= now:
-            api.send_message(chat_id, "Это время уже прошло. Выберите другое.")
-            u["state"] = "waiting_schedule_day"
-            show_day_picker(chat_id)
-        else:
-            u["draft_time"] = dt
-            u["state"] = "waiting_where"
-            ask_where(user_id, chat_id)
-
-    elif payload.startswith("edit_") and u.get("state") == "editing_select":
-        selected_post_id = payload.replace("edit_", "", 1)
-        # Найти message_id для этого поста
-        posts = scheduler.get_user_published_posts(user_id)
-        found = None
-        for post_id, message_id, target_chat_id, post_text in posts:
-            if post_id == selected_post_id:
-                found = (post_id, message_id)
-                break
-        if not found:
-            api.send_message(chat_id, "Пост не найден. Попробуйте /edit заново.")
-            reset_user(user_id)
-            return
-        u["state"] = "editing_text"
-        u["edit_post_id"] = found[0]
-        u["edit_message_id"] = found[1]
-        api.send_message(chat_id, "Отправьте новый текст для этого поста:")
-
-    elif payload.startswith("chat_") and u.get("state") == "waiting_where":
-        target_chat_id = int(payload.replace("chat_", ""))
-        publish_or_schedule(user_id, chat_id, target_chat_id)
-
-
-def show_day_picker(chat_id):
-    """Показать кнопки выбора дня."""
-    from datetime import timedelta
-    now = datetime.now(TZ).replace(tzinfo=None)
-    today = now.date()
-
-    day_names = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
-    month_names = [
-        "", "янв", "фев", "мар", "апр", "мая", "июн",
-        "июл", "авг", "сен", "окт", "ноя", "дек"
-    ]
-
-    buttons = []
-    row = []
-    for i in range(7):
-        d = today + timedelta(days=i)
-        if i == 0:
-            label = "Сегодня"
-        elif i == 1:
-            label = "Завтра"
-        else:
-            wd = day_names[d.weekday()]
-            label = f"{wd}, {d.day} {month_names[d.month]}"
-        row.append({"type": "callback", "text": label, "payload": f"day_{d.isoformat()}"})
-        if len(row) == 2 or i == 6:
-            buttons.append(row)
-            row = []
-
-    api.send_message_with_keyboard(chat_id, "Выберите день:", buttons)
-
-
-def show_hour_picker(chat_id, date_str):
-    """Показать кнопки выбора часа."""
-    now = datetime.now(TZ).replace(tzinfo=None)
-    selected_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-    is_today = selected_date == now.date()
-    current_hour = now.hour if is_today else -1
-
-    buttons = []
-    row = []
-    for h in range(24):
-        if is_today and h < current_hour:
-            continue
-        row.append({"type": "callback", "text": f"{h:02d}:00", "payload": f"hour_{h}"})
-        if len(row) == 4:
-            buttons.append(row)
-            row = []
-    if row:
-        buttons.append(row)
-
-    if not buttons:
-        api.send_message(chat_id, "На сегодня уже нет доступных часов. Выберите другой день.")
-        show_day_picker(chat_id)
-        return
-
-    month_names = [
-        "", "янв", "фев", "мар", "апр", "мая", "июн",
-        "июл", "авг", "сен", "окт", "ноя", "дек"
-    ]
-    label = f"{selected_date.day} {month_names[selected_date.month]}"
-    api.send_message_with_keyboard(chat_id, f"{label} — выберите час:", buttons)
-
-
-def show_minute_picker(chat_id, date_str, hour):
-    """Показать кнопки выбора минут."""
-    now = datetime.now(TZ).replace(tzinfo=None)
-    selected_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-    is_now_hour = selected_date == now.date() and hour == now.hour
-
-    minutes = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
-    buttons = []
-    row = []
-    for m in minutes:
-        if is_now_hour and m <= now.minute:
-            continue
-        row.append({"type": "callback", "text": f"{hour:02d}:{m:02d}", "payload": f"min_{m}"})
-        if len(row) == 4:
-            buttons.append(row)
-            row = []
-    if row:
-        buttons.append(row)
-
-    if not buttons:
-        api.send_message(chat_id, "На этот час уже нет доступных минут. Выберите другой час.")
-        show_hour_picker(chat_id, date_str)
-        return
-
-    month_names = [
-        "", "янв", "фев", "мар", "апр", "мая", "июн",
-        "июл", "авг", "сен", "окт", "ноя", "дек"
-    ]
-    label = f"{selected_date.day} {month_names[selected_date.month]}"
-    api.send_message_with_keyboard(chat_id, f"{label}, {hour:02d}:?? — выберите минуты:", buttons)
-
-
-def ask_where(user_id, chat_id):
-    """Спросить пользователя куда отправить пост."""
-    saved = scheduler.get_saved_chats(user_id)
-
-    if saved:
-        buttons = []
-        for cid, cname in saved:
-            label = cname or str(cid)
-            buttons.append([{"type": "callback", "text": label, "payload": f"chat_{cid}"}])
-
-        api.send_message_with_keyboard(
-            chat_id,
-            "Куда опубликовать? Выберите канал или отправьте ID чата:",
-            buttons,
-        )
-    else:
-        api.send_message(
-            chat_id,
-            "Куда опубликовать?\n\n"
-            "Отправьте ID канала или чата (число).\n"
-            "Бот должен быть добавлен в этот канал/чат как администратор.\n\n"
-            "Совет: сохраните каналы командой /addchat для быстрого доступа.",
-        )
-
-
-def publish_or_schedule(user_id, bot_chat_id, target_chat_id):
-    """Опубликовать пост сейчас или запланировать."""
-    u = get_user(user_id)
-    draft_text = u.get("draft_text", "")
-    draft_markup = u.get("draft_markup")
-    draft_time = u.get("draft_time")
-
-    if not draft_text:
-        api.send_message(bot_chat_id, "Ошибка: текст поста не найден. Начните заново с /post")
-        reset_user(user_id)
-        return
-
-    if draft_time:
-        # Запланировать (сохраняем формат в JSON)
-        post_db_id = scheduler.add_scheduled_post(target_chat_id, draft_text, draft_time, draft_markup)
-        time_str = draft_time.strftime("%d.%m.%Y в %H:%M")
-        api.send_message(
-            bot_chat_id,
-            f"Пост запланирован на {time_str}!\n"
-            f"К нему автоматически подключатся комментарии.",
-        )
-    else:
-        # Опубликовать сейчас
-        try:
-            result, post_id, message_id = api.send_post_with_comments(target_chat_id, draft_text, draft_markup)
-            if message_id:
-                scheduler.save_published_post(post_id, message_id, target_chat_id, user_id=user_id, post_text=draft_text)
-            api.send_message(
-                bot_chat_id,
-                "Пост опубликован! Комментарии подключены автоматически.",
-            )
-        except Exception as e:
-            api.send_message(
-                bot_chat_id,
-                f"Ошибка при публикации: {e}\n"
-                "Убедитесь, что бот добавлен в канал/чат как администратор.",
-            )
-
-    reset_user(user_id)
 
 
 def handle_bot_started(update):
@@ -482,14 +219,13 @@ def handle_bot_started(update):
 
     print(f"[bot_started] user_id={user_id} chat_id={chat_id}")
 
-    # Сохраняем маппинг
     scheduler.save_user_chat(user_id, chat_id)
     reset_user(user_id)
 
-    # Сразу обработать ожидающие запросы профилей для этого пользователя
+    # Обработать ожидающие запросы профилей
     scheduler.process_profile_requests()
 
-    # Отправляем приветствие с рекламой и кнопкой на мини-приложение
+    # Приветствие
     buttons = [
         [{"type": "link", "text": "MIL.LE Digital — наши услуги", "url": "https://milledigital.ru/mini-app.html"}]
     ]
@@ -502,10 +238,9 @@ def handle_bot_started(update):
         "- Ведём трафик на каналы в Max\n"
         "- Приводим клиентов через Max\n\n"
         "А ещё мы подключаем к каналам комментарии — как у основателя нашего агентства Александра Литау.\n\n"
-        "Хотите так же? Напишите нам — разберём вашу ситуацию и честно скажем, что имеет смысл, а что нет."
+        "Чтобы подключить комментарии — просто перешлите мне пост из канала!"
     )
 
-    # Делаем "Александра Литау" кликабельной ссылкой на канал
     link_text = "Александра Литау"
     link_start = welcome_text.index(link_text)
     welcome_markup = [
@@ -518,23 +253,6 @@ def handle_bot_started(update):
         buttons,
         markup=welcome_markup,
     )
-
-
-def parse_datetime(text):
-    """Парсинг даты из текста. Поддерживает ДД.ММ.ГГГГ ЧЧ:ММ и другие форматы."""
-    formats = [
-        "%d.%m.%Y %H:%M",
-        "%d.%m.%Y %H:%M:%S",
-        "%Y-%m-%d %H:%M",
-        "%d/%m/%Y %H:%M",
-        "%d-%m-%Y %H:%M",
-    ]
-    for fmt in formats:
-        try:
-            return datetime.strptime(text.strip(), fmt)
-        except ValueError:
-            continue
-    return None
 
 
 # ─── Главный цикл ───

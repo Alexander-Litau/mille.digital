@@ -217,6 +217,35 @@ def send_post_with_comments(chat_id, post_text, markup=None):
     return result, post_id, message_id
 
 
+def attach_comments_to_post(message_id, chat_id, post_text):
+    """Подключить комментарии к существующему посту в канале.
+
+    Редактирует оригинальный пост, добавляя кнопку 'Прокомментировать'.
+    Сохраняет пост в Firebase.
+    Возвращает post_id.
+    """
+    post_id = f"post_{int(time.time())}_{random.randint(1000, 9999)}"
+
+    buttons = [
+        [{"type": "link", "text": "Прокомментировать", "url": f"{COMMENTS_DEEPLINK}?startapp={post_id}"}]
+    ]
+    attachments = [{"type": "inline_keyboard", "payload": {"buttons": buttons}}]
+
+    # Редактируем оригинальный пост — добавляем только кнопку, текст не трогаем
+    params = {"message_id": message_id}
+    body = {"attachments": attachments}
+    print(f"[attach_comments] message_id={message_id} post_id={post_id}")
+    r = requests.put(f"{API_BASE}/messages", headers=_headers(), params=params, json=body)
+    if not r.ok:
+        print(f"[attach_comments] ERROR {r.status_code}: {r.text}")
+    r.raise_for_status()
+
+    # Сохраняем пост в Firebase
+    save_post_to_firebase(post_id, post_text, chat_id, message_id)
+
+    return post_id
+
+
 def edit_message(message_id, text=None, attachments=None):
     """Редактировать существующее сообщение."""
     params = {"message_id": message_id}
