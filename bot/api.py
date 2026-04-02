@@ -235,6 +235,44 @@ def edit_message(message_id, text=None, attachments=None):
     return r.json()
 
 
+def edit_message_with_keyboard(message_id, text, post_id, markup=None):
+    """Редактировать текст поста, сохраняя кнопку комментариев."""
+    # Получаем текущее количество комментариев для кнопки
+    count = get_comments_count(post_id) or 0
+    if count == 0:
+        btn_text = "Прокомментировать"
+    else:
+        btn_text = f"{count} {_pluralize_comments(count)}"
+
+    buttons = [
+        [{"type": "link", "text": btn_text, "url": f"{COMMENTS_DEEPLINK}?startapp={post_id}"}]
+    ]
+    attachments = [{"type": "inline_keyboard", "payload": {"buttons": buttons}}]
+
+    body = {"attachments": attachments}
+    if markup:
+        body["text"] = markup_to_html(text, markup)
+        body["format"] = "html"
+    else:
+        body["text"] = text
+
+    params = {"message_id": message_id}
+    print(f"[edit_message_with_keyboard] message_id={message_id} post_id={post_id}")
+    r = requests.put(f"{API_BASE}/messages", headers=_headers(), params=params, json=body)
+    if not r.ok:
+        print(f"[edit_message_with_keyboard] ERROR {r.status_code}: {r.text}")
+    r.raise_for_status()
+
+    # Обновляем текст поста в Firebase
+    try:
+        fb_url = f"{FIREBASE_DB_URL}/posts/{post_id}/text.json"
+        requests.put(fb_url, json=text, timeout=10)
+    except Exception as e:
+        print(f"[edit_message_with_keyboard] firebase error: {e}")
+
+    return r.json()
+
+
 def update_comments_button(message_id, post_id, count):
     """Обновить текст кнопки комментариев на сообщении."""
     comments_url = f"{COMMENTS_APP_URL}?post={post_id}"

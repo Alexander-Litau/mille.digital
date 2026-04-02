@@ -48,9 +48,17 @@ def init_db():
             message_id TEXT NOT NULL,
             chat_id INTEGER NOT NULL,
             last_comment_count INTEGER DEFAULT 0,
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            user_id TEXT,
+            post_text TEXT
         )
     """)
+    # Миграция: добавить колонки user_id и post_text если их нет
+    for col, col_type in [("user_id", "TEXT"), ("post_text", "TEXT")]:
+        try:
+            c.execute(f"ALTER TABLE published_posts ADD COLUMN {col} {col_type}")
+        except sqlite3.OperationalError:
+            pass
     c.execute("""
         CREATE TABLE IF NOT EXISTS user_chats (
             user_id TEXT PRIMARY KEY,
@@ -128,14 +136,37 @@ def mark_published(post_db_id):
     conn.close()
 
 
-def save_published_post(post_id, message_id, chat_id):
+def save_published_post(post_id, message_id, chat_id, user_id=None, post_text=None):
     """Сохранить опубликованный пост для отслеживания комментариев."""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute(
-        "INSERT OR REPLACE INTO published_posts (post_id, message_id, chat_id) VALUES (?, ?, ?)",
-        (post_id, str(message_id), chat_id),
+        "INSERT OR REPLACE INTO published_posts (post_id, message_id, chat_id, user_id, post_text) VALUES (?, ?, ?, ?, ?)",
+        (post_id, str(message_id), chat_id, str(user_id) if user_id else None, post_text),
     )
+    conn.commit()
+    conn.close()
+
+
+def get_user_published_posts(user_id, limit=10):
+    """Получить последние опубликованные посты пользователя."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute(
+        "SELECT post_id, message_id, chat_id, post_text FROM published_posts "
+        "WHERE user_id = ? ORDER BY created_at DESC LIMIT ?",
+        (str(user_id), limit),
+    )
+    rows = c.fetchall()
+    conn.close()
+    return rows
+
+
+def update_published_post_text(post_id, new_text):
+    """Обновить текст поста в базе."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("UPDATE published_posts SET post_text = ? WHERE post_id = ?", (new_text, post_id))
     conn.commit()
     conn.close()
 
@@ -196,7 +227,7 @@ def publish_pending():
             result, post_id, message_id = api.send_post_with_comments(chat_id, text, markup)
             mark_published(post_db_id)
             if message_id:
-                save_published_post(post_id, message_id, chat_id)
+                save_published_post(post_id, message_id, chat_id, post_text=text)
             print(f"[scheduler] опубликован пост #{post_db_id} в чат {chat_id}")
         except Exception as e:
             print(f"[scheduler] ошибка публикации поста #{post_db_id}: {e}")

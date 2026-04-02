@@ -63,6 +63,7 @@ def handle_message(update):
             "Просто напишите мне текст поста, и я помогу его опубликовать.\n\n"
             "Команды:\n"
             "/post — создать новый пост\n"
+            "/edit — редактировать опубликованный пост\n"
             "/chats — управление каналами\n"
             "/help — помощь",
         )
@@ -97,7 +98,8 @@ def handle_message(update):
             "4. Укажите куда отправить\n"
             "5. Готово! К посту автоматически прикрепятся комментарии.\n\n"
             "/chats — добавить/посмотреть каналы\n"
-            "/post — создать пост",
+            "/post — создать пост\n"
+            "/edit — редактировать опубликованный пост",
         )
         return
 
@@ -137,6 +139,26 @@ def handle_message(update):
         api.send_message(chat_id, f"Канал {target_chat_id} сохранён!")
         return
 
+    # Команда /edit — редактировать опубликованный пост
+    if text == "/edit":
+        posts = scheduler.get_user_published_posts(user_id)
+        if not posts:
+            api.send_message(chat_id, "У вас нет опубликованных постов для редактирования.")
+            return
+
+        buttons = []
+        for post_id, message_id, target_chat_id, post_text in posts:
+            preview = (post_text or "")[:40]
+            if len(post_text or "") > 40:
+                preview += "..."
+            if not preview:
+                preview = f"Пост {post_id}"
+            buttons.append([{"type": "callback", "text": preview, "payload": f"edit_{post_id}"}])
+
+        u["state"] = "editing_select"
+        api.send_message_with_keyboard(chat_id, "Выберите пост для редактирования:", buttons)
+        return
+
     # Команда /post — начать создание поста
     if text == "/post":
         u["state"] = "waiting_text"
@@ -146,6 +168,23 @@ def handle_message(update):
     # ─── Машина состояний ───
 
     state = u.get("state", "idle")
+
+    # Ожидание нового текста для редактирования
+    if state == "editing_text":
+        edit_post_id = u.get("edit_post_id")
+        edit_message_id = u.get("edit_message_id")
+        if not edit_post_id or not edit_message_id:
+            api.send_message(chat_id, "Ошибка. Попробуйте /edit заново.")
+            reset_user(user_id)
+            return
+        try:
+            api.edit_message_with_keyboard(edit_message_id, text, edit_post_id, markup=markup)
+            scheduler.update_published_post_text(edit_post_id, text)
+            api.send_message(chat_id, "Пост отредактирован!")
+        except Exception as e:
+            api.send_message(chat_id, f"Ошибка при редактировании: {e}")
+        reset_user(user_id)
+        return
 
     # Ожидание текста поста
     if state == "waiting_text":
@@ -247,6 +286,24 @@ def handle_callback(update):
             u["draft_time"] = dt
             u["state"] = "waiting_where"
             ask_where(user_id, chat_id)
+
+    elif payload.startswith("edit_") and u.get("state") == "editing_select":
+        selected_post_id = payload.replace("edit_", "", 1)
+        # Найти message_id для этого поста
+        posts = scheduler.get_user_published_posts(user_id)
+        found = None
+        for post_id, message_id, target_chat_id, post_text in posts:
+            if post_id == selected_post_id:
+                found = (post_id, message_id)
+                break
+        if not found:
+            api.send_message(chat_id, "Пост не найден. Попробуйте /edit заново.")
+            reset_user(user_id)
+            return
+        u["state"] = "editing_text"
+        u["edit_post_id"] = found[0]
+        u["edit_message_id"] = found[1]
+        api.send_message(chat_id, "Отправьте новый текст для этого поста:")
 
     elif payload.startswith("chat_") and u.get("state") == "waiting_where":
         target_chat_id = int(payload.replace("chat_", ""))
@@ -399,7 +456,7 @@ def publish_or_schedule(user_id, bot_chat_id, target_chat_id):
         try:
             result, post_id, message_id = api.send_post_with_comments(target_chat_id, draft_text, draft_markup)
             if message_id:
-                scheduler.save_published_post(post_id, message_id, target_chat_id)
+                scheduler.save_published_post(post_id, message_id, target_chat_id, user_id=user_id, post_text=draft_text)
             api.send_message(
                 bot_chat_id,
                 "Пост опубликован! Комментарии подключены автоматически.",

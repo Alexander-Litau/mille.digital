@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head><title>Export Favicon</title></head>
+<body style="margin:40px;font-family:sans-serif;background:#e0e0e0">
+<h2>Favicon Export</h2>
+<p>PNG автоматически скачается. Если нет — нажмите кнопку ниже.</p>
+<p style="color:#888">Серый фон страницы — чтобы видно было прозрачные углы.</p>
+<canvas id="c" width="512" height="512" style="background: repeating-conic-gradient(#ddd 0% 25%, #fff 0% 50%) 50% / 20px 20px"></canvas>
+<br><br>
+<button onclick="download()">Скачать PNG</button>
+<script>
+const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#1E3A5F"/>
+  <text x="8" y="46" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="36" fill="#ffffff">M</text>
+  <text x="38" y="46" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="36" fill="#ff9e02">L</text>
+</svg>`;
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const img = new Image();
+const blob = new Blob([svgString], {type: 'image/svg+xml;charset=utf-8'});
+const url = URL.createObjectURL(blob);
+
+img.onload = function() {
+  ctx.clearRect(0, 0, 512, 512);
+  ctx.drawImage(img, 0, 0, 512, 512);
+  URL.revokeObjectURL(url);
+  download();
+};
+img.src = url;
+
+function download() {
+  const link = document.createElement('a');
+  link.download = 'favicon.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+</script>
+</body>
+</html>
