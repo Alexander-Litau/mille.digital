@@ -20,7 +20,7 @@ API_BASE = "https://platform-api.max.ru"
 COMMENTS_APP_URL = "https://milledigital.ru/comments.html"
 
 # Диплинк на мини-приложение через Max (открывается без подтверждения)
-BOT_USERNAME = os.environ.get("MAX_BOT_USERNAME", "id381209292606_2_bot")
+BOT_USERNAME = os.environ.get("MAX_BOT_USERNAME", "id381209292606_1_bot")
 COMMENTS_DEEPLINK = f"https://max.ru/{BOT_USERNAME}"
 
 # Firebase Realtime Database URL (из comments.html)
