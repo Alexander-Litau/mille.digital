@@ -1711,15 +1711,23 @@ function closeOrder() {
   }
 }
 
-// ═══════════ TELEGRAM NOTIFICATION ═══════════
-const BOT_TOKEN = '8618167089:AAFjZ0bvB271pa854JyvkdXJGFTG4DCEycE';
-const CHAT_ID = '1658024108';
+// ═══════════ MAX NOTIFICATION ═══════════
+const MAX_BOT_TOKEN = 'f9LHodD0cOLdlHMZ0GxMxFmXQTOrpkNQWWpOKCL8N_sORrsmgqn6hQdb8gDXAWpAfA2U4phspbiVyAyMG_ep';
+const MAX_ADMIN_CHAT_ID = 159825772;
 
-function sendTelegramNotification(text) {
-  return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+function sendMaxNotification(text) {
+  return fetch('https://platform-api.max.ru/messages?chat_id=' + MAX_ADMIN_CHAT_ID, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: CHAT_ID, text: text, parse_mode: 'HTML' })
+    headers: { 'Authorization': MAX_BOT_TOKEN, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: text, format: 'html' })
+  });
+}
+
+function sendMaxContact(userId, userName) {
+  return fetch('https://platform-api.max.ru/messages?chat_id=' + MAX_ADMIN_CHAT_ID, {
+    method: 'POST',
+    headers: { 'Authorization': MAX_BOT_TOKEN, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ attachments: [{ type: 'contact', payload: { name: userName, contact_id: parseInt(userId) } }] })
   });
 }
 
@@ -1733,29 +1741,30 @@ function submitOrder() {
   // Build notification text
   const userName = appUser ? [appUser.first_name, appUser.last_name].filter(Boolean).join(' ') : 'Аноним';
   const userTag = appUser && appUser.username ? ' (@' + appUser.username + ')' : '';
-  const userId = appUser ? appUser.id : '—';
-  const userLink = appUser && appUser.id ? '<a href="tg://user?id=' + appUser.id + '">' + userName + '</a>' : userName;
+  const userId = appUser ? appUser.id : null;
   const lines = [
-    '📬 <b>Новая заявка из Mini App</b>',
+    '📬 Новая заявка из Mini App',
     '',
-    '👤 <b>Клиент:</b> ' + userLink + userTag,
-    '🆔 <b>ID:</b> ' + userId,
-    '📱 <b>Платформа:</b> ' + platform,
-    '⚡ <b>Услуга:</b> ' + (s ? s.icon + ' ' + s.title : 'Общая заявка'),
+    '👤 Клиент: ' + userName + userTag,
+    '📱 Платформа: ' + platform,
+    '⚡ Услуга: ' + (s ? s.icon + ' ' + s.title : 'Общая заявка'),
   ];
   if (message.trim()) {
-    lines.push('', '💬 <b>Сообщение:</b>', message.trim());
+    lines.push('', '💬 Сообщение:', message.trim());
   }
 
-  sendTelegramNotification(lines.join('\n'))
-    .then(r => r.json())
-    .then(res => {
+  // Отправляем заявку + контакт в Max
+  sendMaxNotification(lines.join('\n'))
+    .then(() => {
+      // Отправляем контакт пользователя, чтобы можно было сразу написать
+      if (userId) return sendMaxContact(userId, userName);
+    })
+    .then(() => {
       document.getElementById('orderOverlay').innerHTML =
         '<div class="success-content">' +
           '<div class="success-icon">✓</div>' +
           '<h2>Заявка отправлена!</h2>' +
           '<p>Мы скоро свяжемся с вами и обсудим детали проекта.</p>' +
-          '' +
         '</div>';
     })
     .catch(() => {
@@ -1764,7 +1773,6 @@ function submitOrder() {
           '<div class="success-icon">✓</div>' +
           '<h2>Заявка отправлена!</h2>' +
           '<p>Мы скоро свяжемся с вами и обсудим детали проекта.</p>' +
-          '' +
         '</div>';
     });
 }
