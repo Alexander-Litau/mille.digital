@@ -1,32 +1,37 @@
 #!/usr/bin/env python3
 """
 Бот MIL.LE Digital — услуги агентства.
-Отправляет приветствие с кнопкой на мини-приложение.
+Отправляет приветствие + обрабатывает заявки из мини-приложения через Firebase.
 """
 
 import requests
 import time
+import threading
 from config import API_BASE, BOT_TOKEN, BOT_USERNAME, MINI_APP_URL
+
+FIREBASE_DB_URL = "https://mille-digital-comments-default-rtdb.asia-southeast1.firebasedatabase.app"
+ADMIN_CHAT_ID = 159825772
 
 
 def _headers():
     return {"Authorization": BOT_TOKEN, "Content-Type": "application/json"}
 
 
-def send_message(chat_id, text, buttons=None, markup=None):
-    body = {}
-    if markup:
-        from bot_markup import markup_to_html
-        body["text"] = markup_to_html(text, markup)
-        body["format"] = "html"
-    else:
-        body["text"] = text
+def send_message(chat_id, text, buttons=None):
+    body = {"text": text}
     if buttons:
         body["attachments"] = [{"type": "inline_keyboard", "payload": {"buttons": buttons}}]
     r = requests.post(f"{API_BASE}/messages", headers=_headers(), params={"chat_id": chat_id}, json=body)
     if not r.ok:
         print(f"[send] ERROR {r.status_code}: {r.text}")
     return r
+
+
+def send_contact(chat_id, user_id, user_name):
+    body = {"attachments": [{"type": "contact", "payload": {"name": user_name, "contact_id": int(user_id)}}]}
+    r = requests.post(f"{API_BASE}/messages", headers=_headers(), params={"chat_id": chat_id}, json=body)
+    if not r.ok:
+        print(f"[contact] ERROR {r.status_code}: {r.text}")
 
 
 def send_welcome(chat_id):
@@ -39,8 +44,60 @@ def send_welcome(chat_id):
         "- Разрабатываем лендинги, которые продают\n\n"
         "Посмотрите все наши услуги и кейсы в приложении 👇"
     )
-
     send_message(chat_id, text)
+
+
+def process_orders():
+    """Проверить Firebase на новые заявки и отправить админу."""
+    try:
+        r = requests.get(f"{FIREBASE_DB_URL}/orders.json", timeout=10)
+        r.raise_for_status()
+        data = r.json()
+        if not data:
+            return
+
+        for order_id, order in data.items():
+            try:
+                user_name = order.get("user_name", "Аноним")
+                user_tag = order.get("user_tag", "")
+                user_id = order.get("user_id")
+                platform = order.get("platform", "—")
+                service = order.get("service", "Общая заявка")
+                message = order.get("message", "")
+
+                lines = [
+                    "📬 Новая заявка из Mini App",
+                    "",
+                    f"👤 Клиент: {user_name}" + (f" ({user_tag})" if user_tag else ""),
+                    f"📱 Платформа: {platform}",
+                    f"⚡ Услуга: {service}",
+                ]
+                if message:
+                    lines.extend(["", f"💬 Сообщение: {message}"])
+
+                send_message(ADMIN_CHAT_ID, "\n".join(lines))
+
+                # Отправляем контакт, чтобы можно было сразу написать
+                if user_id:
+                    send_contact(ADMIN_CHAT_ID, user_id, user_name)
+
+                # Удаляем обработанную заявку
+                requests.delete(f"{FIREBASE_DB_URL}/orders/{order_id}.json", timeout=10)
+                print(f"[order] заявка {order_id} от {user_name} отправлена")
+
+            except Exception as e:
+                print(f"[order] ошибка обработки {order_id}: {e}")
+                requests.delete(f"{FIREBASE_DB_URL}/orders/{order_id}.json", timeout=10)
+
+    except Exception as e:
+        print(f"[order] ошибка чтения заявок: {e}")
+
+
+def orders_loop():
+    """Фоновый цикл проверки заявок каждые 3 секунды."""
+    while True:
+        process_orders()
+        time.sleep(3)
 
 
 def get_updates(marker=None, timeout=30):
@@ -63,6 +120,12 @@ def main():
         return
 
     print("Бот услуг запущен...")
+
+    # Запускаем фоновую проверку заявок
+    t = threading.Thread(target=orders_loop, daemon=True)
+    t.start()
+    print("[orders] проверка заявок запущена")
+
     marker = None
 
     try:

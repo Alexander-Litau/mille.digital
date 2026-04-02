@@ -1711,23 +1711,14 @@ function closeOrder() {
   }
 }
 
-// ═══════════ MAX NOTIFICATION ═══════════
-const MAX_BOT_TOKEN = 'f9LHodD0cOLdlHMZ0GxMxFmXQTOrpkNQWWpOKCL8N_sORrsmgqn6hQdb8gDXAWpAfA2U4phspbiVyAyMG_ep';
-const MAX_ADMIN_CHAT_ID = 159825772;
+// ═══════════ ORDER NOTIFICATION VIA FIREBASE ═══════════
+const FIREBASE_ORDERS_URL = 'https://mille-digital-comments-default-rtdb.asia-southeast1.firebasedatabase.app/orders';
 
-function sendMaxNotification(text) {
-  return fetch('https://platform-api.max.ru/messages?chat_id=' + MAX_ADMIN_CHAT_ID, {
+function sendOrder(orderData) {
+  return fetch(FIREBASE_ORDERS_URL + '.json', {
     method: 'POST',
-    headers: { 'Authorization': MAX_BOT_TOKEN, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text: text, format: 'html' })
-  });
-}
-
-function sendMaxContact(userId, userName) {
-  return fetch('https://platform-api.max.ru/messages?chat_id=' + MAX_ADMIN_CHAT_ID, {
-    method: 'POST',
-    headers: { 'Authorization': MAX_BOT_TOKEN, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ attachments: [{ type: 'contact', payload: { name: userName, contact_id: parseInt(userId) } }] })
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(orderData)
   });
 }
 
@@ -1738,27 +1729,22 @@ function submitOrder() {
   btn.textContent = 'Отправляем...';
   btn.disabled = true;
 
-  // Build notification text
+  // Build order data for Firebase
   const userName = appUser ? [appUser.first_name, appUser.last_name].filter(Boolean).join(' ') : 'Аноним';
-  const userTag = appUser && appUser.username ? ' (@' + appUser.username + ')' : '';
+  const userTag = appUser && appUser.username ? '@' + appUser.username : '';
   const userId = appUser ? appUser.id : null;
-  const lines = [
-    '📬 Новая заявка из Mini App',
-    '',
-    '👤 Клиент: ' + userName + userTag,
-    '📱 Платформа: ' + platform,
-    '⚡ Услуга: ' + (s ? s.icon + ' ' + s.title : 'Общая заявка'),
-  ];
-  if (message.trim()) {
-    lines.push('', '💬 Сообщение:', message.trim());
-  }
 
-  // Отправляем заявку + контакт в Max
-  sendMaxNotification(lines.join('\n'))
-    .then(() => {
-      // Отправляем контакт пользователя, чтобы можно было сразу написать
-      if (userId) return sendMaxContact(userId, userName);
-    })
+  const orderData = {
+    user_name: userName,
+    user_tag: userTag,
+    user_id: userId,
+    platform: platform,
+    service: s ? s.icon + ' ' + s.title : 'Общая заявка',
+    message: message.trim() || '',
+    timestamp: Date.now()
+  };
+
+  sendOrder(orderData)
     .then(() => {
       document.getElementById('orderOverlay').innerHTML =
         '<div class="success-content">' +
