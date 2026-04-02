@@ -1,7 +1,17 @@
 import os
+from pathlib import Path
+
+# Загружаем .env файл если есть
+_env_path = Path(__file__).parent / ".env"
+if _env_path.exists():
+    for line in _env_path.read_text().strip().splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            key, _, value = line.partition("=")
+            os.environ.setdefault(key.strip(), value.strip())
 
 # Токен бота из Max — получить у @MasterBot
-BOT_TOKEN = os.environ.get("MAX_BOT_TOKEN", "ВАШ_ТОКЕН_СЮДА")
+BOT_TOKEN = os.environ.get("MAX_BOT_TOKEN", "")
 
 # Max Bot API
 API_BASE = "https://platform-api.max.ru"
