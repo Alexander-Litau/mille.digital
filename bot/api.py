@@ -246,6 +246,41 @@ def attach_comments_to_post(message_id, chat_id, post_text):
     return post_id
 
 
+def detach_comments_from_post(message_id):
+    """Убрать кнопку комментариев с поста (передаём пустой массив attachments)."""
+    params = {"message_id": message_id}
+    body = {"attachments": []}
+    print(f"[detach_comments] message_id={message_id}")
+    r = requests.put(f"{API_BASE}/messages", headers=_headers(), params=params, json=body)
+    if not r.ok:
+        print(f"[detach_comments] ERROR {r.status_code}: {r.text}")
+    r.raise_for_status()
+    return r.json()
+
+
+def reattach_comments_to_post(message_id, post_id):
+    """Повторно подключить комментарии к посту с существующим post_id."""
+    count = get_comments_count(post_id) or 0
+    if count == 0:
+        btn_text = "Прокомментировать"
+    else:
+        btn_text = f"{count} {_pluralize_comments(count)}"
+
+    buttons = [
+        [{"type": "link", "text": btn_text, "url": f"{COMMENTS_DEEPLINK}?startapp={post_id}"}]
+    ]
+    attachments = [{"type": "inline_keyboard", "payload": {"buttons": buttons}}]
+
+    params = {"message_id": message_id}
+    body = {"attachments": attachments}
+    print(f"[reattach_comments] message_id={message_id} post_id={post_id}")
+    r = requests.put(f"{API_BASE}/messages", headers=_headers(), params=params, json=body)
+    if not r.ok:
+        print(f"[reattach_comments] ERROR {r.status_code}: {r.text}")
+    r.raise_for_status()
+    return r.json()
+
+
 def edit_message(message_id, text=None, attachments=None):
     """Редактировать существующее сообщение."""
     params = {"message_id": message_id}

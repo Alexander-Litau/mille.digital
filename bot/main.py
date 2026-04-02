@@ -74,6 +74,8 @@ def handle_message(update):
             "2. Перешлите его мне\n"
             "3. Готово — к посту подключатся комментарии!\n\n"
             "Команды:\n"
+            "/off — отключить комментарии (для редактирования поста)\n"
+            "/on — подключить комментарии обратно\n"
             "/chats — управление каналами\n"
             "/help — помощь",
         )
@@ -103,8 +105,11 @@ def handle_message(update):
             "1. Опубликуйте пост в канале через Max\n"
             "2. Перешлите этот пост мне в личные сообщения\n"
             "3. Я подключу к нему кнопку комментариев\n\n"
-            "Важно: бот должен быть администратором канала.\n"
-            "Редактировать пост можно прямо в канале — бот не мешает.\n\n"
+            "Важно: бот должен быть администратором канала.\n\n"
+            "Если нужно отредактировать пост:\n"
+            "1. /off — отключить комментарии\n"
+            "2. Отредактируйте пост в канале\n"
+            "3. /on — подключить комментарии обратно\n\n"
             "/chats — добавить/посмотреть каналы",
         )
         return
@@ -126,6 +131,44 @@ def handle_message(update):
                 "/addchat ID_КАНАЛА Название\n\n"
                 "Чтобы узнать ID канала, добавьте бота в канал как администратора.",
             )
+        return
+
+    # Команда /off — отключить комментарии от поста
+    if text == "/off":
+        posts = scheduler.get_user_published_posts(user_id)
+        if not posts:
+            api.send_message(chat_id, "У вас нет постов с подключёнными комментариями.")
+            return
+
+        buttons = []
+        for post_id, message_id, target_chat_id, post_text in posts:
+            preview = (post_text or "")[:40]
+            if len(post_text or "") > 40:
+                preview += "..."
+            if not preview:
+                preview = f"Пост {post_id}"
+            buttons.append([{"type": "callback", "text": preview, "payload": f"detach_{post_id}"}])
+
+        api.send_message_with_keyboard(chat_id, "Выберите пост, от которого отключить комментарии:", buttons)
+        return
+
+    # Команда /on — подключить комментарии обратно
+    if text == "/on":
+        posts = scheduler.get_user_published_posts(user_id)
+        if not posts:
+            api.send_message(chat_id, "У вас нет постов.")
+            return
+
+        buttons = []
+        for post_id, message_id, target_chat_id, post_text in posts:
+            preview = (post_text or "")[:40]
+            if len(post_text or "") > 40:
+                preview += "..."
+            if not preview:
+                preview = f"Пост {post_id}"
+            buttons.append([{"type": "callback", "text": preview, "payload": f"reattach_{post_id}"}])
+
+        api.send_message_with_keyboard(chat_id, "Выберите пост, к которому подключить комментарии:", buttons)
         return
 
     if text.startswith("/addchat"):
@@ -206,6 +249,36 @@ def handle_callback(update):
 
     scheduler.save_user_chat(user_id, chat_id)
     api.answer_callback(callback_id)
+
+    # Отключить комментарии
+    if payload.startswith("detach_"):
+        selected_post_id = payload.replace("detach_", "", 1)
+        posts = scheduler.get_user_published_posts(user_id)
+        for post_id, message_id, target_chat_id, post_text in posts:
+            if post_id == selected_post_id:
+                try:
+                    api.detach_comments_from_post(message_id)
+                    api.send_message(chat_id, "Комментарии отключены. Теперь можете отредактировать пост.\n\nЧтобы подключить обратно — /on")
+                except Exception as e:
+                    api.send_message(chat_id, f"Ошибка: {e}")
+                return
+        api.send_message(chat_id, "Пост не найден.")
+        return
+
+    # Подключить комментарии обратно
+    if payload.startswith("reattach_"):
+        selected_post_id = payload.replace("reattach_", "", 1)
+        posts = scheduler.get_user_published_posts(user_id)
+        for post_id, message_id, target_chat_id, post_text in posts:
+            if post_id == selected_post_id:
+                try:
+                    api.reattach_comments_to_post(message_id, post_id)
+                    api.send_message(chat_id, "Комментарии подключены обратно!")
+                except Exception as e:
+                    api.send_message(chat_id, f"Ошибка: {e}")
+                return
+        api.send_message(chat_id, "Пост не найден.")
+        return
 
 
 def handle_bot_started(update):
