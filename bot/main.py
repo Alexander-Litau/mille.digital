@@ -201,15 +201,22 @@ def handle_message(update):
 def handle_forward(user_id, chat_id, link, text):
     """Обработать пересланное сообщение — подключить комментарии."""
     # Извлекаем данные о пересланном сообщении
-    # Структура link может содержать: type, sender, chat_id, message (с mid и body)
     fwd_message = link.get("message", {})
     fwd_mid = fwd_message.get("mid")
-    fwd_body = fwd_message.get("body", {})
-    fwd_text = fwd_body.get("text", "") if isinstance(fwd_body, dict) else ""
     fwd_chat_id = link.get("chat_id")
 
+    # Текст может быть в разных местах структуры
+    fwd_body = fwd_message.get("body", {})
+    fwd_text = ""
+    if isinstance(fwd_body, dict):
+        fwd_text = fwd_body.get("text", "")
+
     # Логируем для отладки
-    print(f"[forward] fwd_mid={fwd_mid} fwd_chat_id={fwd_chat_id} fwd_text={fwd_text[:50] if fwd_text else 'empty'}")
+    print(f"[forward] link keys={list(link.keys())}")
+    print(f"[forward] fwd_message keys={list(fwd_message.keys()) if isinstance(fwd_message, dict) else 'not dict'}")
+    print(f"[forward] fwd_mid={fwd_mid} fwd_chat_id={fwd_chat_id}")
+    print(f"[forward] fwd_text={fwd_text[:80] if fwd_text else 'empty'}")
+    print(f"[forward] body text={text[:80] if text else 'empty'}")
 
     if not fwd_mid:
         api.send_message(
@@ -219,10 +226,25 @@ def handle_forward(user_id, chat_id, link, text):
         )
         return
 
+    # Получаем полную информацию о сообщении через API, если текст не пришёл в link
+    post_text = fwd_text or text
+    actual_chat_id = fwd_chat_id
+    if not post_text or not actual_chat_id:
+        msg_info = api.get_message_info(fwd_mid)
+        if msg_info:
+            if not post_text:
+                msg_body = msg_info.get("body", {})
+                if isinstance(msg_body, dict):
+                    post_text = msg_body.get("text", "")
+            if not actual_chat_id:
+                recipient = msg_info.get("recipient", {})
+                actual_chat_id = recipient.get("chat_id")
+        print(f"[forward] after API: post_text={post_text[:80] if post_text else 'empty'} actual_chat_id={actual_chat_id}")
+
     # Подключаем комментарии к оригинальному посту
     try:
-        post_id = api.attach_comments_to_post(fwd_mid, fwd_chat_id, fwd_text or text)
-        scheduler.save_published_post(post_id, fwd_mid, fwd_chat_id or 0, user_id=user_id, post_text=fwd_text or text)
+        post_id = api.attach_comments_to_post(fwd_mid, actual_chat_id, post_text)
+        scheduler.save_published_post(post_id, fwd_mid, actual_chat_id or 0, user_id=user_id, post_text=post_text)
         api.send_message(chat_id, "Комментарии подключены к посту!")
     except Exception as e:
         print(f"[forward] ошибка: {e}")
