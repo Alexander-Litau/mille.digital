@@ -1316,6 +1316,28 @@ body {
   max-width: 260px;
   margin: 0 auto 24px;
 }
+
+.toast {
+  position: fixed;
+  bottom: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--card);
+  color: var(--text);
+  padding: 16px 24px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  z-index: 10000;
+  text-align: center;
+  max-width: 320px;
+  width: 90%;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  transition: bottom 0.3s ease;
+  border: 1px solid var(--border);
+}
+.toast.show { bottom: 32px; }
+.toast-title { font-weight: 800; font-family: 'Bricolage Grotesque', sans-serif; margin-bottom: 6px; }
 </style>
 </head>
 <body>
@@ -1357,7 +1379,7 @@ body {
   <div class="cta-card" style="margin-top:16px;">
     <h2>Хотите увидеть <em>результаты</em>?</h2>
     <p>Смотрите реальные кейсы наших клиентов на сайте — цифры, процесс и итог.</p>
-    <button class="cta-btn" onclick="alert('Раздел с кейсами готовится к публикации. Совсем скоро здесь появятся реальные проекты с цифрами и результатами!')">Смотреть кейсы →</button>
+    <button class="cta-btn" onclick="showToast('<div class=\'toast-title\'>Скоро здесь появятся кейсы</div>Готовим подробные разборы проектов с цифрами и результатами. Следите за обновлениями!', 4000)">Смотреть кейсы →</button>
     <div class="cta-checks">
       <span>Реальные проекты</span>
       <span>Подробный разбор</span>
@@ -2118,6 +2140,13 @@ function filterIdeas(filter) {
   window.scrollTo(0, 0);
 }
 
+function showToast(text, duration) {
+  var t = document.getElementById('toast');
+  t.innerHTML = text;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, duration || 3000);
+}
+
 // Universal BackButton handler (Telegram + MAX)
 if (app) {
   app.BackButton.onClick(() => {
@@ -2127,5 +2156,6 @@ if (app) {
   });
 }
 </script>
+<div class="toast" id="toast"></div>
 </body>
 </html>
