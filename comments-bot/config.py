@@ -30,4 +30,6 @@ FIREBASE_DB_URL = "https://mille-digital-comments-default-rtdb.asia-southeast1.f
 TIMEZONE = "Asia/Irkutsk"
 
 # Файл базы данных SQLite
-DB_PATH = os.path.join(os.path.dirname(__file__), "bot_data.db")
+# На Amvera /data — постоянное хранилище, локально — рядом со скриптом
+_data_dir = "/data" if os.path.isdir("/data") else os.path.dirname(__file__)
+DB_PATH = os.path.join(_data_dir, "bot_data.db")
