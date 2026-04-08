@@ -1482,7 +1482,7 @@ body {
     <h3>Готов ли ваш сайт к запуску рекламы?</h3>
     <p>17 пунктов, которые нужно проверить до первого рубля на рекламу. Убедитесь, что ваш сайт не сливает трафик.</p>
     <div class="material-meta">
-      <div class="material-meta-item"><span class="num">17</span> пунктов</div>
+      <div class="material-meta-item"><span class="num">18</span> пунктов</div>
       <div class="material-meta-item"><span class="num">5</span> мин</div>
       <div class="material-meta-item"><span class="num">5</span> разделов</div>
     </div>
@@ -1805,13 +1805,13 @@ function submitOrder() {
 
 // ═══════════ MATERIALS SYSTEM ═══════════
 let checklist20State = new Array(20).fill(false);
-let checklistSiteState = new Array(17).fill(false);
+let checklistSiteState = new Array(18).fill(false);
 let quizState = { currentQ: 0, scores: [], total: 0 };
 let currentPlanTab = 'universal';
 
 function openMaterial(type) {
   const el = document.getElementById('materialContent');
-  if (type === 'checklistSite') { checklistSiteState = new Array(17).fill(false); el.innerHTML = renderChecklistSite(); }
+  if (type === 'checklistSite') { checklistSiteState = new Array(18).fill(false); el.innerHTML = renderChecklistSite(); }
   else if (type === 'guideAd') el.innerHTML = renderGuideAd();
   else if (type === 'checklist20') el.innerHTML = renderChecklist20();
   else if (type === 'quiz') { quizState = { currentQ: 0, scores: [], total: 0 }; el.innerHTML = renderQuiz(); }
@@ -1916,10 +1916,10 @@ const checklistSiteData = [
 
 function renderChecklistSite() {
   var checked = checklistSiteState.filter(Boolean).length;
-  var pct = Math.round(checked / 17 * 100);
+  var pct = Math.round(checked / 18 * 100);
   var h = '<div class="mat-header"><h2>Готов ли ваш сайт к запуску рекламы?</h2><p>Отмечайте пункты, которые уже выполнены. Каждый непройденный пункт — потерянные деньги.</p></div>';
   h += '<div class="mat-progress"><div class="mat-progress-bar" style="width:' + pct + '%"></div></div>';
-  h += '<div class="mat-counter">Проверено: ' + checked + ' из 17</div>';
+  h += '<div class="mat-counter">Проверено: ' + checked + ' из 18</div>';
   var idx = 0;
   checklistSiteData.forEach(function(g) {
     h += '<div class="check-group"><div class="check-group-title">' + g.group + '</div>';
@@ -1930,9 +1930,9 @@ function renderChecklistSite() {
     });
     h += '</div>';
   });
-  if (checked === 17) {
+  if (checked === 18) {
     h += '<div class="quiz-result"><div class="quiz-verdict" style="color:var(--sage);">Отлично! Сайт готов к запуску рекламы.</div></div>';
-  } else if (checked >= 10) {
+  } else if (checked >= 12) {
     h += '<div class="quiz-result"><div class="quiz-verdict" style="color:var(--brand);">Есть риски. Доработайте слабые места до запуска.</div></div>';
   } else if (checked > 0) {
     h += '<div class="quiz-result"><div class="quiz-verdict" style="color:#e74c3c;">Стоп! Сначала исправьте сайт, иначе бюджет сольётся.</div></div>';
