@@ -1688,6 +1688,9 @@ function openOrder(index) {
   const s = currentIndex >= 0 ? services[currentIndex] : null;
   document.getElementById('orderBadge').textContent = s ? s.icon + ' ' + s.title : '📋 Общая заявка';
   document.getElementById('orderMessage').value = '';
+  var btn = document.querySelector('.order-submit');
+  btn.textContent = 'Отправить заявку →';
+  btn.disabled = false;
 
   if (appUser) {
     const name = [appUser.first_name, appUser.last_name].filter(Boolean).join(' ');
@@ -1749,12 +1752,8 @@ function submitOrder() {
       return res.json();
     })
     .then(() => {
-      document.getElementById('orderOverlay').innerHTML =
-        '<div class="success-content">' +
-          '<div class="success-icon">✓</div>' +
-          '<h2>Заявка отправлена!</h2>' +
-          '<p>Мы скоро свяжемся с вами и обсудим детали проекта.</p>' +
-        '</div>';
+      btn.textContent = 'Заявка отправлена ✓';
+      setTimeout(function() { closeOrder(); }, 1500);
     })
     .catch(err => {
       console.error('Order error:', err);
