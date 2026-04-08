@@ -1320,12 +1320,14 @@ body {
 .popup-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.85);
   z-index: 10000;
   display: none;
   align-items: center;
   justify-content: center;
   padding: 24px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 .popup-overlay.show { display: flex; }
 .popup-box {
@@ -1333,9 +1335,9 @@ body {
   border-radius: 20px;
   padding: 32px 24px;
   text-align: center;
-  max-width: 320px;
+  max-width: 300px;
   width: 100%;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
   animation: popupIn 0.25s ease;
 }
 @keyframes popupIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
