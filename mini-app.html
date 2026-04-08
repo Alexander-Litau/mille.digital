@@ -1486,7 +1486,7 @@ body {
       <div class="material-meta-item"><span class="num">5</span> мин</div>
       <div class="material-meta-item"><span class="num">5</span> разделов</div>
     </div>
-    <a href="materials/checklist_site_ready_MILLE_3.pdf" download class="material-download primary">Скачать чек-лист →</a>
+    <button class="material-download primary" onclick="openMaterial('checklistSite')">Открыть чек-лист →</button>
   </div>
 
   <div class="material-card">
@@ -1499,7 +1499,7 @@ body {
       <div class="material-meta-item"><span class="num">5</span> мин</div>
       <div class="material-meta-item"><span class="num">0 ₽</span> стоимость</div>
     </div>
-    <a href="materials/guide_ad_check_7points_MILLE.pdf" download class="material-download secondary">Скачать гайд →</a>
+    <button class="material-download secondary" onclick="openMaterial('guideAd')">Открыть гайд →</button>
   </div>
 
   <div class="material-card">
@@ -1805,12 +1805,15 @@ function submitOrder() {
 
 // ═══════════ MATERIALS SYSTEM ═══════════
 let checklist20State = new Array(20).fill(false);
+let checklistSiteState = new Array(17).fill(false);
 let quizState = { currentQ: 0, scores: [], total: 0 };
 let currentPlanTab = 'universal';
 
 function openMaterial(type) {
   const el = document.getElementById('materialContent');
-  if (type === 'checklist20') el.innerHTML = renderChecklist20();
+  if (type === 'checklistSite') { checklistSiteState = new Array(17).fill(false); el.innerHTML = renderChecklistSite(); }
+  else if (type === 'guideAd') el.innerHTML = renderGuideAd();
+  else if (type === 'checklist20') el.innerHTML = renderChecklist20();
   else if (type === 'quiz') { quizState = { currentQ: 0, scores: [], total: 0 }; el.innerHTML = renderQuiz(); }
   else if (type === 'plan') el.innerHTML = renderPlan();
   else if (type === 'guide') el.innerHTML = renderGuide();
@@ -1877,6 +1880,107 @@ function renderChecklist20() {
 function toggleCheck(idx) {
   checklist20State[idx] = !checklist20State[idx];
   document.getElementById('materialContent').innerHTML = renderChecklist20();
+}
+
+// ═══ CHECKLIST SITE (17 items) ═══
+const checklistSiteData = [
+  { group: 'Техническая база', items: [
+    'Сайт загружается быстрее 3 секунд (PageSpeed Insights: 70+ баллов)',
+    'Корректное отображение на мобильных (70%+ трафика с мобильных)',
+    'SSL-сертификат установлен (https://)',
+    'Нет битых ссылок и ошибок 404',
+    'Все формы и кнопки работают корректно'
+  ]},
+  { group: 'Аналитика и отслеживание', items: [
+    'Яндекс.Метрика / Google Analytics установлены',
+    'Настроены цели: заявка, звонок, покупка',
+    'Пиксели рекламных систем установлены',
+    'UTM-метки запланированы для всех рекламных ссылок'
+  ]},
+  { group: 'Посадочная страница (UX)', items: [
+    'Заголовок отвечает на вопрос «Что здесь?» за 3 секунды',
+    'Есть понятный призыв к действию (CTA)',
+    'Контактные данные на видном месте и кликабельны'
+  ]},
+  { group: 'Доверие и убеждение', items: [
+    'Есть отзывы, кейсы или соцдоказательства',
+    'Размещены фото или видео команды / продукта',
+    'Указаны гарантии и условия возврата'
+  ]},
+  { group: 'Юридические требования', items: [
+    'Есть политика конфиденциальности (152-ФЗ)',
+    'Формы содержат согласие на обработку данных',
+    'Указана информация о компании / ИП'
+  ]}
+];
+
+function renderChecklistSite() {
+  var checked = checklistSiteState.filter(Boolean).length;
+  var pct = Math.round(checked / 17 * 100);
+  var h = '<div class="mat-header"><h2>Готов ли ваш сайт к запуску рекламы?</h2><p>Отмечайте пункты, которые уже выполнены. Каждый непройденный пункт — потерянные деньги.</p></div>';
+  h += '<div class="mat-progress"><div class="mat-progress-bar" style="width:' + pct + '%"></div></div>';
+  h += '<div class="mat-counter">Проверено: ' + checked + ' из 17</div>';
+  var idx = 0;
+  checklistSiteData.forEach(function(g) {
+    h += '<div class="check-group"><div class="check-group-title">' + g.group + '</div>';
+    g.items.forEach(function(item) {
+      var cls = checklistSiteState[idx] ? ' checked' : '';
+      h += '<div class="check-item' + cls + '" onclick="toggleCheckSite(' + idx + ')"><div class="check-box"></div><span>' + item + '</span></div>';
+      idx++;
+    });
+    h += '</div>';
+  });
+  if (checked === 17) {
+    h += '<div class="quiz-result"><div class="quiz-verdict" style="color:var(--sage);">Отлично! Сайт готов к запуску рекламы.</div></div>';
+  } else if (checked >= 10) {
+    h += '<div class="quiz-result"><div class="quiz-verdict" style="color:var(--brand);">Есть риски. Доработайте слабые места до запуска.</div></div>';
+  } else if (checked > 0) {
+    h += '<div class="quiz-result"><div class="quiz-verdict" style="color:#e74c3c;">Стоп! Сначала исправьте сайт, иначе бюджет сольётся.</div></div>';
+  }
+  return h;
+}
+
+function toggleCheckSite(idx) {
+  checklistSiteState[idx] = !checklistSiteState[idx];
+  document.getElementById('materialContent').innerHTML = renderChecklistSite();
+}
+
+// ═══ GUIDE AD (7 metrics) ═══
+function renderGuideAd() {
+  var blocks = [
+    { num: '1', title: 'CTR — кликабельность',
+      text: 'Где смотреть: CTR в рекламном кабинете (Яндекс.Директ, VK Ads, TG Ads). Норма: от 1% для поиска, от 0.5% для сетей и таргета.',
+      tip: 'Если низкий: перепишите заголовки — добавьте конкретику и выгоду. Смените креатив. Сузьте аудиторию — показы идут не тем людям.' },
+    { num: '2', title: 'CPC — стоимость клика',
+      text: 'Где смотреть: средняя цена за клик по каждой кампании. Красный флаг: CPC в 2+ раза выше среднего по рынку.',
+      tip: 'Если высокий: проверьте качество объявлений — низкий CTR повышает цену. Уберите слишком широкие ключевые слова. Добавьте минус-слова.' },
+    { num: '3', title: 'Показатель отказов',
+      text: 'Где смотреть: % отказов в Яндекс.Метрике по рекламному трафику. Норма: до 20%. Тревога: выше 30%.',
+      tip: 'Если высокий: объявление и сайт должны совпадать по смыслу. Ускорьте загрузку сайта. Проверьте мобильную версию.' },
+    { num: '4', title: 'Конверсия сайта (CR)',
+      text: 'Где смотреть: % посетителей, совершивших целевое действие. Норма: 2–5% лендинг, 1–3% интернет-магазин.',
+      tip: 'Если низкая: усильте оффер — конкретное и ценное предложение. Упростите форму заявки. Добавьте отзывы, кейсы и цифры.' },
+    { num: '5', title: 'CPL — стоимость заявки',
+      text: 'Формула: бюджет ÷ количество заявок = цена лида. Правило: CPL должен быть ниже прибыли с клиента.',
+      tip: 'Если высокий: отключите кампании с дорогими заявками. Масштабируйте то, что работает. Проверьте пункты 1–4 — CPL растёт из-за них.' },
+    { num: '6', title: 'Качество заявок',
+      text: 'Где смотреть: сколько заявок доходят до сделки. Норма: минимум 30–50% заявок целевые.',
+      tip: 'Если низкое: уточните таргетинг — реклама показывается не тем людям. Добавьте фильтры: цену, гео, условия. Проверьте оффер — не привлекает ли «халявщиков».' },
+    { num: '7', title: 'ROMI — окупаемость',
+      text: 'Формула: (доход − расход) ÷ расход × 100%. Успех: ROMI > 100% — реклама окупается.',
+      tip: 'Если отрицательный: пересмотрите воронку от клика до продажи. Посчитайте LTV — может окупаться в долгосроке. Оптимизируйте пункты 1–6 перед увеличением бюджета.' }
+  ];
+  var h = '<div class="mat-header"><h2>Как проверить, правильно ли работает ваша реклама</h2><p>7 ключевых метрик за 5 минут — узнайте, где проблема.</p></div>';
+  blocks.forEach(function(b) {
+    h += '<div class="guide-block">';
+    h += '<div class="guide-block-num">' + b.num + '</div>';
+    h += '<h3>' + b.title + '</h3>';
+    h += '<p>' + b.text + '</p>';
+    h += '<div class="guide-tip"><span class="guide-tip-icon">💡</span><span>' + b.tip + '</span></div>';
+    h += '</div>';
+  });
+  h += '<div class="quiz-result"><div class="quiz-verdict"><b>6–7 в норме</b> — масштабируйте результат.<br><b>4–5 в норме</b> — точечные доработки улучшат результат.<br><b>Менее 4</b> — нужен полный аудит рекламы и сайта.</div></div>';
+  return h;
 }
 
 // ═══ QUIZ (Mini-audit) ═══
