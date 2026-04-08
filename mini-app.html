@@ -1317,27 +1317,32 @@ body {
   margin: 0 auto 24px;
 }
 
-.toast {
+.popup-overlay {
   position: fixed;
-  bottom: -100px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--card);
-  color: var(--text);
-  padding: 16px 24px;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  inset: 0;
+  background: rgba(0,0,0,0.5);
   z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.popup-overlay.show { display: flex; }
+.popup-box {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 32px 24px;
   text-align: center;
   max-width: 320px;
-  width: 90%;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  transition: bottom 0.3s ease;
-  border: 1px solid var(--border);
+  width: 100%;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+  animation: popupIn 0.25s ease;
 }
-.toast.show { bottom: 32px; }
-.toast-title { font-weight: 800; font-family: 'Bricolage Grotesque', sans-serif; margin-bottom: 6px; }
+@keyframes popupIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.popup-icon { font-size: 2.5rem; margin-bottom: 12px; }
+.popup-box h3 { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 1.15rem; margin-bottom: 8px; }
+.popup-box p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; }
+.popup-close { background: var(--brand); color: #fff; border: none; border-radius: 12px; padding: 12px 32px; font-size: 0.9rem; font-weight: 700; cursor: pointer; font-family: 'Figtree', sans-serif; }
 </style>
 </head>
 <body>
@@ -1379,7 +1384,7 @@ body {
   <div class="cta-card" style="margin-top:16px;">
     <h2>Хотите увидеть <em>результаты</em>?</h2>
     <p>Смотрите реальные кейсы наших клиентов на сайте — цифры, процесс и итог.</p>
-    <button class="cta-btn" onclick="showToast('<div class=\'toast-title\'>Скоро здесь появятся кейсы</div>Готовим подробные разборы проектов с цифрами и результатами. Следите за обновлениями!', 4000)">Смотреть кейсы →</button>
+    <button class="cta-btn" onclick="showPopup()">Смотреть кейсы →</button>
     <div class="cta-checks">
       <span>Реальные проекты</span>
       <span>Подробный разбор</span>
@@ -2140,12 +2145,8 @@ function filterIdeas(filter) {
   window.scrollTo(0, 0);
 }
 
-function showToast(text, duration) {
-  var t = document.getElementById('toast');
-  t.innerHTML = text;
-  t.classList.add('show');
-  setTimeout(function() { t.classList.remove('show'); }, duration || 3000);
-}
+function showPopup() { document.getElementById('popupOverlay').classList.add('show'); }
+function closePopup() { document.getElementById('popupOverlay').classList.remove('show'); }
 
 // Universal BackButton handler (Telegram + MAX)
 if (app) {
@@ -2156,6 +2157,13 @@ if (app) {
   });
 }
 </script>
-<div class="toast" id="toast"></div>
+<div class="popup-overlay" id="popupOverlay" onclick="if(event.target===this)closePopup()">
+  <div class="popup-box">
+    <div class="popup-icon">🚀</div>
+    <h3>Кейсы скоро появятся</h3>
+    <p>Наш сайт сейчас проходит модерацию. Как только он будет опубликован, здесь появятся подробные разборы проектов с цифрами и результатами.</p>
+    <button class="popup-close" onclick="closePopup()">Понятно</button>
+  </div>
+</div>
 </body>
 </html>
