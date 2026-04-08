@@ -1711,56 +1711,38 @@ function closeOrder() {
   }
 }
 
-// ═══════════ ORDER NOTIFICATION VIA FIREBASE ═══════════
-const FIREBASE_ORDERS_URL = 'https://mille-digital-comments-default-rtdb.asia-southeast1.firebasedatabase.app/orders';
-
-function sendOrder(orderData) {
-  return fetch(FIREBASE_ORDERS_URL + '.json', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(orderData)
-  });
-}
-
+// ═══════════ ORDER VIA WEBAPP.SENDDATA ═══════════
 function submitOrder() {
   const s = currentIndex >= 0 ? services[currentIndex] : null;
   const message = document.getElementById('orderMessage').value;
+
+  if (!app) {
+    alert('Откройте мини-приложение через бота, чтобы отправить заявку.');
+    return;
+  }
+
+  const orderData = {
+    type: 'order',
+    user_name: appUser ? [appUser.first_name, appUser.last_name].filter(Boolean).join(' ') : 'Аноним',
+    user_tag: appUser && appUser.username ? '@' + appUser.username : '',
+    user_id: appUser ? appUser.id : null,
+    platform: platform,
+    service: s ? s.icon + ' ' + s.title : 'Общая заявка',
+    message: message.trim() || ''
+  };
+
   const btn = document.querySelector('.order-submit');
   btn.textContent = 'Отправляем...';
   btn.disabled = true;
 
-  // Build order data for Firebase
-  const userName = appUser ? [appUser.first_name, appUser.last_name].filter(Boolean).join(' ') : 'Аноним';
-  const userTag = appUser && appUser.username ? '@' + appUser.username : '';
-  const userId = appUser ? appUser.id : null;
-
-  const orderData = {
-    user_name: userName,
-    user_tag: userTag,
-    user_id: userId,
-    platform: platform,
-    service: s ? s.icon + ' ' + s.title : 'Общая заявка',
-    message: message.trim() || '',
-    timestamp: Date.now()
-  };
-
-  sendOrder(orderData)
-    .then(() => {
-      document.getElementById('orderOverlay').innerHTML =
-        '<div class="success-content">' +
-          '<div class="success-icon">✓</div>' +
-          '<h2>Заявка отправлена!</h2>' +
-          '<p>Мы скоро свяжемся с вами и обсудим детали проекта.</p>' +
-        '</div>';
-    })
-    .catch(() => {
-      document.getElementById('orderOverlay').innerHTML =
-        '<div class="success-content">' +
-          '<div class="success-icon">✓</div>' +
-          '<h2>Заявка отправлена!</h2>' +
-          '<p>Мы скоро свяжемся с вами и обсудим детали проекта.</p>' +
-        '</div>';
-    });
+  try {
+    app.sendData(JSON.stringify(orderData));
+  } catch (e) {
+    console.error('sendData error:', e);
+    btn.textContent = 'Отправить заявку →';
+    btn.disabled = false;
+    alert('Не удалось отправить заявку. Попробуйте ещё раз или напишите нам напрямую.');
+  }
 }
 
 // ═══════════ MATERIALS SYSTEM ═══════════

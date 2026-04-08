@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 """
 Бот MIL.LE Digital — услуги агентства.
-Отправляет приветствие + обрабатывает заявки из мини-приложения через Firebase.
+Отправляет приветствие + обрабатывает заявки из мини-приложения через WebApp.sendData().
 """
 
+import json
 import requests
-import time
-import threading
 from config import API_BASE, BOT_TOKEN, BOT_USERNAME, MINI_APP_URL
 
-FIREBASE_DB_URL = "https://mille-digital-comments-default-rtdb.asia-southeast1.firebasedatabase.app"
 ADMIN_CHAT_ID = 159825772
 
 
@@ -47,57 +45,36 @@ def send_welcome(chat_id):
     send_message(chat_id, text)
 
 
-def process_orders():
-    """Проверить Firebase на новые заявки и отправить админу."""
-    try:
-        r = requests.get(f"{FIREBASE_DB_URL}/orders.json", timeout=10)
-        r.raise_for_status()
-        data = r.json()
-        if not data:
-            return
+def handle_order(order, chat_id, user):
+    """Обработать заявку, пришедшую через WebApp.sendData()."""
+    user_name = order.get("user_name", "Аноним")
+    user_tag = order.get("user_tag", "")
+    user_id = order.get("user_id")
+    platform = order.get("platform", "—")
+    service = order.get("service", "Общая заявка")
+    message = order.get("message", "")
 
-        for order_id, order in data.items():
-            try:
-                user_name = order.get("user_name", "Аноним")
-                user_tag = order.get("user_tag", "")
-                user_id = order.get("user_id")
-                platform = order.get("platform", "—")
-                service = order.get("service", "Общая заявка")
-                message = order.get("message", "")
+    lines = [
+        "📬 Новая заявка из Mini App",
+        "",
+        f"👤 Клиент: {user_name}" + (f" ({user_tag})" if user_tag else ""),
+        f"📱 Платформа: {platform}",
+        f"⚡ Услуга: {service}",
+    ]
+    if message:
+        lines.extend(["", f"💬 Сообщение: {message}"])
 
-                lines = [
-                    "📬 Новая заявка из Mini App",
-                    "",
-                    f"👤 Клиент: {user_name}" + (f" ({user_tag})" if user_tag else ""),
-                    f"📱 Платформа: {platform}",
-                    f"⚡ Услуга: {service}",
-                ]
-                if message:
-                    lines.extend(["", f"💬 Сообщение: {message}"])
+    send_message(ADMIN_CHAT_ID, "\n".join(lines))
 
-                send_message(ADMIN_CHAT_ID, "\n".join(lines))
+    # Отправляем контакт, чтобы можно было сразу написать
+    if user_id:
+        send_contact(ADMIN_CHAT_ID, user_id, user_name)
 
-                # Отправляем контакт, чтобы можно было сразу написать
-                if user_id:
-                    send_contact(ADMIN_CHAT_ID, user_id, user_name)
+    # Подтверждение клиенту
+    if chat_id:
+        send_message(chat_id, "✅ Спасибо за заявку! Мы скоро свяжемся с вами.")
 
-                # Удаляем обработанную заявку
-                requests.delete(f"{FIREBASE_DB_URL}/orders/{order_id}.json", timeout=10)
-                print(f"[order] заявка {order_id} от {user_name} отправлена")
-
-            except Exception as e:
-                print(f"[order] ошибка обработки {order_id}: {e}")
-                requests.delete(f"{FIREBASE_DB_URL}/orders/{order_id}.json", timeout=10)
-
-    except Exception as e:
-        print(f"[order] ошибка чтения заявок: {e}")
-
-
-def orders_loop():
-    """Фоновый цикл проверки заявок каждые 3 секунды."""
-    while True:
-        process_orders()
-        time.sleep(3)
+    print(f"[order] заявка от {user_name}: {service}")
 
 
 def get_updates(marker=None, timeout=30):
@@ -110,6 +87,7 @@ def get_updates(marker=None, timeout=30):
         return r.json()
     except Exception as e:
         print(f"[updates] ошибка: {e}")
+        import time
         time.sleep(3)
         return {}
 
@@ -120,11 +98,6 @@ def main():
         return
 
     print("Бот услуг запущен...")
-
-    # Запускаем фоновую проверку заявок
-    t = threading.Thread(target=orders_loop, daemon=True)
-    t.start()
-    print("[orders] проверка заявок запущена")
 
     marker = None
 
@@ -149,7 +122,18 @@ def main():
                     body = msg.get("body", {})
                     text = body.get("text", "").strip()
                     chat_id = msg.get("recipient", {}).get("chat_id")
+                    user = msg.get("sender", {})
 
+                    # Пробуем распарсить как заявку из мини-приложения
+                    try:
+                        order = json.loads(text)
+                        if isinstance(order, dict) and order.get("type") == "order":
+                            handle_order(order, chat_id, user)
+                            continue
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+
+                    # Обычные команды
                     if chat_id and text in ("/start", "/help"):
                         send_welcome(chat_id)
                     elif chat_id and text == "/about":
