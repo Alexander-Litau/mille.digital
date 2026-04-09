@@ -1541,6 +1541,19 @@ body {
     <button class="material-download primary" onclick="openMaterial('ideas')">Смотреть идеи →</button>
   </div>
 
+  <div class="material-card">
+    <div class="material-badge checklist">Мини-приложения</div>
+    <div class="material-type">Гайд</div>
+    <h3>Зачем бизнесу мини-приложение в MAX</h3>
+    <p>8 сценариев использования — от каталога товаров до программы лояльности. Найдите свой.</p>
+    <div class="material-meta">
+      <div class="material-meta-item"><span class="num">8</span> сценариев</div>
+      <div class="material-meta-item"><span class="num">5</span> мин</div>
+      <div class="material-meta-item"><span class="num">6</span> ниш</div>
+    </div>
+    <button class="material-download secondary" onclick="openMaterial('miniapps')">Читать гайд →</button>
+  </div>
+
   <div class="cta-card" style="margin-top:6px;">
     <h2>Хотите <em>персональный аудит</em>?</h2>
     <p>Наши эксперты проверят ваш сайт и рекламу — бесплатно и с рекомендациями.</p>
@@ -1787,6 +1800,7 @@ function openMaterial(type) {
   const el = document.getElementById('materialContent');
   if (type === 'checklistSite') { checklistSiteState = new Array(18).fill(false); el.innerHTML = renderChecklistSite(); }
   else if (type === 'guideAd') el.innerHTML = renderGuideAd();
+  else if (type === 'miniapps') el.innerHTML = renderGuideMiniApps();
   else if (type === 'checklist20') el.innerHTML = renderChecklist20();
   else if (type === 'quiz') { quizState = { currentQ: 0, scores: [], total: 0 }; el.innerHTML = renderQuiz(); }
   else if (type === 'plan') el.innerHTML = renderPlan();
@@ -2210,6 +2224,57 @@ const ideasData = [
     { title: '«Этот пост сохранят 90%»', why: 'Челлендж триггерит проверку.' }
   ]}
 ];
+
+// ═══ GUIDE MINI-APPS ═══
+function renderGuideMiniApps() {
+  var blocks = [
+    { num: '1', icon: '🛍', title: 'Каталог товаров и услуг',
+      who: 'Магазины, салоны красоты, рестораны, автосервисы',
+      text: 'Клиент открывает мини-приложение прямо в чате и видит весь ассортимент с ценами, фото и описаниями. Не нужно уходить на сторонний сайт — выбрал, написал, заказал.',
+      result: 'Путь от интереса до покупки сокращается в 3–5 раз.' },
+    { num: '2', icon: '📅', title: 'Онлайн-запись и бронирование',
+      who: 'Клиники, барбершопы, студии, коворкинги',
+      text: 'Мини-приложение показывает свободные слоты — клиент выбирает дату и время сам, без звонков и переписок. Вы получаете заявку с именем и контактом.',
+      result: 'Администратор тратит на запись 0 минут вместо 15.' },
+    { num: '3', icon: '📋', title: 'Сбор заявок и анкетирование',
+      who: 'Любой бизнес, где нужна первичная информация от клиента',
+      text: 'Вместо долгой переписки клиент заполняет короткую форму: что нужно, бюджет, сроки. Данные приходят вам в бот. Именно так работает это приложение — вы сами видели.',
+      result: 'Каждая заявка структурирована и ничего не теряется.' },
+    { num: '4', icon: '🎓', title: 'Обучение и полезный контент',
+      who: 'Эксперты, коучи, онлайн-школы',
+      text: 'Чек-листы, гайды, мини-курсы, тесты — всё внутри мессенджера. Подписчик получает пользу, не покидая привычную среду. Растёт доверие и лояльность.',
+      result: 'Вовлечённость контента в мини-приложении выше, чем на внешних платформах.' },
+    { num: '5', icon: '🏆', title: 'Программа лояльности',
+      who: 'Кафе, магазины, сервисы с повторными покупками',
+      text: 'Клиент копит баллы, видит свой статус и бонусы. Никаких физических карт — всё в телефоне, в привычном мессенджере. Причина вернуться — всегда под рукой.',
+      result: 'Повторные покупки растут на 20–40%.' },
+    { num: '6', icon: '🧮', title: 'Калькулятор стоимости',
+      who: 'Строительство, ремонт, логистика, полиграфия',
+      text: 'Клиент сам считает примерную стоимость: вводит параметры, получает цену. Это снимает главный барьер — «сколько стоит?» — ещё до разговора с менеджером.',
+      result: 'Заявки приходят уже «тёплые» — клиент знает цену и готов обсуждать.' },
+    { num: '7', icon: '📊', title: 'Витрина кейсов и портфолио',
+      who: 'Агентства, фрилансеры, дизайнеры, разработчики',
+      text: 'Красивое портфолио с фильтрами по нишам, результатами и отзывами — всё внутри бота. Клиент смотрит ваши работы и тут же оставляет заявку.',
+      result: 'Конверсия из «посмотрел» в «написал» растёт в 2–3 раза.' },
+    { num: '8', icon: '🎫', title: 'Мероприятия и билеты',
+      who: 'Организаторы событий, конференции, мастер-классы',
+      text: 'Расписание, описание спикеров, покупка билетов — всё в одном месте. После оплаты билет хранится в мини-приложении, не нужно искать в почте.',
+      result: 'Покупка билета занимает 30 секунд вместо 5 минут на сайте.' }
+  ];
+  var h = '<div class="mat-header"><h2>Зачем бизнесу мини-приложение</h2><p>8 сценариев, в которых мини-приложение в MAX решает реальные задачи бизнеса.</p></div>';
+  blocks.forEach(function(b) {
+    h += '<div class="guide-block">';
+    h += '<div class="guide-block-num">' + b.icon + '</div>';
+    h += '<h3>' + b.title + '</h3>';
+    h += '<p style="font-size:0.72rem;color:var(--brand);margin-bottom:6px;font-weight:600;">Для кого: ' + b.who + '</p>';
+    h += '<p>' + b.text + '</p>';
+    h += '<div class="guide-tip"><span class="guide-tip-icon">📈</span><span><b>Результат:</b> ' + b.result + '</span></div>';
+    h += '</div>';
+  });
+  h += '<div style="text-align:center;padding:20px 0;"><p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:16px;">Узнали свой бизнес? Мы создадим мини-приложение под ваши задачи.</p>';
+  h += '<button class="detail-cta" onclick="closeMaterial();openOrder(null);">Обсудить мини-приложение →</button></div>';
+  return h;
+}
 
 function renderIdeas(filter) {
   var h = '<div class="mat-header"><h2>50 идей для постов</h2><p>Готовые идеи с пояснениями, почему каждый формат работает.</p></div>';
