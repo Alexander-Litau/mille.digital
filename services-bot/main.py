@@ -149,6 +149,28 @@ def main():
                     body = msg.get("body", {})
                     text = body.get("text", "").strip()
                     chat_id = msg.get("recipient", {}).get("chat_id")
+                    link = msg.get("link") or body.get("link")
+
+                    # Пересланный пост — добавить кнопку
+                    if link and link.get("type") == "forward":
+                        fwd_message = link.get("message", {})
+                        fwd_mid = fwd_message.get("mid")
+                        if fwd_mid and chat_id:
+                            try:
+                                buttons = [[{"type": "link", "text": "MIL.LE Digital", "url": f"https://max.ru/{BOT_USERNAME}"}]]
+                                attachments = [{"type": "inline_keyboard", "payload": {"buttons": buttons}}]
+                                params = {"message_id": fwd_mid}
+                                r = requests.put(f"{API_BASE}/messages", headers=_headers(), params=params, json={"attachments": attachments})
+                                if r.ok:
+                                    send_message(chat_id, "✅ Кнопка добавлена к посту!")
+                                    print(f"[button] добавлена к {fwd_mid}")
+                                else:
+                                    send_message(chat_id, f"Ошибка: {r.status_code}. Убедитесь, что бот — администратор канала.")
+                                    print(f"[button] ERROR {r.status_code}: {r.text}")
+                            except Exception as e:
+                                send_message(chat_id, f"Ошибка: {e}")
+                                print(f"[button] ошибка: {e}")
+                        continue
 
                     if chat_id and text in ("/start", "/help"):
                         send_welcome(chat_id)
