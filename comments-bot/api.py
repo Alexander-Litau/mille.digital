@@ -144,6 +144,33 @@ def get_message_info(message_id):
         return {}
 
 
+def _get_existing_media_attachments(message_id):
+    """Получить медиа-вложения существующего сообщения (фото, видео и т.д.),
+    исключая inline_keyboard — его надо пересобирать.
+
+    PUT /messages заменяет весь список attachments целиком, поэтому при
+    редактировании поста нужно явно передать обратно существующие медиа,
+    иначе они будут удалены.
+    """
+    msg_info = get_message_info(message_id)
+    if not msg_info:
+        return []
+    body = msg_info.get("body", {})
+    if not isinstance(body, dict):
+        return []
+    existing = body.get("attachments") or []
+    media = []
+    for att in existing:
+        if not isinstance(att, dict):
+            continue
+        att_type = att.get("type", "")
+        if att_type == "inline_keyboard":
+            continue
+        media.append(att)
+    print(f"[media_attachments] mid={message_id} count={len(media)} types={[a.get('type') for a in media]}")
+    return media
+
+
 def save_post_to_firebase(post_id, post_text, chat_id, message_id=None):
     """Сохранить пост в Firebase с информацией о канале и статистикой."""
     fb_data = {
@@ -229,12 +256,14 @@ def attach_comments_to_post(message_id, chat_id, post_text):
     buttons = [
         [{"type": "link", "text": "Прокомментировать", "url": f"{COMMENTS_DEEPLINK}?startapp={post_id}"}]
     ]
-    attachments = [{"type": "inline_keyboard", "payload": {"buttons": buttons}}]
+    # Сохраняем существующие медиа (фото/видео/файлы) и добавляем клавиатуру
+    media = _get_existing_media_attachments(message_id)
+    attachments = media + [{"type": "inline_keyboard", "payload": {"buttons": buttons}}]
 
     # Редактируем оригинальный пост — добавляем только кнопку, текст не трогаем
     params = {"message_id": message_id}
     body = {"attachments": attachments}
-    print(f"[attach_comments] message_id={message_id} post_id={post_id}")
+    print(f"[attach_comments] message_id={message_id} post_id={post_id} media_count={len(media)}")
     r = requests.put(f"{API_BASE}/messages", headers=_headers(), params=params, json=body)
     if not r.ok:
         print(f"[attach_comments] ERROR {r.status_code}: {r.text}")
@@ -247,10 +276,12 @@ def attach_comments_to_post(message_id, chat_id, post_text):
 
 
 def detach_comments_from_post(message_id):
-    """Убрать кнопку комментариев с поста (передаём пустой массив attachments)."""
+    """Убрать кнопку комментариев с поста, сохраняя медиа-вложения."""
     params = {"message_id": message_id}
-    body = {"attachments": []}
-    print(f"[detach_comments] message_id={message_id}")
+    # Сохраняем медиа (фото/видео/файлы), убираем только inline_keyboard
+    media = _get_existing_media_attachments(message_id)
+    body = {"attachments": media}
+    print(f"[detach_comments] message_id={message_id} media_count={len(media)}")
     r = requests.put(f"{API_BASE}/messages", headers=_headers(), params=params, json=body)
     if not r.ok:
         print(f"[detach_comments] ERROR {r.status_code}: {r.text}")
@@ -269,11 +300,12 @@ def reattach_comments_to_post(message_id, post_id):
     buttons = [
         [{"type": "link", "text": btn_text, "url": f"{COMMENTS_DEEPLINK}?startapp={post_id}"}]
     ]
-    attachments = [{"type": "inline_keyboard", "payload": {"buttons": buttons}}]
+    media = _get_existing_media_attachments(message_id)
+    attachments = media + [{"type": "inline_keyboard", "payload": {"buttons": buttons}}]
 
     params = {"message_id": message_id}
     body = {"attachments": attachments}
-    print(f"[reattach_comments] message_id={message_id} post_id={post_id}")
+    print(f"[reattach_comments] message_id={message_id} post_id={post_id} media_count={len(media)}")
     r = requests.put(f"{API_BASE}/messages", headers=_headers(), params=params, json=body)
     if not r.ok:
         print(f"[reattach_comments] ERROR {r.status_code}: {r.text}")
@@ -311,7 +343,8 @@ def edit_message_with_keyboard(message_id, text, post_id, markup=None):
     buttons = [
         [{"type": "link", "text": btn_text, "url": f"{COMMENTS_DEEPLINK}?startapp={post_id}"}]
     ]
-    attachments = [{"type": "inline_keyboard", "payload": {"buttons": buttons}}]
+    media = _get_existing_media_attachments(message_id)
+    attachments = media + [{"type": "inline_keyboard", "payload": {"buttons": buttons}}]
 
     body = {"attachments": attachments}
     if markup:
@@ -321,7 +354,7 @@ def edit_message_with_keyboard(message_id, text, post_id, markup=None):
         body["text"] = text
 
     params = {"message_id": message_id}
-    print(f"[edit_message_with_keyboard] message_id={message_id} post_id={post_id}")
+    print(f"[edit_message_with_keyboard] message_id={message_id} post_id={post_id} media_count={len(media)}")
     r = requests.put(f"{API_BASE}/messages", headers=_headers(), params=params, json=body)
     if not r.ok:
         print(f"[edit_message_with_keyboard] ERROR {r.status_code}: {r.text}")
@@ -349,7 +382,8 @@ def update_comments_button(message_id, post_id, count):
     buttons = [
         [{"type": "link", "text": btn_text, "url": f"{COMMENTS_DEEPLINK}?startapp={post_id}"}]
     ]
-    attachments = [{"type": "inline_keyboard", "payload": {"buttons": buttons}}]
+    media = _get_existing_media_attachments(message_id)
+    attachments = media + [{"type": "inline_keyboard", "payload": {"buttons": buttons}}]
 
     try:
         edit_message(message_id, attachments=attachments)
