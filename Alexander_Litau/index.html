@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Александр Литау</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='58%25' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-weight='800' font-size='34' fill='%23ffffff' dominant-baseline='middle'%3EЛ%3C/text%3E%3C/svg%3E">
+<script src="https://st.max.ru/js/max-web-app.js"></script>
+<script>
+if (!window.WebApp) {
+  var s = document.createElement('script');
+  s.src = 'https://telegram.org/js/telegram-web-app.js';
+  document.head.appendChild(s);
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { overflow-x: hidden; }
+
+:root {
+  --bg: #f2f2f2;
+  --surface: #ffffff;
+  --surface-2: #f4f4f5;
+  --surface-3: #f7f7f7;
+  --text: #0a0a0a;
+  --text-muted: #6b6b70;
+  --text-soft: #9c9c9f;
+  --border: #ececec;
+  --verified: #2196f3;
+  --accent-tv: #c9302c;
+  --accent-radio: #1d4ed8;
+  --accent-digital: #0a0a0a;
+  --accent-events: #a16207;
+  --radius: 22px;
+  --radius-md: 14px;
+  --radius-sm: 11px;
+}
+
+body {
+  background: var(--bg);
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text);
+  font-size: 17px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
+  min-height: 100vh;
+  padding-bottom: 110px;
+}
+
+.container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 12px;
+  position: relative;
+}
+
+/* ===== HEADER ===== */
+.header {
+  position: sticky;
+  top: 0;
+  background: rgba(242,242,242,0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  z-index: 90;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 4px;
+  margin-bottom: 4px;
+}
+.header-name {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.header-actions { display: flex; gap: 8px; }
+.header-btn {
+  width: 38px; height: 38px;
+  background: #fff;
+  border-radius: 11px;
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  color: var(--text);
+}
+.header-btn svg { width: 18px; height: 18px; }
+
+/* ===== VERIFIED BADGE (Telegram-style sunburst) ===== */
+.verified {
+  width: 19px; height: 19px;
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: middle;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%232AABEE' d='M12 .6l1.95 1.55 2.4-.78 1.05 2.27 2.5.36-.06 2.52 2.31 1.02-1.13 2.26L23 12l-1.98 2.2 1.13 2.26-2.31 1.02.06 2.52-2.5.36-1.05 2.27-2.4-.78L12 23.4l-1.95-1.55-2.4.78-1.05-2.27-2.5-.36.06-2.52L1.85 16.46 2.98 14.2 1 12l1.98-2.2L1.85 7.54l2.31-1.02-.06-2.52 2.5-.36 1.05-2.27 2.4.78L12 .6z'/><path fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' d='M7.5 12.2l3 3 6-6.4'/></svg>");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.verified-sm { width: 14px; height: 14px; }
+.verified-lg { width: 26px; height: 26px; margin-left: 4px; }
+
+/* ===== CARD ===== */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 26px 24px;
+  margin-bottom: 12px;
+  position: relative;
+}
+.card-tight { padding: 22px 24px; }
+.card-overflow { overflow: hidden; padding: 0; }
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.card-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 18px;
+  color: #fff;
+  flex-shrink: 0;
+  letter-spacing: -0.02em;
+}
+.card-icon.tv { background: var(--accent-tv); }
+.card-icon.radio { background: var(--accent-radio); }
+.card-icon.digital { background: linear-gradient(135deg,#0a0a0a,#3a3a3a); }
+.card-icon.events { background: var(--accent-events); }
+.card-icon.profile { background: #0a0a0a; padding: 2px; overflow: hidden; }
+.card-icon.profile img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+.card-icon.contact { background: #0a0a0a; }
+
+.card-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ===== TEXTS ===== */
+.lead-headline {
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  margin-bottom: 18px;
+}
+.section-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  margin: 18px 4px 10px;
+}
+.card-text {
+  color: var(--text-muted);
+  font-size: 17px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+.card-text + .card-text { margin-top: 14px; }
+.card-text strong { color: var(--text); font-weight: 700; }
+
+/* ===== BUTTONS ===== */
+.btn-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 20px;
+  border-radius: 13px;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: #0a0a0a; color: #fff; }
+.btn-secondary { background: var(--bg); color: var(--text); }
+.btn-go {
+  background: #0a0a0a;
+  color: #fff;
+  position: absolute;
+  top: 22px; right: 22px;
+  padding: 9px 14px;
+  font-size: 13px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  z-index: 2;
+}
+
+/* ===== HERO PHOTO ===== */
+.hero-photo {
+  width: 100%;
+  aspect-ratio: 4/5;
+  background: #0a0a0a;
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 12px;
+  position: relative;
+}
+.hero-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ===== CHIPS ===== */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 18px;
+}
+.chip {
+  background: var(--surface-2);
+  border-radius: 100px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #1c1c1e;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 0.15s ease;
+}
+.chip:active { transform: scale(0.96); }
+
+/* ===== USEFUL (Кому я полезен) ===== */
+.useful-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.useful-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface-2);
+  border-radius: 14px;
+  padding: 14px 16px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  width: 100%;
+  transition: transform 0.15s ease, background 0.2s ease;
+  color: var(--text);
+}
+.useful-row:active { transform: scale(0.98); }
+.useful-row:hover { background: #ececee; }
+.useful-emoji {
+  font-size: 22px;
+  flex-shrink: 0;
+  width: 28px;
+  text-align: center;
+  line-height: 1;
+}
+.useful-text { flex: 1; min-width: 0; }
+.useful-situation {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+.useful-action {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 3px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.useful-arrow {
+  color: var(--text-soft);
+  font-size: 18px;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+/* ===== STATS ===== */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 18px;
+}
+.stat-cell {
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  padding: 14px 10px;
+  text-align: center;
+}
+.stat-num {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  line-height: 1;
+}
+.stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: 6px;
+  letter-spacing: -0.005em;
+}
+.stats-hero {
+  gap: 8px;
+  margin-top: 0;
+}
+.stats-hero .stat-cell {
+  padding: 22px 6px;
+}
+.stats-hero .stat-num {
+  font-size: 32px;
+}
+.stats-hero .stat-label {
+  font-size: 11.5px;
+  margin-top: 8px;
+  white-space: nowrap;
+}
+
+/* ===== MEDIA CARD ===== */
+.media-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  background: #0a0a0a;
+}
+.media-card-img {
+  width: 100%;
+  aspect-ratio: 4/5;
+  display: block;
+  object-fit: cover;
+}
+.media-card-overlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 24px 22px;
+  background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.85) 100%);
+  color: #fff;
+}
+.media-card-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 8px;
+}
+.media-card-title {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+/* ===== LIST ===== */
+.list {
+  display: flex;
+  flex-direction: column;
+  margin-top: 16px;
+}
+.list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.list-item:last-child { border-bottom: none; padding-bottom: 0; }
+.list-num {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-soft);
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+  padding-top: 2px;
+  width: 22px;
+}
+.list-content { flex: 1; min-width: 0; }
+.list-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.015em;
+  margin-bottom: 2px;
+}
+.list-desc {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ===== CONTACT BUTTONS ===== */
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 18px;
+}
+.contact-btn {
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  padding: 16px 16px 14px;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 0.15s ease;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+.contact-btn:active { transform: scale(0.97); }
+.contact-btn.primary { background: #0a0a0a; color: #fff; }
+.contact-btn-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: -0.005em;
+}
+.contact-btn.primary .contact-btn-label { color: rgba(255,255,255,0.6); }
+.contact-btn-value {
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 4px;
+  letter-spacing: -0.015em;
+}
+
+.email-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  margin-top: 8px;
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 0.15s ease;
+}
+.email-link:active { transform: scale(0.98); }
+.email-link-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: -0.005em;
+}
+.email-link-value {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.info-row + .info-row { border-top: 1px solid var(--border); }
+.info-row-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+  line-height: 1;
+}
+
+.bridge {
+  text-align: center;
+  padding: 18px 12px 8px;
+  margin-bottom: 12px;
+}
+.bridge-text {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+  color: var(--text);
+  margin-bottom: 14px;
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.bridge-arrow {
+  display: inline-block;
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+  animation: bridge-bounce 1.6s ease-in-out infinite;
+}
+@keyframes bridge-bounce {
+  0%, 100% { transform: translateY(0); opacity: 0.55; }
+  50% { transform: translateY(6px); opacity: 1; }
+}
+
+/* ===== LIVE BADGE ===== */
+.live-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-top: 14px;
+}
+.live-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  flex-shrink: 0;
+  position: relative;
+  animation: live-pulse 1.6s ease-in-out infinite;
+}
+.live-dot-inline {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ef4444;
+  vertical-align: baseline;
+  margin-left: 12px;
+  margin-bottom: 2.5px;
+  animation: live-pulse 1.6s ease-in-out infinite;
+}
+@keyframes live-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.55); }
+  50% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+}
+.live-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.005em;
+}
+.live-text span { color: var(--text-muted); font-weight: 500; }
+
+/* ===== FOOTER ===== */
+.footer {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-soft);
+  padding: 22px 0 6px;
+  letter-spacing: -0.005em;
+}
+.footer strong { color: #4a4a4d; font-weight: 600; }
+
+/* ===== TAB BAR ===== */
+.tab-bar {
+  position: fixed;
+  bottom: calc(14px + env(safe-area-inset-bottom, 8px));
+  left: 12px;
+  right: 12px;
+  max-width: 456px;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  display: flex;
+  z-index: 100;
+  padding: 5px;
+  border-radius: 60px;
+}
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 4px 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  background: none;
+  font-family: inherit;
+  position: relative;
+  border-radius: 50px;
+  min-width: 0;
+}
+.tab-item .tab-icon {
+  width: 40px; height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  transition: all 0.25s;
+}
+.tab-item .tab-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: -0.01em;
+  transition: color 0.25s;
+  white-space: nowrap;
+}
+.tab-item.active .tab-icon {
+  background: rgba(10,10,10,0.06);
+}
+.tab-item.active .tab-label {
+  color: var(--text);
+}
+
+/* ===== PAGES ===== */
+.page { display: none; animation: fade-in 0.25s ease; }
+.page.active { display: block; }
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tablet/desktop: пусть выглядит как «телефон в центре» */
+@media (min-width: 600px) {
+  body { background: #e8e8e8; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ===== HEADER ===== -->
+  <div class="header">
+    <div class="header-name">Александр Литау<span class="verified"></span></div>
+    <div class="header-actions">
+      <button class="header-btn" title="Поделиться" onclick="shareApp()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============== PAGE: ГЛАВНАЯ ============== -->
+  <div class="page active" id="pageHome">
+
+    <div class="card">
+      <h1 class="lead-headline" style="font-size:26px;letter-spacing:-0.03em;margin-bottom:18px;">Если коротко:</h1>
+      <div class="stats stats-hero">
+        <div class="stat-cell">
+          <div class="stat-num">9</div>
+          <div class="stat-label">лет в кадре</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num">2000+</div>
+          <div class="stat-label">эфиров</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num">60+</div>
+          <div class="stat-label">мероприятий</div>
+        </div>
+      </div>
+      <p class="card-text" style="margin-top:18px;">Ведущий <strong>«Вести-Иркутск»</strong>, новостей на радио <strong>«MCM»</strong>, основатель агентства комплексного digital-присутствия <strong>MIL.LE Digital</strong>. Веду деловые конференции, концерты и официальные мероприятия.</p>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="switchTabByName('pageContacts')">Сотрудничество</button>
+      </div>
+    </div>
+
+    <div class="hero-photo">
+      <img src="photos/IMG_2796.jpg" alt="Александр Литау в студии Вести-Иркутск" loading="lazy">
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon contact">→</div>
+        <div class="card-title">Кому я полезен</div>
+      </div>
+      <p class="card-text" style="margin-bottom:18px;">Если ваша задача попадает в одну из ситуаций ниже — мы найдём общий язык.</p>
+      <div class="useful-list">
+        <button class="useful-row" onclick="switchTabByName('pageStage')">
+          <div class="useful-emoji">📅</div>
+          <div class="useful-text">
+            <div class="useful-situation">У вас деловое событие</div>
+            <div class="useful-action">Веду конференции, форумы, официальные церемонии и концерты</div>
+          </div>
+          <div class="useful-arrow">→</div>
+        </button>
+        <button class="useful-row" onclick="switchTabByName('pageAgency')">
+          <div class="useful-emoji">📈</div>
+          <div class="useful-text">
+            <div class="useful-situation">Нужен маркетинг с результатом</div>
+            <div class="useful-action">MIL.LE Digital — реклама, контент, цифровые инструменты</div>
+          </div>
+          <div class="useful-arrow">→</div>
+        </button>
+        <button class="useful-row" onclick="switchTabByName('pageBroadcast')">
+          <div class="useful-emoji">📺</div>
+          <div class="useful-text">
+            <div class="useful-situation">Нужен спикер или эксперт</div>
+            <div class="useful-action">Эфир, интервью, комментарий по медиа и маркетингу</div>
+          </div>
+          <div class="useful-arrow">→</div>
+        </button>
+        <button class="useful-row" onclick="switchTabByName('pageBroadcast')">
+          <div class="useful-emoji">📢</div>
+          <div class="useful-text">
+            <div class="useful-situation">Нужно медиасопровождение</div>
+            <div class="useful-action">Тексты, эфиры, PR и продвижение</div>
+          </div>
+          <div class="useful-arrow">→</div>
+        </button>
+        <button class="useful-row" onclick="switchTabByName('pageBroadcast')">
+          <div class="useful-emoji">🎬</div>
+          <div class="useful-text">
+            <div class="useful-situation">Хотите авторский телепроект</div>
+            <div class="useful-action">Идея, сценарий, ведение под задачу заказчика</div>
+          </div>
+          <div class="useful-arrow">→</div>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============== PAGE: В ЭФИРЕ ============== -->
+  <div class="page" id="pageBroadcast">
+
+    <div class="card card-tight">
+      <h2 class="lead-headline" style="font-size:30px;margin-bottom:6px;">В эфире<span class="live-dot-inline"></span></h2>
+      <p class="card-text">ТВ и радио. Главные информационные программы Иркутской области.</p>
+      <div class="info-row" style="margin-top:14px;">
+        <span class="info-row-icon">📺</span>
+        <span class="info-row-text">Вести-Иркутск · 21:05</span>
+      </div>
+      <div class="info-row">
+        <span class="info-row-icon">🎙</span>
+        <span class="info-row-text">Новости на MCM · 07:30–22:00, каждые полчаса</span>
+      </div>
+    </div>
+
+    <div class="media-card">
+      <img class="media-card-img" src="photos/studio.jpg" alt="В студии Вести-Иркутск">
+      <div class="media-card-overlay">
+        <div class="media-card-tag">01 / Телевидение</div>
+        <div class="media-card-title">Вести-Иркутск</div>
+      </div>
+    </div>
+
+    <div class="bridge">
+      <p class="bridge-text">Это ☝️ моя работа. А вот что мы с командой делаем для бизнеса</p>
+      <span class="bridge-arrow">↓</span>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon tv">🎬</div>
+        <div class="card-title">Авторский телепроект</div>
+      </div>
+      <p class="card-text">Под вашу задачу. Полный цикл: концепция, продакшн, ведение, эфир.</p>
+      <div class="list">
+        <div class="list-item">
+          <div class="list-num">01</div>
+          <div class="list-content">
+            <div class="list-title">Идея и формат</div>
+            <div class="list-desc">Концепция под задачу, целевую аудиторию</div>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="list-num">02</div>
+          <div class="list-content">
+            <div class="list-title">Сценарий и съёмочный план</div>
+            <div class="list-desc">Структура выпусков, тайминг, локации</div>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="list-num">03</div>
+          <div class="list-content">
+            <div class="list-title">Производство</div>
+            <div class="list-desc">Съёмки, монтаж, графика, ведение</div>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="list-num">04</div>
+          <div class="list-content">
+            <div class="list-title">Эфир и продвижение</div>
+            <div class="list-desc">Размещение, нарезки для соцсетей, посевы</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon radio">📰</div>
+        <div class="card-title">Рекламные репортажи</div>
+      </div>
+      <p class="card-text">Изготовление и прокат в программах «Вести-Иркутск» и «Утро. Местное время».</p>
+      <div class="list">
+        <div class="list-item">
+          <div class="list-num">01</div>
+          <div class="list-content">
+            <div class="list-title">Брифинг</div>
+            <div class="list-desc">Повод, посыл, спикеры и локации</div>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="list-num">02</div>
+          <div class="list-content">
+            <div class="list-title">Съёмки</div>
+            <div class="list-desc">Корреспондент, оператор, ваши герои и локации</div>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="list-num">03</div>
+          <div class="list-content">
+            <div class="list-title">Монтаж и согласование</div>
+            <div class="list-desc">Собираем сюжет, согласуем финальную версию</div>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="list-num">04</div>
+          <div class="list-content">
+            <div class="list-title">Прокат в эфире</div>
+            <div class="list-desc">«Вести-Иркутск» и «Утро. Местное время»</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon events">🚀</div>
+        <div class="card-title">Комплексный PR</div>
+      </div>
+      <p class="card-text">Личность, бренд, событие — выводим в публичное поле.</p>
+      <div class="list">
+        <div class="list-item">
+          <div class="list-num">01</div>
+          <div class="list-content">
+            <div class="list-title">Стратегия и цели</div>
+            <div class="list-desc">Цель, аудитории, ключевые сообщения, сроки</div>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="list-num">02</div>
+          <div class="list-content">
+            <div class="list-title">Подготовка</div>
+            <div class="list-desc">Спикеры, пресс-кит, инфоповоды, креативы</div>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="list-num">03</div>
+          <div class="list-content">
+            <div class="list-title">Размещение в СМИ</div>
+            <div class="list-desc">ТВ, радио, онлайн-медиа, печатные издания, подкасты, гостевые эфиры в «Вести-Иркутск»</div>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="list-num">04</div>
+          <div class="list-content">
+            <div class="list-title">Контент и каналы</div>
+            <div class="list-desc">Соцсети, реакции на повестку, материалы под кампанию</div>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="list-num">05</div>
+          <div class="list-content">
+            <div class="list-title">Аналитика и отчёт</div>
+            <div class="list-desc">Охваты, тон публикаций, KPI</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="lead-headline" style="font-size:24px;margin-bottom:6px;">Запустим проект?</h2>
+      <p class="card-text">Напишите — обсудим задачу, формат и условия.</p>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="switchTabByName('pageContacts')">Обсудить задачу</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============== PAGE: СЦЕНА ============== -->
+  <div class="page" id="pageStage">
+
+    <div class="card card-tight">
+      <h2 class="lead-headline" style="font-size:30px;margin-bottom:6px;">Сцена</h2>
+      <p class="card-text">Деловые форматы и большие концертные площадки. 14 лет на публике.</p>
+    </div>
+
+    <div class="media-card">
+      <img class="media-card-img" src="photos/stage.jpg" alt="На сцене с микрофоном">
+      <div class="media-card-overlay">
+        <div class="media-card-tag">02 / Live</div>
+        <div class="media-card-title">Ведущий деловых событий</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon events">→</div>
+        <div class="card-title">Что веду</div>
+      </div>
+      <div class="list">
+        <div class="list-item">
+          <div class="list-num">01</div>
+          <div class="list-content">
+            <div class="list-title">Деловые конференции и форумы</div>
+            <div class="list-desc">Модерация, тайминг, работа со спикерами</div>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="list-num">02</div>
+          <div class="list-content">
+            <div class="list-title">Официальные церемонии</div>
+            <div class="list-desc">Открытия, награждения, корпоративные события</div>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="list-num">03</div>
+          <div class="list-content">
+            <div class="list-title">Концерты</div>
+            <div class="list-desc">Большие площадки, многочасовая программа</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="card-text"><strong>Свадьбы, выпускные и корпоративы — не моя история.</strong></p>
+      <p class="card-text">Если вашему событию нужна профессиональная подача, точный тайминг и спокойствие на сцене — поговорим.</p>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="switchTabByName('pageContacts')">Обсудить мероприятие</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============== PAGE: АГЕНТСТВО ============== -->
+  <div class="page" id="pageAgency">
+
+    <div class="card card-tight">
+      <h2 class="lead-headline" style="font-size:30px;margin-bottom:6px;">Агентство</h2>
+      <p class="card-text">В команде: стратеги, дизайнеры, таргетологи, разработчики — все, кто нужен под цифровой проект. Некоторые услуги закрываю сам — по образованию я маркетолог.</p>
+    </div>
+
+    <div class="card" id="agency">
+      <a href="https://max.ru/id381209292606_2_bot" target="_blank" rel="noopener" class="btn btn-go" onclick="openMaxUrl(event, this.href)">Mini App →</a>
+      <div class="card-head">
+        <div class="card-icon digital">M</div>
+        <div class="card-title">MIL.LE Digital</div>
+      </div>
+      <p class="card-text">Цифровые продукты в MAX и Telegram — и трафик к ним.</p>
+      <div class="list">
+        <div class="list-item">
+          <div class="list-num">01</div>
+          <div class="list-content">
+            <div class="list-title">Ведение MAX/Telegram-каналов</div>
+            <div class="list-desc">Контент-план, оформление, рост подписчиков</div>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="list-num">02</div>
+          <div class="list-content">
+            <div class="list-title">Чат-боты</div>
+            <div class="list-desc">Для MAX и Telegram — продажи, поддержка, автоматизация</div>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="list-num">03</div>
+          <div class="list-content">
+            <div class="list-title">Мини-приложения</div>
+            <div class="list-desc">Для MAX и Telegram — под бизнес-задачу</div>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="list-num">04</div>
+          <div class="list-content">
+            <div class="list-title">Лендинги</div>
+            <div class="list-desc">Сайты под запуск, акцию, продукт</div>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="list-num">05</div>
+          <div class="list-content">
+            <div class="list-title">Яндекс Директ</div>
+            <div class="list-desc">Поиск, РСЯ, ремаркетинг</div>
+          </div>
+        </div>
+        <div class="list-item">
+          <div class="list-num">06</div>
+          <div class="list-content">
+            <div class="list-title">Telegram Ads + посевы</div>
+            <div class="list-desc">Закупка официального трафика и размещения в каналах</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon contact">★</div>
+        <div class="card-title">Подход</div>
+      </div>
+      <p class="card-text">Делаем ровно то, о чём договорились — в срок и без сюрпризов. Всё фиксируем письменно, всегда на связи. Если что-то идёт не по плану — решаем, без драмы и перекладывания ответственности.</p>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="switchTabByName('pageContacts')">Обсудить проект</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============== PAGE: КОНТАКТЫ ============== -->
+  <div class="page" id="pageContacts">
+
+    <div class="card card-tight">
+      <h2 class="lead-headline" style="font-size:30px;margin-bottom:6px;">Контакты</h2>
+      <p class="card-text">Пишите в любой канал ниже. Отвечаю в течение дня.</p>
+    </div>
+
+    <div class="card" id="contact">
+      <div class="contact-grid" style="margin-top:0;">
+        <button class="contact-btn primary" onclick="openMax()">
+          <span class="contact-btn-label">Написать в</span>
+          <span class="contact-btn-value">MAX →</span>
+        </button>
+        <button class="contact-btn" onclick="openTelegram()">
+          <span class="contact-btn-label">Написать в</span>
+          <span class="contact-btn-value">Telegram →</span>
+        </button>
+      </div>
+      <a href="mailto:al.litau@mail.ru" class="email-link">
+        <span class="email-link-label">Email</span>
+        <span class="email-link-value">al.litau@mail.ru →</span>
+      </a>
+    </div>
+
+    <div class="card card-tight">
+      <div class="info-row">
+        <span class="info-row-icon">🌍</span>
+        <span class="info-row-text">Иркутск · GMT+8</span>
+      </div>
+      <div class="info-row">
+        <span class="info-row-icon">🕘</span>
+        <span class="info-row-text">Будни 9:00–19:00</span>
+      </div>
+      <div class="info-row">
+        <span class="info-row-icon">✈️</span>
+        <span class="info-row-text">Выезжаю по России и за рубеж</span>
+      </div>
+    </div>
+
+    <div class="footer">
+      © Александр Литау · <strong>Иркутск</strong>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ===== TAB BAR ===== -->
+<nav class="tab-bar">
+  <button class="tab-item active" data-page="pageHome" onclick="switchTab(this)">
+    <div class="tab-icon">🏠</div>
+    <div class="tab-label">Главная</div>
+  </button>
+  <button class="tab-item" data-page="pageBroadcast" onclick="switchTab(this)">
+    <div class="tab-icon">📺</div>
+    <div class="tab-label">В эфире</div>
+  </button>
+  <button class="tab-item" data-page="pageStage" onclick="switchTab(this)">
+    <div class="tab-icon">🎤</div>
+    <div class="tab-label">Сцена</div>
+  </button>
+  <button class="tab-item" data-page="pageAgency" onclick="switchTab(this)">
+    <div class="tab-icon">📈</div>
+    <div class="tab-label">Агентство</div>
+  </button>
+  <button class="tab-item" data-page="pageContacts" onclick="switchTab(this)">
+    <div class="tab-icon">📬</div>
+    <div class="tab-label">Контакты</div>
+  </button>
+</nav>
+
+<script>
+const MAX_USERNAME = 'u/f9LHodD0cOJjpA8IcT8R5DX13-0VsNHW-4ulnpIjGedGegtriCUrdGrIveo';
+const TG_USERNAME = 'alexander_litau';
+
+function haptic(type) {
+  try {
+    if (window.WebApp && window.WebApp.HapticFeedback) {
+      if (type === 'select') window.WebApp.HapticFeedback.selectionChanged();
+      else window.WebApp.HapticFeedback.impactOccurred(type || 'light');
+    } else if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback) {
+      const h = window.Telegram.WebApp.HapticFeedback;
+      if (type === 'select') h.selectionChanged();
+      else h.impactOccurred(type || 'light');
+    }
+  } catch (e) {}
+}
+
+function switchTab(el) {
+  haptic('select');
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const pageId = el.getAttribute('data-page');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function switchTabByName(pageId) {
+  const btn = document.querySelector('.tab-item[data-page="' + pageId + '"]');
+  if (btn) switchTab(btn);
+}
+
+function openMax() {
+  haptic('medium');
+  const url = 'https://max.ru/' + MAX_USERNAME;
+  try {
+    // Внутри приложения MAX (platform != null) — используем нативный API
+    if (window.WebApp && window.WebApp.platform) {
+      if (window.WebApp.openMaxLink) { window.WebApp.openMaxLink(url); return; }
+      if (window.WebApp.openLink) { window.WebApp.openLink(url); return; }
+    }
+  } catch (e) {}
+  // В браузере — открываем как обычную ссылку
+  window.open(url, '_blank');
+}
+
+// Универсальный обработчик для max.ru ссылок на <a> элементах
+function openMaxUrl(event, url) {
+  haptic('medium');
+  try {
+    if (window.WebApp && window.WebApp.platform) {
+      event.preventDefault();
+      if (window.WebApp.openMaxLink) { window.WebApp.openMaxLink(url); return false; }
+      if (window.WebApp.openLink) { window.WebApp.openLink(url); return false; }
+    }
+  } catch (e) {}
+  return true;
+}
+
+function openTelegram() {
+  haptic('medium');
+  const url = 'https://t.me/' + TG_USERNAME;
+  try {
+    // Внутри Telegram WebApp
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.platform && window.Telegram.WebApp.openTelegramLink) {
+      window.Telegram.WebApp.openTelegramLink(url);
+      return;
+    }
+    // Внутри MAX — открываем через openLink
+    if (window.WebApp && window.WebApp.platform && window.WebApp.openLink) {
+      window.WebApp.openLink(url);
+      return;
+    }
+  } catch (e) {}
+  // В браузере
+  window.open(url, '_blank');
+}
+
+function shareApp() {
+  haptic('light');
+  const url = window.location.href;
+  const text = 'Александр Литау — журналист, ведущий, маркетолог';
+  if (navigator.share) {
+    navigator.share({ title: text, url: url }).catch(() => {});
+  } else {
+    navigator.clipboard?.writeText(url);
+  }
+}
+
+// Init Telegram/MAX WebApp
+(function init() {
+  try {
+    const wa = window.WebApp || (window.Telegram && window.Telegram.WebApp);
+    if (wa) {
+      wa.ready && wa.ready();
+      wa.expand && wa.expand();
+    }
+  } catch (e) {}
+})();
+</script>
+
+</body>
+</html>
