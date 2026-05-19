@@ -593,21 +593,6 @@ body {
 }
 .footer strong { color: #4a4a4d; font-weight: 600; }
 
-/* ===== TAB BAR SHELF (сплошная плашка фона за таб-баром) ===== */
-.tab-bar-shelf {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: calc(96px + env(safe-area-inset-bottom, 8px));
-  pointer-events: none;
-  z-index: 90;
-  background: var(--bg);
-}
-@media (min-width: 600px) {
-  .tab-bar-shelf { background: #e8e8e8; }
-}
-
 /* ===== TAB BAR ===== */
 .tab-bar {
   position: fixed;
@@ -1112,9 +1097,6 @@ body {
   </div>
 
 </div>
-
-<!-- ===== TAB BAR SHELF ===== -->
-<div class="tab-bar-shelf"></div>
 
 <!-- ===== TAB BAR ===== -->
 <nav class="tab-bar">
