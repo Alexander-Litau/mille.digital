@@ -593,21 +593,16 @@ body {
 }
 .footer strong { color: #4a4a4d; font-weight: 600; }
 
-/* ===== TAB BAR SHELF (минимальная — только чтобы браузер «поймал» серый внизу) ===== */
+/* ===== TAB BAR SHELF (1px сплошного серого на самом низу) ===== */
 .tab-bar-shelf {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  height: calc(28px + env(safe-area-inset-bottom, 8px));
+  height: 1px;
   pointer-events: none;
   z-index: 90;
-  background: linear-gradient(
-    to top,
-    var(--bg) 0px,
-    var(--bg) 1px,
-    rgba(242, 242, 242, 0) 100%
-  );
+  background: var(--bg);
 }
 
 /* ===== TAB BAR ===== */
