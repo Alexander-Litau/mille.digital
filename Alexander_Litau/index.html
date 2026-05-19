@@ -593,13 +593,14 @@ body {
 }
 .footer strong { color: #4a4a4d; font-weight: 600; }
 
-/* ===== TAB BAR SHELF (1px сплошного серого на самом низу) ===== */
+/* ===== TAB BAR SHELF (сплошной серый от низа до середины таб-бара) ===== */
 .tab-bar-shelf {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 1px;
+  /* высота = pill bottom (14px) + половина высоты пилюли (~35px) = середина таб-бара */
+  height: calc(49px + env(safe-area-inset-bottom, 8px));
   pointer-events: none;
   z-index: 90;
   background: var(--bg);
