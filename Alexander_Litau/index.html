@@ -1073,14 +1073,14 @@ body {
 
     <div class="card" id="contact">
       <div class="contact-grid" style="margin-top:0;">
-        <button class="contact-btn primary" onclick="openMax()">
+        <a href="https://max.ru/u/f9LHodD0cOJjpA8IcT8R5DX13-0VsNHW-4ulnpIjGedGegtriCUrdGrIveo" target="_blank" rel="noopener" class="contact-btn primary" onclick="return openMaxUrl(event, this.href)">
           <span class="contact-btn-label">Написать в</span>
           <span class="contact-btn-value">MAX →</span>
-        </button>
-        <button class="contact-btn" onclick="openTelegram()">
+        </a>
+        <a href="https://t.me/alexander_litau" target="_blank" rel="noopener" class="contact-btn" onclick="return openTelegramUrl(event, this.href)">
           <span class="contact-btn-label">Написать в</span>
           <span class="contact-btn-value">Telegram →</span>
-        </button>
+        </a>
       </div>
       <a href="mailto:al.litau@mail.ru" class="email-link">
         <span class="email-link-label">Email</span>
@@ -1192,6 +1192,24 @@ function openMaxUrl(event, url) {
       event.preventDefault();
       if (window.WebApp.openMaxLink) { window.WebApp.openMaxLink(url); return false; }
       if (window.WebApp.openLink) { window.WebApp.openLink(url); return false; }
+    }
+  } catch (e) {}
+  return true;
+}
+
+// Универсальный обработчик для t.me ссылок на <a> элементах
+function openTelegramUrl(event, url) {
+  haptic('medium');
+  try {
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.platform && window.Telegram.WebApp.openTelegramLink) {
+      event.preventDefault();
+      window.Telegram.WebApp.openTelegramLink(url);
+      return false;
+    }
+    if (window.WebApp && window.WebApp.platform && window.WebApp.openLink) {
+      event.preventDefault();
+      window.WebApp.openLink(url);
+      return false;
     }
   } catch (e) {}
   return true;
