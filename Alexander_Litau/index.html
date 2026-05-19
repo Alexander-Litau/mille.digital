@@ -2,12 +2,9 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#f2f2f2">
 <meta name="color-scheme" content="light">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="mobile-web-app-capable" content="yes">
 <title>Александр Литау</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='58%25' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-weight='800' font-size='34' fill='%23ffffff' dominant-baseline='middle'%3EЛ%3C/text%3E%3C/svg%3E">
 <script src="https://st.max.ru/js/max-web-app.js"></script>
@@ -596,6 +593,21 @@ body {
 }
 .footer strong { color: #4a4a4d; font-weight: 600; }
 
+/* ===== TAB BAR SHELF (сплошная плашка фона за таб-баром) ===== */
+.tab-bar-shelf {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(96px + env(safe-area-inset-bottom, 8px));
+  pointer-events: none;
+  z-index: 90;
+  background: var(--bg);
+}
+@media (min-width: 600px) {
+  .tab-bar-shelf { background: #e8e8e8; }
+}
+
 /* ===== TAB BAR ===== */
 .tab-bar {
   position: fixed;
@@ -1100,6 +1112,9 @@ body {
   </div>
 
 </div>
+
+<!-- ===== TAB BAR SHELF ===== -->
+<div class="tab-bar-shelf"></div>
 
 <!-- ===== TAB BAR ===== -->
 <nav class="tab-bar">
