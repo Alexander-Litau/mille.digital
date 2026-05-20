@@ -432,6 +432,29 @@ body {
   line-height: 1.4;
 }
 
+/* ===== LOGO CARDS (Вести-Иркутск + MCM на странице "В эфире") ===== */
+.logo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.logo-card {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  aspect-ratio: 2 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.logo-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 /* ===== CONTACT BUTTONS ===== */
 .contact-grid {
   display: grid;
@@ -796,6 +819,11 @@ body {
         <div class="media-card-tag">01 / Телевидение</div>
         <div class="media-card-title">Вести-Иркутск</div>
       </div>
+    </div>
+
+    <div class="logo-grid">
+      <div class="logo-card"><img src="photos/logo-vesti.jpg" alt="Вести-Иркутск"></div>
+      <div class="logo-card"><img src="photos/logo-mcm.jpg" alt="MCM"></div>
     </div>
 
     <div class="bridge">
