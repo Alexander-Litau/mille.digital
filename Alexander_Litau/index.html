@@ -454,6 +454,7 @@ body {
   text-align: left;
 }
 .contact-btn:active { transform: scale(0.97); }
+.contact-btn * { pointer-events: none; }
 .contact-btn.primary { background: #0a0a0a; color: #fff; }
 .contact-btn-label {
   font-size: 12px;
@@ -998,7 +999,7 @@ body {
     </div>
 
     <div class="card" id="agency">
-      <a href="https://max.ru/id381209292606_2_bot" target="_blank" rel="noopener" class="btn btn-go" onclick="openMaxUrl(event, this.href)">Mini App →</a>
+      <a href="https://max.ru/id381209292606_2_bot" target="_blank" rel="noopener" class="btn btn-go">Mini App →</a>
       <div class="card-head">
         <div class="card-icon digital">M</div>
         <div class="card-title">MIL.LE Digital</div>
@@ -1073,11 +1074,11 @@ body {
 
     <div class="card" id="contact">
       <div class="contact-grid" style="margin-top:0;">
-        <a href="https://max.ru/u/f9LHodD0cOJjpA8IcT8R5DX13-0VsNHW-4ulnpIjGedGegtriCUrdGrIveo" class="contact-btn primary" onclick="return openMaxUrl(event, this.href)">
+        <a href="https://max.ru/u/f9LHodD0cOJjpA8IcT8R5DX13-0VsNHW-4ulnpIjGedGegtriCUrdGrIveo" class="contact-btn primary">
           <span class="contact-btn-label">Написать в</span>
           <span class="contact-btn-value">MAX →</span>
         </a>
-        <a href="https://t.me/alexander_litau" class="contact-btn" onclick="return openTelegramUrl(event, this.href)">
+        <a href="https://t.me/alexander_litau" class="contact-btn">
           <span class="contact-btn-label">Написать в</span>
           <span class="contact-btn-value">Telegram →</span>
         </a>
@@ -1263,6 +1264,43 @@ function shareApp() {
     }
   } catch (e) {}
 })();
+
+// Глобальный перехватчик кликов по ссылкам — внутри MAX/Telegram открываем через нативный API.
+// В обычном браузере (Safari, Chrome) не вмешиваемся — <a href> работает естественно.
+document.addEventListener('click', function (e) {
+  try {
+    const a = e.target.closest('a[href]');
+    if (!a) return;
+    const href = a.href;
+    if (!href) return;
+
+    // Внутри MAX-приложения: перехватываем max.ru и t.me ссылки
+    if (isInMaxApp()) {
+      if (/^https?:\/\/max\.ru\//.test(href)) {
+        e.preventDefault();
+        haptic('medium');
+        if (window.WebApp.openMaxLink) window.WebApp.openMaxLink(href);
+        else if (window.WebApp.openLink) window.WebApp.openLink(href);
+        return;
+      }
+      if (/^https?:\/\/t\.me\//.test(href)) {
+        e.preventDefault();
+        haptic('medium');
+        if (window.WebApp.openLink) window.WebApp.openLink(href);
+        return;
+      }
+    }
+    // Внутри Telegram-приложения
+    if (isInTelegramApp()) {
+      if (/^https?:\/\/t\.me\//.test(href) && window.Telegram.WebApp.openTelegramLink) {
+        e.preventDefault();
+        haptic('medium');
+        window.Telegram.WebApp.openTelegramLink(href);
+        return;
+      }
+    }
+  } catch (err) {}
+});
 </script>
 
 </body>
