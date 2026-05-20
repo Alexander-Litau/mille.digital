@@ -1212,17 +1212,29 @@ function handleContactLink(event, url) {
     }
     if (window.Telegram.WebApp.openLink) { window.Telegram.WebApp.openLink(url); return false; }
   }
-  // Браузер (Safari, Chrome) — пробуем через скрытый iframe (iOS Universal Link трюк)
+  // Браузер (iOS Safari особенно): комбо iframe + window.open + location.href
   try {
+    // 1. Iframe «прайм» — провоцируем iOS на распознавание Universal Link
     const iframe = document.createElement('iframe');
     iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;border:0;';
     iframe.src = url;
     document.body.appendChild(iframe);
+
+    // 2. Через 50ms — window.open в текущей вкладке
+    setTimeout(() => {
+      try { window.open(url, '_self'); } catch (e) {}
+    }, 50);
+
+    // 3. Через 200ms — окончательный фолбэк через location.href
+    setTimeout(() => {
+      try { window.location.href = url; } catch (e) {}
+    }, 200);
+
+    // 4. Очистка iframe
     setTimeout(() => {
       if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
-    }, 2000);
+    }, 2500);
   } catch (e) {
-    // Финальный фолбэк
     window.location.href = url;
   }
   return false;
