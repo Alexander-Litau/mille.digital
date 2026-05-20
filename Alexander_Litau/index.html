@@ -1212,8 +1212,8 @@ function handleContactLink(event, url) {
     }
     if (window.Telegram.WebApp.openLink) { window.Telegram.WebApp.openLink(url); return false; }
   }
-  // Браузер (Safari, Chrome) — принудительная навигация, обходим Universal Links блокировку
-  window.location.assign(url);
+  // Браузер (Safari, Chrome) — пробуем window.open
+  try { window.open(url, '_blank'); } catch (e) {}
   return false;
 }
 
