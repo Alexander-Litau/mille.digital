@@ -1184,35 +1184,43 @@ function openMax() {
   window.open(url, '_blank');
 }
 
+// Проверка: реально внутри Mini App (initData есть только в настоящем контексте)
+function isInMaxApp() {
+  return !!(window.WebApp && window.WebApp.platform && window.WebApp.initData);
+}
+function isInTelegramApp() {
+  return !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.platform && window.Telegram.WebApp.initData);
+}
+
 // Универсальный обработчик для max.ru ссылок на <a> элементах
 function openMaxUrl(event, url) {
   haptic('medium');
   try {
-    if (window.WebApp && window.WebApp.platform) {
+    if (isInMaxApp()) {
       event.preventDefault();
       if (window.WebApp.openMaxLink) { window.WebApp.openMaxLink(url); return false; }
       if (window.WebApp.openLink) { window.WebApp.openLink(url); return false; }
     }
   } catch (e) {}
-  return true;
+  return true; // В браузере — пусть href сработает естественно
 }
 
 // Универсальный обработчик для t.me ссылок на <a> элементах
 function openTelegramUrl(event, url) {
   haptic('medium');
   try {
-    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.platform && window.Telegram.WebApp.openTelegramLink) {
+    if (isInTelegramApp() && window.Telegram.WebApp.openTelegramLink) {
       event.preventDefault();
       window.Telegram.WebApp.openTelegramLink(url);
       return false;
     }
-    if (window.WebApp && window.WebApp.platform && window.WebApp.openLink) {
+    if (isInMaxApp() && window.WebApp.openLink) {
       event.preventDefault();
       window.WebApp.openLink(url);
       return false;
     }
   } catch (e) {}
-  return true;
+  return true; // В браузере — пусть href сработает естественно
 }
 
 function openTelegram() {
