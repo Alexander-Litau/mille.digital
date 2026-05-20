@@ -1195,6 +1195,8 @@ function isInTelegramApp() {
 
 // Универсальный обработчик для контактных кнопок: MAX, Telegram (Safari, MAX, Telegram)
 function handleContactLink(event, url) {
+  // ОТЛАДКА: изменим title чтобы понять, вызывается ли обработчик
+  document.title = 'CLICK ' + url.substring(0, 30);
   haptic('medium');
   // Всегда отменяем дефолтное поведение — навигируем сами
   event.preventDefault();
